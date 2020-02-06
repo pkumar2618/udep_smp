@@ -1,4 +1,6 @@
 from ug_utils import *
+from nltk.tokenize import word_tokenize
+import string
 
 class NLQuestion(object):
     """
@@ -18,19 +20,69 @@ class NLQuestion(object):
     #     "Take questions from a dictionary of question and create a list "
     #     return cls(question_list.items())
 
+    def tokenize(self):
+        """
+        tokenize the nl_question to create a NLQToken object
+        :return:
+        """
+        # split sentence into token using nltk.word_tokenize(), this will have punctuations as separate tokens
+        nlq_tokens = word_tokenize(self.question)
 
-    @staticmethod
-    def nl_to_ug(nl_question):
-        return UGForm(nl_question)
+        # filter out punctuations from each word
+        table = str.maketrans('', '', string.punctuation)
+        nlq_tokens = [token.translate(table) for token in nlq_tokens]
 
-class NLQTokens(NLQuestion):
+        # remove token which are not alpha-numeric
+        nlq_tokens = [token for token in nlq_tokens if token.isalpha()]
+
+        # convert to lower case
+        nlq_tokens = [token.lower() for token in nlq_tokens]
+
+        return NLQTokens(nlq_tokens)
+
+class NLQTokens(object):
     """
     Takes the Natural Language Question and processes using Standard NLP Tools.
-
+    A wrapper class to wrap the output of PreProcessor into NLQTokens.
     """
     # pass
-    def __init__(self, nl_quesion):
-        self.nlq_tokesns = tokenize(lammatise(nl_quesion))
+    def __init__(self, questions_tokens):
+        self.nlq_tokens = questions_tokens
+
+    def canonicalize(self):
+        """
+        Take the tokenized natural language question and parse it into un-grounded canonical form.
+        :return:
+        """
+        canonical_form = self.nlq_tokens
+        return NLCanonical(canonical_form)
+
+
+class NLCanonical(object):
+    """
+    Wrapper Class for Canonical form of the Natural Language Questions
+    """
+    def __init__(self, canonical_form):
+        self.nl_canonical = canonical_form
+
+    def formalize(self):
+        """
+        create a Query from the Canonical form
+        :return: query
+        """
+        query_form = self.nl_canonical
+        return Query(query_form)
+
+class Query(object):
+    """
+    Wrapper for storing logical query
+    """
+    def __init__(self, query_form):
+        """
+        take the query_form obtained by formalizer and wrap it
+        :param query_form:
+        """
+        self.sparql = query_form
 
 class NLQDependencyTree(NLQuestion):
     """

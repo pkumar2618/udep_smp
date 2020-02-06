@@ -3,26 +3,31 @@ from ug_utils import *
 
 class Parser(object):
     """
-    Takes as input a list of pre_processed NLQuestion(one or more)
-    questions and return list of
+    Takes as input a list NLQuestion(one or more)
+    and parse it.
     """
 
-    def __init__(self, pp_nlqs):
+    def __init__(self, nlqs):
         """
         Take a list of questions (one or more)
         :param pp_nlqs: take as input a list of pre-processed NLQuestions
         """
-        self.pp_nlqs = pp_nlqs
-        self.ungrounded_form = []
-        self.grounded_form = []
+        nlq_questions_list = [NLQuestion(nl_question) for nl_question in nlqs]
+        self.nlq_tokens_list = [nl_question.tokenize() for nl_question in nlq_questions_list]
+        self.nl_canonical_list = []
+        self.query_list = []
 
-    def create_ungrounded_form(self):
-        self.ungrounded_form= [self.nlq_to_ug_form(pp_question) for pp_question in self.pp_nlqs]
-        return self.ungrounded_form
+    def canonicalize(self):
+        self.nl_canonical_list = [nlq_tokens.canonicalize() for nlq_tokens in self.nlq_tokens_list]
+        # return nl_canonical_list
 
-    def create_grounded_form(self):
-        self.grounded_form = [self.ug_to_g_form(ug_form) for ug_form in self.ungrounded_form]
-        return self.grounded_form
+    def formalize(self):
+        """
+        takes the nl_canonical form and formalize it into a query
+        :return:
+        """
+        self.query_list = [nl_canonical.formalize() for nl_canonical in self.nl_canonical_list]
+        # return query_list
 
     @staticmethod
     def nlq_to_ug_form(nlq):

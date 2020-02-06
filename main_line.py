@@ -36,15 +36,18 @@ while True:
         if args.questions_file:
             # filename = input()
             filename = args.questions_file
-            # file_obj = open(filename, 'r')
+            # with open(filename, 'r') as file_obj:
+            #     pre_processor = PreProcessor.from_file(file_obj)
+            #
+            # pp_questions = pre_processor.get_pp_questions()
+
             with open(filename, 'r') as file_obj:
-                pre_processor = PreProcessor.from_file(file_obj)
+                nlqs = file_obj.readlines()
 
-            pp_questions = pre_processor.get_pp_questions()
-
-            parser = Parser(pp_questions)
-            ug_questions = parser.create_ungrounded_form()
-            grounded_questions = parser.create_grounded_form()
+            parser = Parser(nlqs)
+            parser.canonicalize()
+            parser.formalize()
+            print("done")
 
         elif args.questions_list:
             pass

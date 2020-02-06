@@ -25,19 +25,19 @@ class PreProcessor(object):
         assert isinstance(nlqs, list), "Questions should be inside a list"
 
         # split sentence into token using nltk.word_tokenize(), this will have punctuations as separate tokens
-        pre_proc_questions_list = [NLQuestion([token for token in word_tokenize(nl_question)]) for nl_question in nlqs ]
+        nlq_tokens_list = [NLQTokens([token for token in word_tokenize(nl_question)]) for nl_question in nlqs ]
 
         # filter out punctuations from each word
         table = str.maketrans('', '', string.punctuation)
-        pp_questions_list = [NLQuestion([token.translate(table) for token in pp_question.question]) for pp_question in pre_proc_questions_list]
+        nlq_tokens_list = [NLQTokens([token.translate(table) for token in question_tokens.nlq_tokens]) for question_tokens in nlq_tokens_list]
 
         # remove token which are not alpha-numeric
-        pp_questions_list = [NLQuestion([token for token in pp_question.question if token.isalpha()]) for pp_question in pp_questions_list]
+        nlq_tokens_list = [NLQTokens([token for token in question_tokens.nlq_tokens if token.isalpha()]) for question_tokens in nlq_tokens_list]
 
         # convert to lower case
-        pp_questions_list = [NLQuestion([token.lower() for token in pp_question.question]) for pp_question in pp_questions_list]
+        nlq_tokens_list = [NLQTokens([token.lower() for token in question_tokens.nlq_tokens]) for question_tokens in nlq_tokens_list]
 
-        self.pp_questions_list = pp_questions_list
+        self.nlq_tokens_list = nlq_tokens_list
 
         # creating gensim dictonary
         # self.dictionary = corpora.Dictionary(tokens_mat)
@@ -49,8 +49,8 @@ class PreProcessor(object):
         #         simple_preprocess(line, deacc=True) for line in nlqs)
         # print(self.dictionary)
 
-    def get_pp_questions(self):
-        return self.pp_questions_list
+    def get_nlq_tokens_list(self):
+        return self.nlq_tokens_list
 
     @classmethod
     def from_file(cls, file_obj: object):
