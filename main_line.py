@@ -5,6 +5,8 @@ from ug_to_g import *
 from parser import Parser
 from pre_processor import PreProcessor
 import argparse
+import sys
+sys.path.insert(0, './dl_modules')
 
 arguments_parser = argparse.ArgumentParser(
     prog= 'NLQA',
@@ -30,15 +32,19 @@ while True:
         Continuously look for input question and spit out Answer to the question,
         unless interrupted. 
         """
-        print("Enter name of the file containing the questions")
+        # print("Enter name of the file containing the questions")
         if args.questions_file:
             # filename = input()
             filename = args.questions_file
-            file_obj = open(filename, 'r')
+            # file_obj = open(filename, 'r')
             with open(filename, 'r') as file_obj:
-                PreProcessor.from_file(file_obj)
+                pre_processor = PreProcessor.from_file(file_obj)
 
+            pp_questions = pre_processor.get_pp_questions()
 
+            parser = Parser(pp_questions)
+            ug_questions = parser.create_ungrounded_form()
+            grounded_questions = parser.create_grounded_form()
 
         elif args.questions_list:
             pass

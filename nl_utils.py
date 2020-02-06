@@ -18,6 +18,7 @@ class NLQuestion(object):
     #     "Take questions from a dictionary of question and create a list "
     #     return cls(question_list.items())
 
+
     @staticmethod
     def nl_to_ug(nl_question):
         return UGForm(nl_question)
@@ -27,9 +28,9 @@ class NLQTokens(NLQuestion):
     Takes the Natural Language Question and processes using Standard NLP Tools.
 
     """
-    pass
-    # def __init__(self, nl_quesion):
-    #     self.nlq_tokesns = tokenize(lammatise(nl_quesion))
+    # pass
+    def __init__(self, nl_quesion):
+        self.nlq_tokesns = tokenize(lammatise(nl_quesion))
 
 class NLQDependencyTree(NLQuestion):
     """
