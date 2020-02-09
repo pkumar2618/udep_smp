@@ -42,9 +42,8 @@ while True:
             # pp_questions = pre_processor.get_pp_questions()
 
             with open(filename, 'r') as file_obj:
-                nlqs = file_obj.readlines()
+                parser = Parser.from_file(file_obj)
 
-            parser = Parser(nlqs)
             parser.canonicalize()
             parser.formalize()
             print("done")

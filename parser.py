@@ -37,14 +37,14 @@ class Parser(object):
     def ug_to_g_form(ug_form):
         return ug_form
 
-    # @classmethod
-    # def from_file(cls, file_obj):
-    #     """
-    #     should parse question in batch
-    #     :param file_obj:
-    #     :return:
-    #     """
-    #     return cls(file_obj.readlines())
+    @classmethod
+    def from_file(cls, file_obj):
+        """
+        should parse question in batch
+        :param file_obj:
+        :return:
+        """
+        return cls(file_obj.readlines())
 
     # @classmethod
     # def from_list(cls, question_list):
