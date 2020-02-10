@@ -13,8 +13,15 @@ arguments_parser = argparse.ArgumentParser(
     description="Take a Natural Language Question and provide it's answer.")
 
 arguments_parser.add_argument("--questions_file", help="Path to the file containing Natural Langugae Questions" )
-arguments_parser.add_argument("--questions_list", help = "List all the questions one after another, separated by new line")
-arguments_parser.add_argument("-question", help = "Ask your questions!")
+arguments_parser.add_argument("--questions_list", help="List all the questions one after another, separated by new line")
+arguments_parser.add_argument("-question", help="Ask your questions!")
+arguments_parser.add_argument("--canonical_form", help="enable the intermediate canonical form, default is disable",
+                              action="store_true")
+arguments_parser.add_argument("--dependency_parsing", help="Dependency parsing with universal dependency parser, "
+                                                           "default is disable",
+                              action="store_true")
+arguments_parser.add_argument("--disambiguator", help="select linker for disambiguation among spotlight and "
+                                                       "custom", choices=['spotlight', 'custom'])
 
 arguments_parser.add_argument("--one_hot", help="Take the questions and create a one-hot representation based on "
                                                 "dbpedia vocabulary.")
@@ -42,9 +49,18 @@ while True:
             # pp_questions = pre_processor.get_pp_questions()
 
             with open(filename, 'r') as file_obj:
-                parser = Parser.from_file(file_obj)
+                parser = Parser.from_file(file_obj, args.dependency_parsing)
 
-            parser.canonicalize()
+            if args.canonical_form:
+                parser.canonicalize(enable=True)
+            else:
+                parser.canonicalize(enable=False)
+
+            if args.disambiguator:
+                parser.disambiguate(args.disambiguator)
+            else:
+                parser.disambiguate(None)
+
             parser.formalize()
             print("done")
 

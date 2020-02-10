@@ -1,6 +1,8 @@
 from ug_utils import *
 from nltk.tokenize import word_tokenize
 import string
+import spotlight
+import stanfordnlp
 
 class NLQuestion(object):
     """
@@ -9,36 +11,35 @@ class NLQuestion(object):
     def __init__(self, question):
         self.question = question
 
-    # @classmethod
-    # def from_file(cls, filename):
-    #     "Take the question from questions in a file and create list of questions"
-    #     data = open(filename, 'r').readlines()
-    #     return cls(data)
-    #
-    # @classmethod
-    # def from_list(cls, question_list):
-    #     "Take questions from a dictionary of question and create a list "
-    #     return cls(question_list.items())
-
-    def tokenize(self):
+    def tokenize(self, dependency_parsing=False):
         """
-        tokenize the nl_question to create a NLQToken object
+        tokenize the nl_question to create a NLQToken object, when the dependency parser is True,
+        it will return NLQTokenDepParsed
+        :param dependency_parsing: when True, use stanfordnlp dependency parser.
         :return:
         """
-        # split sentence into token using nltk.word_tokenize(), this will have punctuations as separate tokens
-        nlq_tokens = word_tokenize(self.question)
+        if dependency_parsing:
+            nlp = stanfordnlp.Pipeline(processors='tokenize,lemma,pos,depparse')
+            doc = nlp(self.question)
+            # doc.sentences[0].print_dependencies()
+            return NLQTokensDepParsed(doc.sentences[0])
 
-        # filter out punctuations from each word
-        table = str.maketrans('', '', string.punctuation)
-        nlq_tokens = [token.translate(table) for token in nlq_tokens]
+        else:
+            # split sentence into token using nltk.word_tokenize(), this will have punctuations as separate tokens
+            nlq_tokens = word_tokenize(self.question)
 
-        # remove token which are not alpha-numeric
-        nlq_tokens = [token for token in nlq_tokens if token.isalpha()]
+            # filter out punctuations from each word
+            table = str.maketrans('', '', string.punctuation)
+            nlq_tokens = [token.translate(table) for token in nlq_tokens]
 
-        # convert to lower case
-        nlq_tokens = [token.lower() for token in nlq_tokens]
+            # remove token which are not alpha-numeric
+            nlq_tokens = [token for token in nlq_tokens if token.isalpha()]
 
-        return NLQTokens(nlq_tokens)
+            # convert to lower case
+            nlq_tokens = [token.lower() for token in nlq_tokens]
+
+            return NLQTokens(nlq_tokens)
+
 
 class NLQTokens(object):
     """
@@ -49,14 +50,38 @@ class NLQTokens(object):
     def __init__(self, questions_tokens):
         self.nlq_tokens = questions_tokens
 
-    def canonicalize(self):
+    def canonicalize(self, enable=False):
         """
         Take the tokenized natural language question and parse it into un-grounded canonical form.
         :return:
         """
-        canonical_form = self.nlq_tokens
-        return NLCanonical(canonical_form)
+        if enable: #todo
+            canonical_form = self.nlq_tokens
+            return NLCanonical(canonical_form)
+        else:
+            canonical_form = self.nlq_tokens
+            return NLCanonical(canonical_form)
 
+class NLQTokensDepParsed(object):
+    """
+    Takes the Natural Language Question and processes using Standard NLP Tools.
+    A wrapper class to wrap the output of PreProcessor into NLQTokens.
+    """
+    # pass
+    def __init__(self, questions_tokens):
+        self.nlq_tokens = questions_tokens
+
+    def canonicalize(self, enable=False):
+        """
+        Take the tokenized natural language question and parse it into un-grounded canonical form.
+        :return:
+        """
+        if enable:  # todo
+            canonical_form = self.nlq_tokens
+            return NLCanonical(canonical_form)
+        else:
+            canonical_form = self.nlq_tokens
+            return NLCanonical(canonical_form)
 
 class NLCanonical(object):
     """
@@ -64,6 +89,31 @@ class NLCanonical(object):
     """
     def __init__(self, canonical_form):
         self.nl_canonical = canonical_form
+
+    def entity_linker(self, linker=None):
+        """
+        entity linking using dbpedia Spotlight
+        :return:
+        """
+        if linker == 'spotlight':
+            # todo: creating filters based on POS tags.
+            #linking entities using dbpedia sptolight
+            entities =[]
+            for token in self.nl_canonical:
+                try:
+                    entities.append(spotlight.annotate('https://api.dbpedia-spotlight.org/en/annotate', token,
+                                               confidence=0.1, support=5))
+                except spotlight.SpotlightException as e:
+                    pass
+
+        elif linker == 'custom_linker':
+            # todo: may be required to implement
+            entities = self.nl_canonical
+        else:
+            # no entity linking
+            entities = self.nl_canonical
+
+        return entities
 
     def formalize(self):
         """
