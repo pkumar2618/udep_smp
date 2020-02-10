@@ -8,6 +8,9 @@ class NLQuestion(object):
     """
     This class will take Natural Language Question and create an object.
     """
+    # class variable used to set up standfordnlp pipeline, so that every time loading could be avoided
+    nlp = stanfordnlp.Pipeline(processors='tokenize,lemma,pos,depparse')
+
     def __init__(self, question):
         self.question = question
 
@@ -19,8 +22,8 @@ class NLQuestion(object):
         :return:
         """
         if dependency_parsing:
-            nlp = stanfordnlp.Pipeline(processors='tokenize,lemma,pos,depparse')
-            doc = nlp(self.question)
+            # nlp = stanfordnlp.Pipeline(processors='tokenize,lemma,pos,depparse')
+            doc = NLQuestion.nlp(self.question)
             # doc.sentences[0].print_dependencies()
             return NLQTokensDepParsed(doc.sentences[0])
 
