@@ -49,19 +49,30 @@ while True:
             # pp_questions = pre_processor.get_pp_questions()
 
             with open(filename, 'r') as file_obj:
-                parser = Parser.from_file(file_obj, args.dependency_parsing)
+                parser = Parser.from_file(file_obj)
 
-            if args.canonical_form:
-                parser.canonicalize(enable=True)
-            else:
-                parser.canonicalize(enable=False)
+            # current pipeline,
+            # tokenization -> canonicalization(default bypassed)->disambiguation->formalization
+            # Tokenize the list of questions.
+            parser.tokenize(args.dependency_parsing)
 
-            if args.disambiguator:
-                parser.disambiguate(args.disambiguator)
-            else:
-                parser.disambiguate(None)
+            # for nlq_tokens in parser.nlq_tokens_list:
+            #     print(nlq_tokens)
 
+            # canonicalize based on canonical_form flag and dependency_parsing flag. when canonical_form flag is
+            # disabled the parser sets it's attribute self.canonical_list as copy of nlq_token_list
+            parser.canonicalize(args.dependency_parsing, args.canonical_form)
+
+            # entity linking or disambiguation is an required for the tokens in the questions.
+            # if args.disambiguator:
+            #     parser.disambiguate(args.disambiguator)
+            # else:
+            #     parser.disambiguate(None)
+
+            # convert the question into a Query
             parser.formalize()
+
+            # Reuslt of Querying the Knowledge Graph
             print("done")
 
         elif args.questions_list:

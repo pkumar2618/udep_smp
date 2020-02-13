@@ -53,46 +53,6 @@ class NLQTokens(object):
     def __init__(self, questions_tokens):
         self.nlq_tokens = questions_tokens
 
-    def canonicalize(self, enable=False):
-        """
-        Take the tokenized natural language question and parse it into un-grounded canonical form.
-        :return:
-        """
-        if enable: #todo
-            canonical_form = self.nlq_tokens
-            return NLCanonical(canonical_form)
-        else:
-            canonical_form = self.nlq_tokens
-            return NLCanonical(canonical_form)
-
-class NLQTokensDepParsed(object):
-    """
-    Takes the Natural Language Question and processes using Standard NLP Tools.
-    A wrapper class to wrap the output of PreProcessor into NLQTokens.
-    """
-    # pass
-    def __init__(self, questions_tokens):
-        self.nlq_tokens = questions_tokens
-
-    def canonicalize(self, enable=False):
-        """
-        Take the tokenized natural language question and parse it into un-grounded canonical form.
-        :return:
-        """
-        if enable:  # todo
-            canonical_form = self.nlq_tokens
-            return NLCanonical(canonical_form)
-        else:
-            canonical_form = self.nlq_tokens
-            return NLCanonical(canonical_form)
-
-class NLCanonical(object):
-    """
-    Wrapper Class for Canonical form of the Natural Language Questions
-    """
-    def __init__(self, canonical_form):
-        self.nl_canonical = canonical_form
-
     def entity_linker(self, linker=None):
         """
         entity linking using dbpedia Spotlight
@@ -100,12 +60,12 @@ class NLCanonical(object):
         """
         if linker == 'spotlight':
             # todo: creating filters based on POS tags.
-            #linking entities using dbpedia sptolight
-            entities =[]
+            # linking entities using dbpedia sptolight
+            entities = []
             for token in self.nl_canonical:
                 try:
                     entities.append(spotlight.annotate('https://api.dbpedia-spotlight.org/en/annotate', token,
-                                               confidence=0.1, support=5))
+                                                       confidence=0.1, support=5))
                 except spotlight.SpotlightException as e:
                     pass
 
@@ -118,13 +78,49 @@ class NLCanonical(object):
 
         return entities
 
-    def formalize(self):
+
+    def formalize_into_sparql(self):
         """
-        create a Query from the Canonical form
-        :return: query
+        when the canonicalization is disabled, we will not have the NLCanonical object, instead nl_Canonical_list
+        is set with NLQTokens(subclass NLQTokenDepParsed) instead.
+        Therefore this method will be used to conver the Tokens into query (formalization).
+        :return: a Query object
         """
-        query_form = self.nl_canonical
+        query_form = self.nlq_tokens
         return Query(query_form)
+
+    def canonicalize(self, dependency_parsing=False, canonical_form=False):
+        """
+        Take the tokenized natural language question and parse it into un-grounded canonical form.
+        :return:
+        """
+        if canonical_form: #todo
+            canonical_form = self.nlq_tokens
+            return NLCanonical(canonical_form)
+        elif dependency_parsing:
+            return NLQTokensDepParsed(self.nlq_tokens)
+        else: # both are false, no canonicalization, a vanilla tokenized form
+            return NLQTokens(self.nlq_tokens)
+
+
+class NLQTokensDepParsed(NLQTokens):
+    """
+    A wrapper class to wrap the output of stanfordnlp.pipeline(). This class inherit attributes and
+     methods of it's base class NLQTokens which has most of the useful methods defined.
+    """
+    def __init__(self, questions_tokens):
+        # self.nlq_tokens = questions_tokens
+        super().__init__(questions_tokens)
+
+
+    def __str__(self):
+        """
+        return representation for the dependency in the sentence.
+        :return:
+        """
+        return "\n".join([f"({word.text}, {word.governor}, {word.dependency_relation})"
+                         for word in self.nlq_tokens.words])
+
 
 class Query(object):
     """
@@ -136,6 +132,15 @@ class Query(object):
         :param query_form:
         """
         self.sparql = query_form
+
+
+class NLCanonical(object):
+    """
+    Wrapper Class for Canonical form of the Natural Language Questions
+    """
+    def __init__(self, canonical_form):
+        self.nl_canonical = canonical_form
+
 
 class NLQDependencyTree(NLQuestion):
     """
