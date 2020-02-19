@@ -36,7 +36,7 @@ class Parser(object):
         takes the nl_canonical form and formalize it into a query
         :return:
         """
-        self.query_list = [nl_canonical.formalize_into_sparql(kg) for nl_canonical in self.nl_canonical_list]
+        self.query_list = [nl_canonical.formalize_into_sparql(kg) for nl_canonical in self.nlq_canonical_list]
         # return query_list
 
     def query_executor(self, kg='dbpedia'):

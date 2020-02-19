@@ -50,22 +50,14 @@ while True:
         """
         # print("Enter name of the file containing the questions")
         if args.questions_file:
-            filename = input()
-            filename = args.questions_file
-            # with open(filename, 'r') as file_obj:
-            #     pre_processor = PreProcessor.from_file(file_obj)
-            #
-            # pp_questions = pre_processor.get_pp_questions()
-
-            with open(filename, 'r') as file_obj:
+            # provide the file name containing the questions
+            with open(args.questions_file, 'r') as file_obj:
                 parser = Parser.from_file(file_obj)
 
             # current pipeline,
             # nl_question -> tokenization -> canonicalization(default bypassed)->disambiguation->formalization
             # Tokenize the list of questions.
             parser.tokenize(args.dependency_parsing)
-
-
             # for nlq_tokens in parser.nlq_tokens_list:
             #     print(nlq_tokens)
 

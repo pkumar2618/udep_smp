@@ -53,7 +53,7 @@ class NLQTokens(object):
     # pass
     def __init__(self, questions_tokens):
         self.nlq_tokens = questions_tokens
-        self.nlq_token_entity_dict = {}
+        self.nlq_tokens_entity_dict = {}
 
     def entity_linker(self, linker=None, kg='dbpedia'):
         """
@@ -86,6 +86,8 @@ class NLQTokens(object):
         Therefore this method will be used to conver the Tokens into query (formalization).
         :return: a Query object
         """
+
+        # for word in
         query_form = self.nlq_tokens_entity_dict
         return Query(query_form)
 
