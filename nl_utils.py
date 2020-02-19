@@ -10,7 +10,7 @@ class NLQuestion(object):
     This class will take Natural Language Question and create an object.
     """
     # class variable used to set up standfordnlp pipeline, so that every time loading could be avoided
-    nlp = stanfordnlp.Pipeline(processors='tokenize,lemma,pos,depparse')
+    nlp = stanfordnlp.Pipeline(processors='tokenize,lemma,pos,depparse', use_gpu=False)
 
     def __init__(self, question):
         self.question = question
@@ -53,30 +53,33 @@ class NLQTokens(object):
     # pass
     def __init__(self, questions_tokens):
         self.nlq_tokens = questions_tokens
-        self.nlq_tokens_entity_dict = {}
+        self.nlq_token_entity_dict = {}
 
-    def entity_linker(self, linker=None, kg='dbpedia'):
+    def entity_linker(self, linker=None, kg=None):
         """
         entity linking using dbpedia Spotlight
         :return:
         """
-        if linker == 'spotlight' or linker == 'dbpedia':
+        if linker == 'spotlight' and kg == 'dbpedia':
             # todo: creating filters based on POS tags.
             # linking entities using dbpedia sptolight
-            entities = []
-            for token in self.nlq_tokens:
+            for token in self.nlq_tokens.words:
                 try:
-                    entities.append(spotlight.annotate('https://api.dbpedia-spotlight.org/en/annotate', token,
-                                                       confidence=0.1, support=5))
+                    entities = spotlight.annotate('https://api.dbpedia-spotlight.org/en/annotate', token,
+                                                       confidence=0.1, support=5)
+                    self.nlq_token_entity_dict['token'] = entities
+
                 except spotlight.SpotlightException as e:
-                    pass
+                    self.nlq_token_entity_dict['token'] = None
 
         elif linker == 'custom_linker':
             # todo: may be required to implement
-            self.nlq_token_entity_dict = {token: token for token in self.nlq_tokens}
+            self.nlq_token_entity_dict = {token.text: token.text for token in self.nlq_tokens.words}
+
         else:
             # no entity linking
-            self.nlq_token_entity_dict = {token: token for token in self.nlq_tokens}
+            self.nlq_token_entity_dict = {k:v for (k, v) in zip([word.text for word in self.nlq_tokens.words],
+                                                                [word.text for word in self.nlq_tokens.words])}
 
 
     def formalize_into_sparql(self, kg='dbpedia'):

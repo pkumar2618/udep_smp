@@ -3,7 +3,7 @@ from ug_utils import *
 from nl_to_ug import *
 from ug_to_g import *
 from parser import Parser
-from pre_processor import PreProcessor
+# from pre_processor import PreProcessor
 import pickle
 import argparse
 import sys
@@ -51,23 +51,23 @@ while True:
         # print("Enter name of the file containing the questions")
         if args.questions_file:
             # provide the file name containing the questions
-            with open(args.questions_file, 'r') as file_obj:
-                parser = Parser.from_file(file_obj)
-
-            # current pipeline,
-            # nl_question -> tokenization -> canonicalization(default bypassed)->disambiguation->formalization
-            # Tokenize the list of questions.
-            parser.tokenize(args.dependency_parsing)
-            # for nlq_tokens in parser.nlq_tokens_list:
-            #     print(nlq_tokens)
-
-            # canonicalize based on canonical_form flag and dependency_parsing flag. when canonical_form flag is
-            # disabled the parser sets it's attribute self.canonical_list as copy of nlq_token_list
-            parser.canonicalize(args.dependency_parsing, args.canonical_form)
-
-            pickle_handle = open('after_canonical.pickle', 'wb')
-            pickle.dump(parser, pickle_handle)
-            pickle_handle.close()
+            # with open(args.questions_file, 'r') as file_obj:
+            #     parser = Parser.from_file(file_obj)
+            #
+            # # current pipeline,
+            # # nl_question -> tokenization -> canonicalization(default bypassed)->disambiguation->formalization
+            # # Tokenize the list of questions.
+            # parser.tokenize(args.dependency_parsing)
+            # # for nlq_tokens in parser.nlq_tokens_list:
+            # #     print(nlq_tokens)
+            #
+            # # canonicalize based on canonical_form flag and dependency_parsing flag. when canonical_form flag is
+            # # disabled the parser sets it's attribute self.canonical_list as copy of nlq_token_list
+            # parser.canonicalize(args.dependency_parsing, args.canonical_form)
+            #
+            # pickle_handle = open('after_canonical.pickle', 'wb')
+            # pickle.dump(parser, pickle_handle)
+            # pickle_handle.close()
 
             pickle_handle = open('after_canonical.pickle', 'rb')
             parser = pickle.load(pickle_handle)
@@ -76,14 +76,13 @@ while True:
             # for nlq_tokens in parser.nlq_tokens_list:
             #     print(nlq_tokens, '\n')
 
-            # entity linking or disambiguation is an required for the tokens in the questions.
-            if args.disambiguator:
-                parser.disambiguate(args.disambiguator)
-            else:
-                parser.disambiguate(None)
+            # # entity linking or disambiguation is an required for the tokens in the questions. The disambiguator
+            # # provides denotation (entity or resources) for each token,
+            # # the parser stores a dictionary of token-denotation pairs
+            parser.disambiguate(linker=args.disambiguator, kg=args.knowledge_graph)
 
             # convert the question into a Query
-            parser.formalize()
+            parser.formalize(kg=args.knowledge_graph)
             parser.query_executor(args.knowledge_graph)
 
             # Reuslt of Querying the Knowledge Graph
