@@ -47,7 +47,10 @@ class Parser(object):
         """
         query = Query(query_string)
         query.run(kg)
-        print("\t".join([f"{result}" for result in query.results]))
+        result_list_dict  = query.results["results"]["bindings"]
+            # print(result["label"]["value"])
+        for result_dict in result_list_dict:
+            print("\t".join([f"label: {key} \t value: {result_dict[key]}"  for key in result_dict.keys()]))
 
     @staticmethod
     def nlq_to_ug_form(nlq):

@@ -58,6 +58,8 @@ class NLQTokens(object):
     def entity_linker(self, linker=None, kg=None):
         """
         entity linking using dbpedia Spotlight
+        Entity linker by definition must have reference to Knowledge Graph, whence it bring list of denotation for
+        the token.
         :return:
         """
         if linker == 'spotlight' and kg == 'dbpedia':
@@ -81,18 +83,22 @@ class NLQTokens(object):
             self.nlq_token_entity_dict = {k:v for (k, v) in zip([word.text for word in self.nlq_tokens.words],
                                                                 [word.text for word in self.nlq_tokens.words])}
 
+        return self.nlq_token_entity_dict
 
     def formalize_into_sparql(self, kg='dbpedia'):
         """
         when the canonicalization is disabled, we will not have the NLCanonical object, instead nl_Canonical_list
         is set with NLQTokens(subclass NLQTokenDepParsed) instead.
         Therefore this method will be used to conver the Tokens into query (formalization).
+        Note: Fomalize into SPARQL will note require reference to a Knowledge Graph for the purpose of
+        denotation as that is already done. The KG is required to provide list of namespace for creating query-string
+        in during entity_linking stage of the parser.
         :return: a Query object
         """
 
         # for word in
-        query_form = self.nlq_tokens_entity_dict
-        return Query(query_form)
+        query_string = self.nlq_token_entity_dict
+        return Query(query_string)
 
     def canonicalize(self, dependency_parsing=False, canonical_form=False):
         """
@@ -132,12 +138,12 @@ class Query(object):
     Wrapper for storing logical query
     """
 
-    def __init__(self, query_form):
+    def __init__(self, query_string):
         """
         take the query_form obtained by formalizer and wrap it
         :param query_form:
         """
-        self.sparql = query_form
+        self.sparql = query_string
         self.results = []
 
     def run(self, kg='dbpedia'):
@@ -146,6 +152,7 @@ class Query(object):
         try:
             sparql.setQuery(self.sparql)
             self.results = sparql.query().convert()
+
         except:
             self.results = None
 

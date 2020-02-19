@@ -81,8 +81,10 @@ while True:
             # # the parser stores a dictionary of token-denotation pairs
             parser.disambiguate(linker=args.disambiguator, kg=args.knowledge_graph)
 
-            # convert the question into a Query
+            # convert the question into a Query, the reference to knowledge graph is rquired to provide list of namespace
+            # prefixes used during creating a query-string
             parser.formalize(kg=args.knowledge_graph)
+
             parser.query_executor(args.knowledge_graph)
 
             # Reuslt of Querying the Knowledge Graph
