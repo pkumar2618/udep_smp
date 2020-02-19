@@ -50,7 +50,7 @@ while True:
         """
         # print("Enter name of the file containing the questions")
         if args.questions_file:
-            # provide the file name containing the questions
+            # # provide the file name containing the questions
             # with open(args.questions_file, 'r') as file_obj:
             #     parser = Parser.from_file(file_obj)
             #
@@ -62,7 +62,7 @@ while True:
             # #     print(nlq_tokens)
             #
             # # canonicalize based on canonical_form flag and dependency_parsing flag. when canonical_form flag is
-            # # disabled the parser sets it's attribute self.canonical_list as copy of nlq_token_list
+            # # disabled the parser sets it's attribute self.canonical_list as copy based on nlq_token_list
             # parser.canonicalize(args.dependency_parsing, args.canonical_form)
             #
             # pickle_handle = open('after_canonical.pickle', 'wb')

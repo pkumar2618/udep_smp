@@ -55,63 +55,31 @@ class NLQTokens(object):
         self.nlq_tokens = questions_tokens
         self.nlq_token_entity_dict = {}
 
-    def entity_linker(self, linker=None, kg=None):
-        """
-        entity linking using dbpedia Spotlight
-        Entity linker by definition must have reference to Knowledge Graph, whence it bring list of denotation for
-        the token.
-        :return:
-        """
-        if linker == 'spotlight' and kg == 'dbpedia':
-            # todo: creating filters based on POS tags.
-            # linking entities using dbpedia sptolight
-            for token in self.nlq_tokens.words:
-                try:
-                    entities = spotlight.annotate('https://api.dbpedia-spotlight.org/en/annotate', token,
-                                                       confidence=0.1, support=5)
-                    self.nlq_token_entity_dict['token'] = entities
-
-                except spotlight.SpotlightException as e:
-                    self.nlq_token_entity_dict['token'] = None
-
-        elif linker == 'custom_linker':
-            # todo: may be required to implement
-            self.nlq_token_entity_dict = {token.text: token.text for token in self.nlq_tokens.words}
-
-        else:
-            # no entity linking
-            self.nlq_token_entity_dict = {k:v for (k, v) in zip([word.text for word in self.nlq_tokens.words],
-                                                                [word.text for word in self.nlq_tokens.words])}
-
-        return self.nlq_token_entity_dict
-
-    def formalize_into_sparql(self, kg='dbpedia'):
-        """
-        when the canonicalization is disabled, we will not have the NLCanonical object, instead nl_Canonical_list
-        is set with NLQTokens(subclass NLQTokenDepParsed) instead.
-        Therefore this method will be used to conver the Tokens into query (formalization).
-        Note: Fomalize into SPARQL will note require reference to a Knowledge Graph for the purpose of
-        denotation as that is already done. The KG is required to provide list of namespace for creating query-string
-        in during entity_linking stage of the parser.
-        :return: a Query object
-        """
-
-        # for word in
-        query_string = self.nlq_token_entity_dict
-        return Query(query_string)
-
     def canonicalize(self, dependency_parsing=False, canonical_form=False):
         """
         Take the tokenized natural language question and parse it into un-grounded canonical form.
+        I am considering dependency_parsing as the canonical form here. However, there are works as in AskNow
+        where the canonical form has altogether different syntax. Here we take either dependency parsing or the
+        canonical form.
         :return:
+
         """
         if canonical_form: #todo
+            # for now, consider canonicalization is disabled, and i pass on the nlq_token object over to the next stage,
+            # through the nlq_canonical object.
             canonical_form = self.nlq_tokens
-            return NLCanonical(canonical_form)
+            return NLQCanonical(canonical_form)
+
         elif dependency_parsing:
-            return NLQTokensDepParsed(self.nlq_tokens)
-        else: # both are false, no canonicalization, a vanilla tokenized form
-            return NLQTokens(self.nlq_tokens)
+            # in case dependency parsing is enabled, It will use the dependency tree as the canonical form
+            # not that in that case the tokenizer in the NLQuestion object will return NLQTokensDepParsed object itself.
+            return NLQCanonical(self.nlq_tokens)
+
+        else:
+            # both are false, no canonicalization, a vanilla tokenized form.
+            # the NLQCanonical object will just be a list of tokens, as returned by NLQQuestion tokenizer with
+            # dependency parsing disabled.
+            return NLQCanonical(self.nlq_tokens)
 
 
 class NLQTokensDepParsed(NLQTokens):
@@ -157,12 +125,57 @@ class Query(object):
             self.results = None
 
 
-class NLCanonical(object):
+class NLQCanonical(object):
     """
     Wrapper Class for Canonical form of the Natural Language Questions
     """
     def __init__(self, canonical_form):
-        self.nl_canonical = canonical_form
+        self.nlq_canonical = canonical_form
+
+    def entity_linker(self, linker=None, kg=None):
+        """
+        entity linking using dbpedia Spotlight
+        Entity linker by definition must have reference to Knowledge Graph, whence it bring list of denotation for
+        the token.
+        :return:
+        """
+        if linker == 'spotlight' and kg == 'dbpedia':
+            # todo: creating filters based on POS tags.
+            # linking entities using dbpedia sptolight
+            for token in self.nlq_canonical.words:
+                try:
+                    entities = spotlight.annotate('https://api.dbpedia-spotlight.org/en/annotate', token,
+                                                       confidence=0.1, support=5)
+                    self.nlq_token_entity_dict['token'] = entities
+
+                except spotlight.SpotlightException as e:
+                    self.nlq_token_entity_dict['token'] = None
+
+        elif linker == 'custom_linker':
+            # todo: may be required to implement
+            self.nlq_token_entity_dict = {token.text: token.text for token in self.nlq_canonical.words}
+
+        else:
+            # no entity linking
+            self.nlq_token_entity_dict = {k:v for (k, v) in zip([word.text for word in self.nlq_canonical.words],
+                                                                [word.text for word in self.nlq_canonical.words])}
+
+        return self.nlq_token_entity_dict
+
+    def formalize_into_sparql(self, kg='dbpedia'):
+        """
+        when the canonicalization is disabled, we will not have the NLCanonical object, instead nlq_Canonical_list
+        is set with NLQTokens(subclass NLQTokenDepParsed).
+        Therefore this method will be used to conver the Tokens into query (formalization).
+        Note: Fomalize into SPARQL will note require reference to a Knowledge Graph for the purpose of
+        denotation as that is already done. The KG is required to provide list of namespace for creating query-string
+        in during entity_linking stage of the parser.
+        :return: a Query object
+        """
+
+        # for word in
+        query_string = self.nlq_token_entity_dict
+        return Query(query_string)
 
 
 class NLQDependencyTree(NLQuestion):
