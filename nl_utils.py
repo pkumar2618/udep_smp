@@ -3,6 +3,7 @@ from nltk.tokenize import word_tokenize
 import string
 import spotlight
 import stanfordnlp
+from SPARQLWrapper import SPARQLWrapper, JSON
 
 class NLQuestion(object):
     """
@@ -52,17 +53,18 @@ class NLQTokens(object):
     # pass
     def __init__(self, questions_tokens):
         self.nlq_tokens = questions_tokens
+        self.nlq_token_entity_dict = {}
 
-    def entity_linker(self, linker=None):
+    def entity_linker(self, linker=None, kg='dbpedia'):
         """
         entity linking using dbpedia Spotlight
         :return:
         """
-        if linker == 'spotlight':
+        if linker == 'spotlight' or linker == 'dbpedia':
             # todo: creating filters based on POS tags.
             # linking entities using dbpedia sptolight
             entities = []
-            for token in self.nl_canonical:
+            for token in self.nlq_tokens:
                 try:
                     entities.append(spotlight.annotate('https://api.dbpedia-spotlight.org/en/annotate', token,
                                                        confidence=0.1, support=5))
@@ -71,22 +73,20 @@ class NLQTokens(object):
 
         elif linker == 'custom_linker':
             # todo: may be required to implement
-            entities = self.nl_canonical
+            self.nlq_token_entity_dict = {token: token for token in self.nlq_tokens}
         else:
             # no entity linking
-            entities = self.nl_canonical
-
-        return entities
+            self.nlq_token_entity_dict = {token: token for token in self.nlq_tokens}
 
 
-    def formalize_into_sparql(self):
+    def formalize_into_sparql(self, kg='dbpedia'):
         """
         when the canonicalization is disabled, we will not have the NLCanonical object, instead nl_Canonical_list
         is set with NLQTokens(subclass NLQTokenDepParsed) instead.
         Therefore this method will be used to conver the Tokens into query (formalization).
         :return: a Query object
         """
-        query_form = self.nlq_tokens
+        query_form = self.nlq_tokens_entity_dict
         return Query(query_form)
 
     def canonicalize(self, dependency_parsing=False, canonical_form=False):
@@ -126,12 +126,23 @@ class Query(object):
     """
     Wrapper for storing logical query
     """
+
     def __init__(self, query_form):
         """
         take the query_form obtained by formalizer and wrap it
         :param query_form:
         """
         self.sparql = query_form
+        self.results = []
+
+    def run(self, kg='dbpedia'):
+        sparql = SPARQLWrapper("http://dbpedia.org/sparql")
+        sparql.setReturnFormat(JSON)
+        try:
+            sparql.setQuery(self.sparql)
+            self.results = sparql.query().convert()
+        except:
+            self.results = None
 
 
 class NLCanonical(object):
