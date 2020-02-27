@@ -3,8 +3,7 @@ from nltk.tokenize import word_tokenize
 import string
 import spotlight
 import stanfordnlp
-from SPARQLWrapper import SPARQLWrapper, JSON
-
+from sparql_builder import Query
 class NLQuestion(object):
     """
     This class will take Natural Language Question and create an object.
@@ -97,32 +96,7 @@ class NLQTokensDepParsed(NLQTokens):
         return representation for the dependency in the sentence.
         :return:
         """
-        return "\n".join([f"({word.text}, {word.governor}, {word.dependency_relation})"
-                         for word in self.nlq_tokens.words])
-
-
-class Query(object):
-    """
-    Wrapper for storing logical query
-    """
-
-    def __init__(self, query_string):
-        """
-        take the query_form obtained by formalizer and wrap it
-        :param query_form:
-        """
-        self.sparql = query_string
-        self.results = []
-
-    def run(self, kg='dbpedia'):
-        sparql = SPARQLWrapper("http://dbpedia.org/sparql")
-        sparql.setReturnFormat(JSON)
-        try:
-            sparql.setQuery(self.sparql)
-            self.results = sparql.query().convert()
-
-        except:
-            self.results = None
+        return "\n".join(["({ }, { }, { })".format(word.text, word.governor, word.dependency_relation) for word in self.nlq_tokens.words])
 
 
 class NLQCanonical(object):
