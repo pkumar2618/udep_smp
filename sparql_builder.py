@@ -1,21 +1,27 @@
 from SPARQLWrapper import SPARQLWrapper, JSON
-from rdflib import Graph, URIRef
+# from surf.query import a, select
+# from surf.rdf import BNode, Graph, ConjunctiveGraph, Literal, Namespace
+# from surf.rdf import RDF, URIRef
+# import surf.namespace as namespace
+import rdflib
+from rdflib import URIRef, Graph
 from rdflib.namespace import Namespace, NamespaceManager
-from surf.query import a, select
-from surf.rdf import BNode, Graph, ConjunctiveGraph, Literal, Namespace
-from surf.rdf import RDF, URIRef
-import surf.namespace as namespace
 
 class Query(object):
     """
     Wrapper for storing logical query
     """
-    namespace_manager = namespace
-    namespace_manager.register(dbo="http://dbpedia.org/ontology/")
-    namespace_manager.register(dbp="http://dbpedia.org/property/")
-    namespace_manager.register(dbr="http://dbpedia.org/resource/")
-    namespace_manager.register(dbt="http://dbpedia.org/resource/Template:")
-    namespace_manager.register(dbc="http://dbpedia.org/resource/Category:")
+    # Graph to keep all the namespace
+    sparql_group = Graph()
+
+    # namespace manager, to be attached to the sparql_group
+    sparql_group.namespace_manager = NamespaceManager(Graph())
+
+    # namespace.register(dbo="http://dbpedia.org/ontology/")
+    # namespace.register(dbp="http://dbpedia.org/property/")
+    # namespace.register(dbr="http://dbpedia.org/resource/")
+    # namespace.register(dbt="http://dbpedia.org/resource/Template:")
+    # namespace.register(dbc="http://dbpedia.org/resource/Category:")
     # namespace.register(dbpedia_commons="http://commons.dbpedia.org/resource/")
     # namespace.register(dbpedia_wikidata='http://wikidata.dbpedia.org/resource/')
 
@@ -25,9 +31,10 @@ class Query(object):
         :param query_form:
         """
         self.sparql = None
+        self.results = None
         # self.namespace_manager = NamespaceManager(Graph())
         # self.triples = Graph()
-        # self.results = []
+
 
     def select(self, var):
         """create a SELECT query"""
@@ -62,48 +69,70 @@ class Query(object):
         :param filter:
         :return:
         """
+        pass
 
     def get_query_string(self):
         return unicode(self.sparql)
 
-    def add_namespace(self, namespace_dict=[]):
+    def add_namespace(self, prefix, url_string):
         """
-        Default add dbpedia prefixes.
+        #todo not working
         :return:
         """
-        for key in namespace_dict.keys():
-            Query.namespace_manager.register(key=namespace_dict[key])
+        # create the Namespace using url_string
+        namespace = Namespace(url_string)
+        Query.sparql_group.namespace_manager.bind(prefix, namespace, override=False)
+
+    def get_uri_for_prefix(self, prefix):
+        """
+        given the prefix, return its uri if it exist in the namespace
+        :param prefix:
+        :return:
+        """
+        for p, u in Query.sparql_group.namespaces():
+            if p == prefix:
+                return u
 
     def run(self, kg='dbpedia'):
-        sparql = SPARQLWrapper("http://dbpedia.org/sparql")
-        sparql.setReturnFormat(JSON)
+        sparql_endpoint = SPARQLWrapper("http://dbpedia.org/sparql")
+        sparql_endpoint.setReturnFormat(JSON)
         try:
-            sparql.setQuery(self.sparql)
-            self.results = sparql.query().convert()
+            sparql_endpoint.setQuery(self.sparql)
+            self.results = sparql_endpoint.query().convert()
 
         except:
+            print("error quering endpoint")
             self.results = None
 
 
 if __name__ == "__main__":
     print("testing class Query")
-    sparql = Query()
-    sparql.select("?date")
-    sparql.distinct()
-    sparql.where((URIRef("http://dbpedia.org/resource/Michael_Jackson"), URIRef("http://dbpedia.org/ontology/deathDate"), "?date"))
-    print(unicode(sparql.sparql))
-    # sparql.run(kg="dbpedia")
-    # result_list_dict  = sparql.results["results"]["bindings"]
+    query = Query()
+    # test 1
+    query.add_namespace('dbr', "http://dbpedia.org/resource/")
+    # test 2
+    print(query.get_uri_for_prefix('dbr'))
+    # print([(p, u) for p, u in Query.sparql_group.namespaces()])
+    # test 3
+
+    # # query example
+    # sparql = Query()
+    # sparql.select("?date")
+    # sparql.distinct()
+    # sparql.where((URIRef("http://dbpedia.org/resource/Michael_Jackson"), URIRef("http://dbpedia.org/ontology/deathDate"), "?date"))
+    # print(unicode(sparql.sparql))
+
+    # another query example
+    # query = Query()
+    # print(namespace.get_namespace_url('xsd'))
+    # query.select('?d')
+    # query.distinct()
+    # query.where((URIRef("http://dbpedia.org/resource/Diana,_Princess_of_Wales"), URIRef("http://dbpedia.org/ontology/deathDate"), "?d"))
+    # print(unicode(query.sparql))
+    #
+    # query.run(kg="dbpedia")
+    # result_list_dict  = query.results["results"]["bindings"]
     # print(result["label"]["value"])
     # for result_dict in result_list_dict:
     #     print("\n".join(["label: { }\t value: { }".format(key, result_dict[key]) for key in result_dict.keys()]))
-
-    # Test Namespace hold across various call to the QUERY Object
-    sparql.add_namespace({'dbpedia_wikidata':'http://wikidata.dbpedia.org/resource/'})
-
-
-    print Query.namespace_manager.get_namespace_url('dbr')
-    print namespace.get_namespace_url('DBP')
-    print namespace.get_namespace_url('DBR')
-    print namespace.get_namespace_url('DBC')
-    # print Query.namespace_manger.get_namespace_url('dbpedia_wikidata')
+    #
