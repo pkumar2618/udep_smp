@@ -42,9 +42,15 @@ class Parser(object):
 
     def query_executor(self, kg='dbpedia'):
         # self.results_list = [query.run(kg) for query in self.query_list]
-        query_string = """SELECT DISTINCT xsd:date(?d) WHERE { <http://dbpedia.org/resource/Diana,_Princess_of_Wales> 
-        <http://dbpedia.org/ontology/deathDate> ?d}
-        """
+        # query_string = """SELECT DISTINCT xsd:date(?d) WHERE { <http://dbpedia.org/resource/Diana,_Princess_of_Wales>
+        # <http://dbpedia.org/ontology/deathDate> ?d}
+        # """
+        query_string="""
+        SELECT
+        DISTINCT ?date
+        WHERE
+        { <http://dbpedia.org/resource/Michael_Jackson> < http://dbpedia.org/ontology/deathDate> ?date}"""
+
         query = Query(query_string)
         query.run(kg)
         result_list_dict  = query.results["results"]["bindings"]
@@ -77,4 +83,6 @@ class Parser(object):
     #     :return:
     #     """
 
-# if __init__ == __main__:
+if __name__ == "__main__":
+    parser = Parser("When did Michael Jackson die?")
+    parser.query_executor()
