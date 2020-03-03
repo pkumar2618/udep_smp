@@ -4,7 +4,7 @@ from SPARQLWrapper import SPARQLWrapper, JSON
 # from surf.rdf import RDF, URIRef
 # import surf.namespace as namespace
 import rdflib
-from rdflib import URIRef, Graph
+from rdflib import URIRef, Graph, BNode
 from rdflib.namespace import Namespace, NamespaceManager
 
 class Query(object):
@@ -13,7 +13,7 @@ class Query(object):
     """
     # Graph to keep all the namespace
     sparql_group = Graph()
-
+    TYPES = ['SELECT']
     # namespace manager, to be attached to the sparql_group
     sparql_group.namespace_manager = NamespaceManager(Graph())
 
@@ -25,29 +25,64 @@ class Query(object):
     # namespace.register(dbpedia_commons="http://commons.dbpedia.org/resource/")
     # namespace.register(dbpedia_wikidata='http://wikidata.dbpedia.org/resource/')
 
-    def __init__(self):
+    def __init__(self, *vars):
         """
         take the query_form obtained by formalizer and wrap it
         :param query_form:
         """
-        self.sparql = None
-        self.results = None
-        # self.namespace_manager = NamespaceManager(Graph())
-        # self.triples = Graph()
+        if type not in self.TYPES:
+            raise ValueError("""The query type is not supported yet""")
+        # self.sparql = None
+        # self.results = None
+        self._type = type
+        self._modifier = None
+        self._vars = []
+        self._limit = None
+        self._order_by = []
 
 
-    def select(self, var):
+    def _validate_variable(self, var):
+        if isinstance(var, str):
+            if var.startswith('?'):
+                return True
+            else:
+                raise ValueError(f"Not a Variable:{var} should start with ?")
+    def _validate_triple_pattern(self, t_pattern):
+        if type(t_pattern) in [list, tuple]:
+            try:
+                s, p, o = t_pattern
+            except:
+                raise ValueError('t_pattern requires 3 terms')
+
+            if isinstance(s, [BNode, URIRef]):
+                pass
+            else:
+                raise ValueError('Subject is not a valid rdf term')
+
+            if isinstance(p, [BNode, URIRef]):
+                pass
+            else:
+                raise ValueError('Predicate is not a valid rdf term')
+
+            if isinstance(o, [BNode, URIRef]):
+                pass
+            else:
+                raise ValueError('Object is not a valid rdf term')
+
+    def select(self, *var):
         """create a SELECT query"""
-        self.sparql = select(var)
+        self._type = "SELECT"
+        self._vars = [var for var in vars if self._validate_variable(var)]
+
 
     def distinct(self):
         """
         add DISTINCT modifier to select clause
         :return:
         """
-        self.sparql.distinct()
+        self._modifier = 'DISTINCT'
 
-    def where(self, tripple_pattern):
+    def where(self, statement):
         """
         Where clause for the select query
         :param tripple_pattern:
@@ -108,12 +143,14 @@ class Query(object):
 if __name__ == "__main__":
     print("testing class Query")
     query = Query()
+
     # test 1
     query.add_namespace('dbr', "http://dbpedia.org/resource/")
-    # test 2
+    # test 1.1
     print(query.get_uri_for_prefix('dbr'))
     # print([(p, u) for p, u in Query.sparql_group.namespaces()])
-    # test 3
+
+    # test 2
 
     # # query example
     # sparql = Query()
