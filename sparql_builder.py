@@ -199,9 +199,8 @@ if __name__ == "__main__":
     # query.where((URIRef("http://dbpedia.org/resource/Diana,_Princess_of_Wales"), URIRef("http://dbpedia.org/ontology/deathDate"), "?d"))
     # print(unicode(query.sparql))
     #
-    # query.run(kg="dbpedia")
-    # result_list_dict  = query.results["results"]["bindings"]
-    # print(result["label"]["value"])
-    # for result_dict in result_list_dict:
-    #     print("\n".join(["label: { }\t value: { }".format(key, result_dict[key]) for key in result_dict.keys()]))
-    #
+    query.run(kg="dbpedia")
+    result_list_dict  = query.results["results"]["bindings"]
+    # print(result_list_dict["label"]["value"])
+    for result_dict in result_list_dict:
+        print("\n".join([f"label:{key}\t value:{result_dict[key]}" for key in result_dict.keys()]))
