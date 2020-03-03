@@ -30,11 +30,11 @@ class Query(object):
         take the query_form obtained by formalizer and wrap it
         :param query_form:
         """
-        if type not in self.TYPES:
-            raise ValueError("""The query type is not supported yet""")
-        # self.sparql = None
+        self.sparql = None
+        self._where = None
         # self.results = None
-        self._type = type
+        self._type = None
+        self._data = Graph()
         self._modifier = None
         self._vars = []
         self._limit = None
@@ -47,10 +47,11 @@ class Query(object):
                 return True
             else:
                 raise ValueError(f"Not a Variable:{var} should start with ?")
-    def _validate_triple_pattern(self, t_pattern):
-        if type(t_pattern) in [list, tuple]:
+
+    def _validate_triple_pattern(self, spo_tuple):
+        if type(spo_tuple) in [list, tuple]:
             try:
-                s, p, o = t_pattern
+                s, p, o = spo_tuple
             except:
                 raise ValueError('t_pattern requires 3 terms')
 
@@ -69,7 +70,7 @@ class Query(object):
             else:
                 raise ValueError('Object is not a valid rdf term')
 
-    def select(self, *var):
+    def select(self, *vars):
         """create a SELECT query"""
         self._type = "SELECT"
         self._vars = [var for var in vars if self._validate_variable(var)]
@@ -82,13 +83,23 @@ class Query(object):
         """
         self._modifier = 'DISTINCT'
 
-    def where(self, statement):
+    def add_triple(self, spo_tuple):
+        """
+        will take the tuple of s p o and add it to the _data to crete the graph-pattern
+        :return:
+        """
+        self._data.add(spo_tuple)
+
+    def where(self, spo_tuple):
         """
         Where clause for the select query
         :param tripple_pattern:
         :return:
         """
-        self.sparql.where(tripple_pattern)
+        # take spo_tuple and add to the graph-patern
+        # if self._validate_triple_pattern(spo_tuple):
+        self._where = "WHERE"
+        self._data.add(spo_tuple)
 
     def optional_group(self, optional_tripple):
         """
@@ -106,8 +117,23 @@ class Query(object):
         """
         pass
 
-    def get_query_string(self):
-        return unicode(self.sparql)
+    def _angular_braces(self, term):
+        if isinstance(term, URIRef):
+            return f'<{term}>'
+        elif isinstance(term, BNode):
+            return term
+        else:
+            raise ValueError("can't compose sparql query")
+
+    def get_query_string(self, logical_form = 'sparql'):
+        if logical_form == 'sparql':
+            query_type = f"{self._type} {self._modifier} {' '.join(self._vars)} "
+
+            bgp_string = '\n'.join([f"{self._angular_braces(s)} {self._angular_braces(p)} {self._angular_braces(o)}" for s, p, o in self._data])
+
+            self.sparql= f"{query_type}\n{self._where} {{{bgp_string}}}"
+
+        return str(self.sparql)
 
     def add_namespace(self, prefix, url_string):
         """
@@ -144,13 +170,19 @@ if __name__ == "__main__":
     print("testing class Query")
     query = Query()
 
-    # test 1
+    # # test 1
     query.add_namespace('dbr', "http://dbpedia.org/resource/")
-    # test 1.1
+    # # test 1.1
     print(query.get_uri_for_prefix('dbr'))
-    # print([(p, u) for p, u in Query.sparql_group.namespaces()])
 
     # test 2
+    # compose sparql query
+    # test 2.1
+    query.select('?d')
+    query.distinct()
+    query.where((URIRef("http://dbpedia.org/resource/Diana,_Princess_of_Wales"), URIRef("http://dbpedia.org/ontology/deathDate"), BNode("?d")))
+    # query.add_triple((URIRef("http://dbpedia.org/resource/_Princess_of_Wales"), URIRef("http://dbpedia.org/ontology/deathDate"), BNode("?d")))
+    print(query.get_query_string())
 
     # # query example
     # sparql = Query()
