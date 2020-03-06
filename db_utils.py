@@ -40,7 +40,8 @@ def get_dbpedia_predicates(filename_raw="dbpedia_predicates.csv", filename_prett
         # with open("test.csv", 'w') as f_handle:
         #   predicate_df.to_csv(f_handle,index=True)
 
-        predicate_df['value_label'] =" "
+        predicate_df['value_label']=" "
+        predicate_df['value_label_split']=" "
         predicate_df['prefix'] = " "
         # value_label_df = pd.DataFrame(columns=['value_label'])
         # prefix_df = pd.DataFrame(columns=['prefix'])
@@ -59,6 +60,7 @@ def get_dbpedia_predicates(filename_raw="dbpedia_predicates.csv", filename_prett
                 try:
                     if re.match(rf'^{url_base}[/#]?',ns_url):
                         predicate_df.loc[url, 'value_label'] = value_label
+                        predicate_df.loc[url, 'value_label_split'] = split_camelcase_predicates(value_label)
                         predicate_df.loc[url, 'prefix'] = ns_prefix
                 except:
                     e = sys.exc_info()[0]
@@ -66,48 +68,19 @@ def get_dbpedia_predicates(filename_raw="dbpedia_predicates.csv", filename_prett
 
         with open(filename_pretty, 'w') as f_handle:
             predicate_df = predicate_df.drop(columns=['type'])
-            predicate_df = predicate_df[['prefix', 'value_label', 'value']]
+            predicate_df = predicate_df[['prefix', 'value_label', 'value_label_split', 'value']]
             predicate_df.to_csv(f_handle, index=False)
 
-def get_dbpedia_predicate_pretty(filename='dbpedia_predicate_pretty.txt'):
-    query = """select
-      distinct ?prettyName ?property
-      where
-      {
-        {select distinct ?property where
-          { [a dbo: Person; ?property[]]
-          }
-        }
-        values(?prefixURI ?prefixName) 
-        {
-          (dbo: "dbo")
-        }
-      filter strstarts(str(?property), str(?prefixURI))
-      bind(concat(?prefixName, ":", strafter(str(?property), str(?prefixURI))) as ?prettyName)
-      } limit 1000 """
 
-    sparql = SPARQLWrapper("http://dbpedia.org/sparql")
-    sparql.setQuery(query)
-    sparql.setReturnFormat(JSON)
-    results = sparql.query().convert()
-
-    predicate_df = pd.DataFrame([result['x'] for result in results['results']['bindings']], columns=['type', 'value'])
-    with open(filename, 'w') as f_handle:
-        # for result in results["results"]["bindings"]:
-        #   print(result["type"]["value"])
-        predicate_df.to_csv(f_handle, index = False)
-
-
-def get_dbpedia_namespaces():
-    # sparql = SPARQLWrapper("http://dbpedia.org/sparql")
-    # sparql.namespaces()
-    pass
-
+def split_camelcase_predicates(cc_predicate):
+    return re.findall(r'[a-zA-Z](?:[a-z]+|[A-Z]*(?=[A-Z]|$))', cc_predicate)
 
 if __name__ == "__main__":
     # get_dbpedia_predicates(filename_raw="dbpedia_predicates.csv", filename_pretty="dbpedia_predicates_pretty.csv",
     #                        namespaces="dbp_namespaces_prefix.tsv", refresh=True)
     get_dbpedia_predicates(filename_raw="dbpedia_predicates.csv", filename_pretty="dbpedia_predicates_pretty.csv",
                            namespaces="dbp_namespaces_prefix.tsv", refresh=False)
-    # get_dbpedia_predicate_pretty()
-    # get_dbpedia_namespaces()
+
+    # print(split_camelcase_predicates("ateneoWChess"))
+    # print(split_camelcase_predicates("CamelCaseXYZ"))
+    # print(split_camelcase_predicates("XYZCamelCase"))

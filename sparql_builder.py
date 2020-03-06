@@ -154,6 +154,10 @@ class Query(object):
             if p == prefix:
                 return u
 
+    def get_namespace(self):
+        all_ns = '\n'.join([f"PREFIX: {p} \t URL: {u}" for p, u in Query.sparql_group.namespaces()])
+        print(all_ns)
+
     def run(self, kg='dbpedia'):
         sparql_endpoint = SPARQLWrapper("http://dbpedia.org/sparql")
         sparql_endpoint.setReturnFormat(JSON)
