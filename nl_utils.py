@@ -4,15 +4,23 @@ import string
 import spotlight
 import stanfordnlp
 from sparql_builder import Query
+from gensim.models import KeyedVectors
+from threading import Semaphore
+
 class NLQuestion(object):
     """
     This class will take Natural Language Question and create an object.
     """
     # class variable used to set up standfordnlp pipeline, so that every time loading could be avoided
-    nlp = stanfordnlp.Pipeline(processors='tokenize,lemma,pos,depparse', use_gpu=False)
+    sd_nlp_loaded=False
+    nlp = None
+
 
     def __init__(self, question):
         self.question = question
+        if not NLQuestion.sd_nlp_loaded:
+            NLQuestion.nlp = stanfordnlp.Pipeline(processors='tokenize,lemma,pos,depparse', use_gpu=False)
+            NLQuestion.sd_nlp_loaded = True
 
     def tokenize(self, dependency_parsing=False):
         """
@@ -103,8 +111,25 @@ class NLQCanonical(object):
     """
     Wrapper Class for Canonical form of the Natural Language Questions
     """
+
+    # Using GloVe-6B trained on 6Billion tokens, contains 400k vocabulary
+    # loading once for the object is created, and later to be used by entity linker
+    # or predicate linker
+    glove_loaded = False # flag to load the keyedvector from file once
+    glove = None # the keyedvector stored using memory map for fast access
+
+
+
     def __init__(self, canonical_form):
         self.nlq_canonical = canonical_form
+        if not NLQCanonical.glove_loaded:
+            glove_loading_kv = KeyedVectors.load_word2vec_format("./pt_word_embedding/glove/glove.6B.50d.w2vformat.txt")
+            glove_loading_kv.save('./glove_gensim_mmap')
+            NLQCanonical.glove = KeyedVectors.load('./glove_gensim_mmap', mmap='r')
+            NLQCanonical.glove.syn0norm = NLQCanonical.glove.syn0  # prevent recalc of normed vectors
+            NLQCanonical.glove.most_similar('stuff')  # any word will do: just to page all in
+            # Semaphore(0).acquire()  # just hang until process killed
+            NLQCanonical.glove_loaded = True
 
     def entity_linker(self, linker=None, kg=None):
         """
@@ -163,5 +188,12 @@ class NLQDependencyTree(NLQuestion):
     #
     #     elif kwargs.get(parser == "stanford_parser"):
     #         self.dep_tree = stanford_parser(args[0])
+
+
+if __name__ == "__main__":
+    nlq_canon = NLQCanonical("glove_testing")
+    print(NLQCanonical.glove['the'])
+    print(NLQCanonical.glove['lesson'])
+    print(NLQCanonical.glove.most_similar('orange'))
 
 
