@@ -50,28 +50,31 @@ while True:
         """
         # print("Enter name of the file containing the questions")
         if args.questions_file:
-            # # provide the file name containing the questions
+            # # # # provide the file name containing the questions
             # with open(args.questions_file, 'r') as file_obj:
             #     parser = Parser.from_file(file_obj)
             #
-            # # current pipeline,
-            # # nl_question -> tokenization -> canonicalization(default bypassed)->disambiguation->formalization
-            # # Tokenize the list of questions.
+            # # # # current pipeline,
+            # # # # nl_question -> tokenization -> canonicalization(default bypassed)->disambiguation->formalization
+            # # # # Tokenize the list of questions.
             # parser.tokenize(args.dependency_parsing)
-            # # for nlq_tokens in parser.nlq_tokens_list:
-            # #     print(nlq_tokens)
+            # # # # for nlq_tokens in parser.nlq_tokens_list:
+            # # # #     print(nlq_tokens)
+            # # #
             #
-            # # canonicalize based on canonical_form flag and dependency_parsing flag. when canonical_form flag is
-            # # disabled the parser sets it's attribute self.canonical_list as copy based on nlq_token_list
-            # parser.canonicalize(args.dependency_parsing, args.canonical_form)
-            #
-            # pickle_handle = open('after_canonical.pickle', 'wb')
+            # # # saving the parser state using pickle
+            # pickle_handle = open('before_canonical.pkl', 'wb')
             # pickle.dump(parser, pickle_handle)
             # pickle_handle.close()
 
-            pickle_handle = open('after_canonical.pickle', 'rb')
+            # # # loading the parser state from canonical form
+            pickle_handle = open('before_canonical.pkl', 'rb')
             parser = pickle.load(pickle_handle)
             pickle_handle.close()
+
+            # # # canonicalize based on canonical_form flag and dependency_parsing flag. when canonical_form flag is
+            # # # disabled the parser sets it's attribute self.canonical_list as copy based on nlq_token_list
+            parser.canonicalize(args.dependency_parsing, args.canonical_form)
 
             # for nlq_tokens in parser.nlq_tokens_list:
             #     print(nlq_tokens, '\n')
@@ -85,7 +88,7 @@ while True:
             # prefixes used during creating a query-string
             parser.formalize(kg=args.knowledge_graph)
 
-            parser.query_executor(args.knowledge_graph)
+            # parser.query_executor(args.knowledge_graph)
 
             # Reuslt of Querying the Knowledge Graph
             print("done")

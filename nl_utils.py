@@ -122,6 +122,7 @@ class NLQCanonical(object):
 
     def __init__(self, canonical_form):
         self.nlq_canonical = canonical_form
+
         if not NLQCanonical.glove_loaded:
             glove_loading_kv = KeyedVectors.load_word2vec_format("./pt_word_embedding/glove/glove.6B.50d.w2vformat.txt")
             glove_loading_kv.save('./glove_gensim_mmap')
@@ -131,7 +132,7 @@ class NLQCanonical(object):
             # Semaphore(0).acquire()  # just hang until process killed
             NLQCanonical.glove_loaded = True
 
-    def entity_linker(self, linker=None, kg=None):
+    def entity_predicate_linker(self, linker=None, kg=None):
         """
         entity linking using dbpedia Spotlight
         Entity linker by definition must have reference to Knowledge Graph, whence it bring list of denotation for
@@ -142,6 +143,7 @@ class NLQCanonical(object):
             # todo: creating filters based on POS tags.
             # linking entities using dbpedia sptolight
             for token in self.nlq_canonical.words:
+                if token.pos
                 try:
                     entities = spotlight.annotate('https://api.dbpedia-spotlight.org/en/annotate', token,
                                                        confidence=0.1, support=5)
@@ -176,6 +178,8 @@ class NLQCanonical(object):
         query_string = self.nlq_token_entity_dict
         return Query(query_string)
 
+    @staticmethod
+    def dbpedia_property_similarity():
 
 class NLQDependencyTree(NLQuestion):
     """
@@ -191,9 +195,13 @@ class NLQDependencyTree(NLQuestion):
 
 
 if __name__ == "__main__":
+    # NLQCanonical object should be created first to load and save the glove word2vec data
     nlq_canon = NLQCanonical("glove_testing")
-    print(NLQCanonical.glove['the'])
-    print(NLQCanonical.glove['lesson'])
-    print(NLQCanonical.glove.most_similar('orange'))
+    # print(NLQCanonical.glove['the'])
+    # print(NLQCanonical.glove['lesson'])
+    # print(NLQCanonical.glove.most_similar('orange'))
+    # require to run the word with each predicate in the dbpedia.
 
+    for predicate in
+    NLQCanonical.glove.similar_by_word()
 

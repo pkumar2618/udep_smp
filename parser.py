@@ -15,7 +15,7 @@ class Parser(object):
         self.nlq_questions_list = [NLQuestion(nl_question) for nl_question in nlqs]
         self.nlq_tokens_list = []
         self.nlq_canonical_list = []
-        self.token_entities_list = []
+        self.token_entities_tree = []
         self.query_list = []
         self.results_list = []
 
@@ -30,7 +30,7 @@ class Parser(object):
         self.nlq_canonical_list = [nlq_tokens.canonicalize(dependency_parsing, canonical_form) for nlq_tokens in self.nlq_tokens_list]
 
     def disambiguate(self, linker=None, kg=None):
-        self.token_entities_list = [nlq_canonical.entity_linker(linker, kg) for nlq_canonical in self.nlq_canonical_list]
+        self.token_entities_tree_list = [nlq_canonical.entity_predicate_linker(linker, kg) for nlq_canonical in self.nlq_canonical_list]
 
     def formalize(self, kg='dbpedia'):
         """
