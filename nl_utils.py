@@ -1,4 +1,4 @@
-from ug_utils import *
+# from ug_utils import *
 from nltk.tokenize import word_tokenize
 import string
 import spotlight
@@ -124,13 +124,17 @@ class NLQCanonical(object):
         self.nlq_canonical = canonical_form
 
         if not NLQCanonical.glove_loaded:
-            glove_loading_kv = KeyedVectors.load_word2vec_format("./pt_word_embedding/glove/glove.6B.50d.w2vformat.txt")
-            glove_loading_kv.save('./glove_gensim_mmap')
-            NLQCanonical.glove = KeyedVectors.load('./glove_gensim_mmap', mmap='r')
-            NLQCanonical.glove.syn0norm = NLQCanonical.glove.syn0  # prevent recalc of normed vectors
-            NLQCanonical.glove.most_similar('stuff')  # any word will do: just to page all in
-            # Semaphore(0).acquire()  # just hang until process killed
-            NLQCanonical.glove_loaded = True
+            try:
+                NLQCanonical.glove = KeyedVectors.load('./glove_gensim_mmap', mmap='r')
+                NLQCanonical.glove_loaded = True
+            except Exception as e:
+                glove_loading_kv = KeyedVectors.load_word2vec_format("./pt_word_embedding/glove/glove.6B.50d.w2vformat.txt")
+                glove_loading_kv.save('./glove_gensim_mmap')
+                NLQCanonical.glove = KeyedVectors.load('./glove_gensim_mmap', mmap='r')
+                # NLQCanonical.glove.syn0norm = NLQCanonical.glove.syn0  # prevent recalc of normed vectors
+                # NLQCanonical.glove.most_similar('stuff')  # any word will do: just to page all in
+                # Semaphore(0).acquire()  # just hang until process killed
+                NLQCanonical.glove_loaded = True
 
     def entity_predicate_linker(self, linker=None, kg=None):
         """
@@ -142,15 +146,25 @@ class NLQCanonical(object):
         if linker == 'spotlight' and kg == 'dbpedia':
             # todo: creating filters based on POS tags.
             # linking entities using dbpedia sptolight
-            for token in self.nlq_canonical.words:
-                if token.pos
-                try:
-                    entities = spotlight.annotate('https://api.dbpedia-spotlight.org/en/annotate', token,
-                                                       confidence=0.1, support=5)
-                    self.nlq_token_entity_dict['token'] = entities
+            skip_nwords = 0 # will be used as a flag to skip next nwords if they are already included
+            n_words = len(self.nlq_canonical.words)-1 # one minus for punctuations.
+            for index in range(n_words-1):
+                if skip_nwords == 0:
+                    # if word is a proper noun, we need to consider next 1 (or may be two words
+                    # to see if they are also proper noun, it's possible that these words are part of same name, or
+                    # name of different person
+                    if self.nlq_canonical.words[index].pos == 'PROPN':
+                        try:
+                            combined_words = self.join_fnln_based_on_dependency(start_index=index, next_nwords=1)
+                            entities = spotlight.annotate('https://api.dbpedia-spotlight.org/en/annotate', combined_words,
+                                                               confidence=0.1, support=5)
+                            self.nlq_token_entity_dict['token'] = entities
 
-                except spotlight.SpotlightException as e:
-                    self.nlq_token_entity_dict['token'] = None
+                        except spotlight.SpotlightException as e:
+                            self.nlq_token_entity_dict['token'] = None
+                else:
+                    skip_nwords -= 1
+                    continue
 
         elif linker == 'custom_linker':
             # todo: may be required to implement
@@ -162,6 +176,20 @@ class NLQCanonical(object):
                                                                 [word.text for word in self.nlq_canonical.words])}
 
         return self.nlq_token_entity_dict
+
+    def join_fnln_based_on_dependency(self, start_index, next_nwords=1):
+        n_words = len(self.nlq_canonical.words)
+        # skip_nwords = 0
+        # for word in self.nlq_canonical.words[start_index:start_index+next_nwords]:
+        for i in range(start_index,start_index+next_nwords):
+            # compare universal dependency.
+            if self.nlq_canonical.words[i].upos == self.nlq_canonical.words[i+1].upos:
+                # check if the two words also has dependency relations
+                if (self.nlq_canonical.words[i].governor == self.nlq_canonical.words[i+1].index) or (self.nlq_canonical.words[i].index == self.nlq_canonical.words[i+1].governor):
+                    return f"{self.nlq_canonical.words[i].text}_{self.nlq_canonical.words[i+1].text}"
+
+
+
 
     def formalize_into_sparql(self, kg='dbpedia'):
         """
@@ -178,8 +206,12 @@ class NLQCanonical(object):
         query_string = self.nlq_token_entity_dict
         return Query(query_string)
 
+
+
     @staticmethod
     def dbpedia_property_similarity():
+        pass
+
 
 class NLQDependencyTree(NLQuestion):
     """
@@ -196,12 +228,15 @@ class NLQDependencyTree(NLQuestion):
 
 if __name__ == "__main__":
     # NLQCanonical object should be created first to load and save the glove word2vec data
-    nlq_canon = NLQCanonical("glove_testing")
+    # nlq_canon = NLQCanonical("glove_testing")
     # print(NLQCanonical.glove['the'])
     # print(NLQCanonical.glove['lesson'])
     # print(NLQCanonical.glove.most_similar('orange'))
     # require to run the word with each predicate in the dbpedia.
 
-    for predicate in
-    NLQCanonical.glove.similar_by_word()
-
+    # testing entity_predicate_linker
+    question = "Where is Fort Knox located ?"
+    nlq = NLQuestion(question)
+    nlq_tokens = nlq.tokenize(dependency_parsing=True)
+    nlq_canon = nlq_tokens.canonicalize(dependency_parsing=True)
+    nlq_canon.entity_predicate_linker(linker='spotlight', kg='dbpedia')

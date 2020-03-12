@@ -72,25 +72,25 @@ while True:
             parser = pickle.load(pickle_handle)
             pickle_handle.close()
 
-            # # # canonicalize based on canonical_form flag and dependency_parsing flag. when canonical_form flag is
-            # # # disabled the parser sets it's attribute self.canonical_list as copy based on nlq_token_list
+            # # canonicalize based on canonical_form flag and dependency_parsing flag. when canonical_form flag is
+            # # disabled the parser sets it's attribute self.canonical_list as copy based on nlq_token_list
             parser.canonicalize(args.dependency_parsing, args.canonical_form)
 
             # for nlq_tokens in parser.nlq_tokens_list:
             #     print(nlq_tokens, '\n')
 
-            # # entity linking or disambiguation is an required for the tokens in the questions. The disambiguator
-            # # provides denotation (entity or resources) for each token,
-            # # the parser stores a dictionary of token-denotation pairs
+            # entity linking or disambiguation is an required for the tokens in the questions. The disambiguator
+            # provides denotation (entity or resources) for each token,
+            # the parser stores a dictionary of token-denotation pairs
             parser.disambiguate(linker=args.disambiguator, kg=args.knowledge_graph)
 
-            # convert the question into a Query, the reference to knowledge graph is rquired to provide list of namespace
-            # prefixes used during creating a query-string
+            # # convert the question into a Query, the reference to knowledge graph is rquired to provide list of namespace
+            # # prefixes used during creating a query-string
             parser.formalize(kg=args.knowledge_graph)
 
-            # parser.query_executor(args.knowledge_graph)
+            parser.query_executor(args.knowledge_graph)
 
-            # Reuslt of Querying the Knowledge Graph
+            # Result of Querying the Knowledge Graph
             print("done")
 
         elif args.questions_list:
@@ -102,4 +102,4 @@ while True:
         break
 
     except FileNotFoundError as f_error:
-        print("File named %s not found" % filename, f_error)
+        print("File named %s not found" % args.questions_file, f_error)

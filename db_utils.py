@@ -206,12 +206,12 @@ if __name__ == "__main__":
     # # test cosine_smilarity the function will return top-n property based on the cosine similarity
     glove = KeyedVectors.load('./glove_gensim_mmap', mmap='r')
 
-    # you may need to run this once to get numpy array of property_vector
+    # # you may need to run this once to get numpy array of property_vector
     # vector = glove['stuff'].reshape((1,-1))
     # get_property_using_cosine_similarity(vector, recalculate_numpy_property_vector=True)
 
-    # further run don't require refresh, as the numpy 2d array of property_value is loaded from the
-    # first run with recaclulate_numpy_property_vector=True
+    # # further run don't require refresh, as the numpy 2d array of property_value is loaded from the
+    # # first run with recaclulate_numpy_property_vector=True
     # vector = glove['location'].reshape(1,-1)
     print(get_property_using_cosine_similarity(vector, recalculate_numpy_property_vector=False))
 
