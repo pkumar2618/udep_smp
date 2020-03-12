@@ -6,6 +6,8 @@ import stanfordnlp
 from sparql_builder import Query
 from gensim.models import KeyedVectors
 from threading import Semaphore
+import pickle
+
 
 class NLQuestion(object):
     """
@@ -236,7 +238,17 @@ if __name__ == "__main__":
 
     # testing entity_predicate_linker
     question = "Where is Fort Knox located ?"
-    nlq = NLQuestion(question)
-    nlq_tokens = nlq.tokenize(dependency_parsing=True)
+    dump_name = "fort_knox.pkl"
+    try:
+        # if the file exist load it
+        with open(dump_name, 'rb') as f:
+            nlq_tokens = pickle.load(f)
+
+    except FileNotFoundError as e:
+        nlq = NLQuestion(question)
+        nlq_tokens = nlq.tokenize(dependency_parsing=True)
+        with open(dump_name, 'wb') as f:
+            pickle.dump(nlq_tokens, f)
+
     nlq_canon = nlq_tokens.canonicalize(dependency_parsing=True)
     nlq_canon.entity_predicate_linker(linker='spotlight', kg='dbpedia')
