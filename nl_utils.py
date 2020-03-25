@@ -10,7 +10,9 @@ import pickle
 import subprocess
 import re
 import json
+from db_utils import get_property_using_cosine_similarity
 import ast
+
 
 class NLQuestion(object):
     """
@@ -149,27 +151,34 @@ class NLQCanonical(object):
         :return:
         """
         if linker == 'spotlight' and kg == 'dbpedia':
-            # todo: creating filters based on POS tags.
-            # linking entities using dbpedia sptolight
-            skip_nwords = 0 # will be used as a flag to skip next nwords if they are already included
-            n_words = len(self.nlq_canonical.words)-1 # one minus for punctuations.
-            for index in range(n_words-1):
-                if skip_nwords == 0:
-                    # if word is a proper noun, we need to consider next 1 (or may be two words
-                    # to see if they are also proper noun, it's possible that these words are part of same name, or
-                    # name of different person
-                    if self.nlq_canonical.words[index].pos == 'PROPN':
-                        try:
-                            combined_words = self.join_fnln_based_on_dependency(start_index=index, next_nwords=1)
-                            entities = spotlight.annotate('https://api.dbpedia-spotlight.org/en/annotate', combined_words,
-                                                               confidence=0.1, support=5)
-                            self.nlq_token_entity_dict['token'] = entities
+            if self.udep_lambda: # if the formalization was true. start the linker
+                # linking entities using dbpedia sptolight
+                for entity_phrase in self.udep_lambda['entities']:
+                    try:
+                        entities = spotlight.annotate('https://api.dbpedia-spotlight.org/en/candidates', entity_phrase['phrase'],
+                                                      confidence=0.0, support=0)
+                        self.nlq_phrase_kbentity_dict[entity_phrase] = entities
 
-                        except spotlight.SpotlightException as e:
-                            self.nlq_token_entity_dict['token'] = None
-                else:
-                    skip_nwords -= 1
-                    continue
+                    except spotlight.SpotlightException as e:
+                        self.nlq_phrase_kbentity_dict[entity_phrase] = None
+
+                # linking dbpedia_predicate using cosine similarity on word2vec
+                # find the event type tokens according to Neo-Davidsonia grammar
+                for neod_lambda_term in self.udep_lambda['dependency_lambda']:
+                    word_udep, type_tuple = get_name_type_tuple(neod_lambda_term)
+                    args = type_tuple.split(",")
+                    word_modifier = word_udep.split(".")
+                    word = word_modifier[0]
+                    modifier = word_modifier[1]
+                    # if neod_term is a event use its name to get dbpedia predicate
+                    if re.match(r'[\d]+:e', args[0]):
+                        # if neod_term is a argument to a predicate pass
+                        if re.match(r'arg[\d+]', modifier):
+                            pass
+                        else: # when the modifier is a grammar term it emplies the predicate
+                            vector = NLQCanonical.glove[word].reshape(1, -1)
+                            value_prefix = get_property_using_cosine_similarity(vector, recalculate_numpy_property_vector=False)
+                            self.nlq_word_kb_predicate_dict[word] = value_prefix['value']
 
         elif linker == 'custom_linker':
             # todo: may be required to implement
@@ -179,8 +188,14 @@ class NLQCanonical(object):
             # no entity linking
             self.nlq_token_entity_dict = {k:v for (k, v) in zip([word.text for word in self.nlq_canonical.words],
                                                                 [word.text for word in self.nlq_canonical.words])}
-
-        return self.nlq_token_entity_dict
+    @staticmethod
+    def get_name_type_tuple(neod_lambda_term):
+        pattern = r'(\w[\w\d_]*)\((.*)\)$'
+        match = re.match(pattern, neod_lambda_term)
+        if match:
+            return match.group(1), match.group(2)
+        else:
+            return None
 
     def join_fnln_based_on_dependency(self, start_index, next_nwords=1):
         n_words = len(self.nlq_canonical.words)
@@ -208,22 +223,6 @@ class NLQCanonical(object):
         # convert the bytecode into dictionary.
         self.udep_lambda = json.loads(res.decode('utf-8'))
 
-        # self.udep_lambda = ast.literal_eval(res.decode('utf-8'))
-        # start_udepl_op = False
-        # self.udep_lambda = []
-        # skip = False
-        # for line in res.splitlines():
-        #     if re.match(r'Initializing[\s]dependency[\s]parser[\s]done.', line):
-        #         start_udepl_op = True
-        #         skip = True
-        #         continue
-        #     if skip:
-        #         skip = False
-        #     if start_udepl_op:
-        #         start_udepl_op = False
-        #         self.udep_lambda=ast.literal_eval(line)
-
-        # print(self.udep_lambda)
 
 
     def translate_to_sparql(self, kg='dbpedia'):
