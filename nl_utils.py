@@ -7,7 +7,10 @@ from sparql_builder import Query
 from gensim.models import KeyedVectors
 from threading import Semaphore
 import pickle
-
+import subprocess
+import re
+import json
+import ast
 
 class NLQuestion(object):
     """
@@ -124,7 +127,7 @@ class NLQCanonical(object):
 
     def __init__(self, canonical_form):
         self.nlq_canonical = canonical_form
-
+        self.udep_lambda = None
         if not NLQCanonical.glove_loaded:
             try:
                 NLQCanonical.glove = KeyedVectors.load('./glove_gensim_mmap', mmap='r')
@@ -191,9 +194,39 @@ class NLQCanonical(object):
                     return f"{self.nlq_canonical.words[i].text}_{self.nlq_canonical.words[i+1].text}"
 
 
+    def formalize_into_deplambda(self):
+        # This is shortcut, note the we take help from UDepLambda to create lambda logical form
+        # from the natural question itself. So all this pipeline from natural language uptil tokenization is
+        # now taken care off by the UDepLambda.
+        # the lambda form is stored in the self.udep_lambda object variable.
+        nlq = " ".join([word.text for word in self.nlq_canonical.words])
+        with open("udepl_nlq.txt", 'w') as f:
+            f.write(f'{{"sentence":"{nlq}"}}')
+
+        res = subprocess.check_output("./run_udep_lambda.sh")
+
+        # convert the bytecode into dictionary.
+        self.udep_lambda = json.loads(res.decode('utf-8'))
+
+        # self.udep_lambda = ast.literal_eval(res.decode('utf-8'))
+        # start_udepl_op = False
+        # self.udep_lambda = []
+        # skip = False
+        # for line in res.splitlines():
+        #     if re.match(r'Initializing[\s]dependency[\s]parser[\s]done.', line):
+        #         start_udepl_op = True
+        #         skip = True
+        #         continue
+        #     if skip:
+        #         skip = False
+        #     if start_udepl_op:
+        #         start_udepl_op = False
+        #         self.udep_lambda=ast.literal_eval(line)
+
+        # print(self.udep_lambda)
 
 
-    def formalize_into_sparql(self, kg='dbpedia'):
+    def translate_to_sparql(self, kg='dbpedia'):
         """
         when the canonicalization is disabled, we will not have the NLCanonical object, instead nlq_Canonical_list
         is set with NLQTokens(subclass NLQTokenDepParsed).
@@ -239,6 +272,10 @@ if __name__ == "__main__":
     # testing entity_predicate_linker
     question = "Where is Fort Knox located ?"
     dump_name = "fort_knox.pkl"
+
+    # question = "Where was Barack Obama Born?"
+    # dump_name = "obama_born.pkl"
+
     try:
         # if the file exist load it
         with open(dump_name, 'rb') as f:
@@ -251,4 +288,9 @@ if __name__ == "__main__":
             pickle.dump(nlq_tokens, f)
 
     nlq_canon = nlq_tokens.canonicalize(dependency_parsing=True)
+    nlq_canon.formalize_into_deplambda()
     nlq_canon.entity_predicate_linker(linker='spotlight', kg='dbpedia')
+    nlq_canon.translate_to_sparql()
+    print(nlq_canon.udep_lambda)
+
+    # nlq_canon.entity_predicate_linker(linker='spotlight', kg='dbpedia')
