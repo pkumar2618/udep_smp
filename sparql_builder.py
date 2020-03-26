@@ -70,7 +70,7 @@ class Query(object):
             else:
                 raise ValueError('Object is not a valid rdf term')
 
-    def select(self, *vars):
+    def select(self, vars: object) -> object:
         """create a SELECT query"""
         self._type = "SELECT"
         self._vars = [var for var in vars if self._validate_variable(var)]

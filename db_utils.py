@@ -212,6 +212,6 @@ if __name__ == "__main__":
 
     # # further run don't require refresh, as the numpy 2d array of property_value is loaded from the
     # # first run with recaclulate_numpy_property_vector=True
-    # vector = glove['location'].reshape(1,-1)
+    vector = glove['location'].reshape(1,-1)
     print(get_property_using_cosine_similarity(vector, recalculate_numpy_property_vector=False))
 

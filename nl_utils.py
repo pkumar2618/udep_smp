@@ -12,6 +12,7 @@ import re
 import json
 from db_utils import get_property_using_cosine_similarity
 import ast
+from rdflib import URIRef, BNode
 
 
 class NLQuestion(object):
@@ -130,6 +131,8 @@ class NLQCanonical(object):
     def __init__(self, canonical_form):
         self.nlq_canonical = canonical_form
         self.udep_lambda = None
+        self.nlq_phrase_kbentity_dict = {}
+        self.nlq_word_kb_predicate_dict = {}
         if not NLQCanonical.glove_loaded:
             try:
                 NLQCanonical.glove = KeyedVectors.load('./glove_gensim_mmap', mmap='r')
@@ -153,29 +156,39 @@ class NLQCanonical(object):
         if linker == 'spotlight' and kg == 'dbpedia':
             if self.udep_lambda: # if the formalization was true. start the linker
                 # linking entities using dbpedia sptolight
-                for entity_phrase in self.udep_lambda['entities']:
-                    try:
-                        entities = spotlight.annotate('https://api.dbpedia-spotlight.org/en/candidates', entity_phrase['phrase'],
-                                                      confidence=0.0, support=0)
-                        self.nlq_phrase_kbentity_dict[entity_phrase] = entities
-
-                    except spotlight.SpotlightException as e:
-                        self.nlq_phrase_kbentity_dict[entity_phrase] = None
-
+                # identify entity phrase from the predicate arguments
+                # and
                 # linking dbpedia_predicate using cosine similarity on word2vec
                 # find the event type tokens according to Neo-Davidsonia grammar
-                for neod_lambda_term in self.udep_lambda['dependency_lambda']:
-                    word_udep, type_tuple = get_name_type_tuple(neod_lambda_term)
+                for neod_lambda_term in self.udep_lambda['dependency_lambda'][0]:
+                    word_udep, type_tuple = NLQCanonical.get_name_type_tuple(neod_lambda_term)
                     args = type_tuple.split(",")
                     word_modifier = word_udep.split(".")
                     word = word_modifier[0]
-                    modifier = word_modifier[1]
+                    try:
+                        modifier = word_modifier[1]
+                    except IndexError as e:
+                        modifier = None
+                    # linking resources
                     # if neod_term is a event use its name to get dbpedia predicate
                     if re.match(r'[\d]+:e', args[0]):
-                        # if neod_term is a argument to a predicate pass
+                        # if neod_term is a argument to a predicate the terms inside the bracket is an entity
                         if re.match(r'arg[\d+]', modifier):
-                            pass
+                            entity_phrase  =  re.split(r'[.]', args[1])[1]
+                            try:
+                                # entities = spotlight.annotate('https://api.dbpedia-spotlight.org/en/annotate', entity_phrase['phrase'],
+                                #                               confidence=0.0, support=0)
+                                # self.nlq_phrase_kbentity_dict[entity_phrase] = entities
+                                self.nlq_phrase_kbentity_dict[entity_phrase] = entity_phrase
+
+                            except spotlight.SpotlightException as e:
+                                self.nlq_phrase_kbentity_dict[entity_phrase] = None
+
                         else: # when the modifier is a grammar term it emplies the predicate
+                            # use lemma of the word
+                            word_index = ast.literal_eval(re.match(r'^[\d]+', args[0]).group())
+                            # word = self.nlq_canonical.words[word_index].lemma
+                            word = self.nlq_canonical.words[word_index].text
                             vector = NLQCanonical.glove[word].reshape(1, -1)
                             value_prefix = get_property_using_cosine_similarity(vector, recalculate_numpy_property_vector=False)
                             self.nlq_word_kb_predicate_dict[word] = value_prefix['value']
@@ -190,7 +203,7 @@ class NLQCanonical(object):
                                                                 [word.text for word in self.nlq_canonical.words])}
     @staticmethod
     def get_name_type_tuple(neod_lambda_term):
-        pattern = r'(\w[\w\d_]*)\((.*)\)$'
+        pattern = r'(\w[\w\d._]*)\((.*)\)$'
         match = re.match(pattern, neod_lambda_term)
         if match:
             return match.group(1), match.group(2)
@@ -227,18 +240,74 @@ class NLQCanonical(object):
 
     def translate_to_sparql(self, kg='dbpedia'):
         """
-        when the canonicalization is disabled, we will not have the NLCanonical object, instead nlq_Canonical_list
-        is set with NLQTokens(subclass NLQTokenDepParsed).
-        Therefore this method will be used to conver the Tokens into query (formalization).
+        The logical form in udep_lambda is translated into SPARQL.
         Note: Fomalize into SPARQL will note require reference to a Knowledge Graph for the purpose of
         denotation as that is already done. The KG is required to provide list of namespace for creating query-string
-        in during entity_linking stage of the parser.
+        during entity_linking stage of the parser.
         :return: a Query object
         """
+        query = Query()
+        variables_list = []
+        event_triple_dict = {}
+        # tuple_list = [s, p, o]
+        for neod_lambda_term in self.udep_lambda['dependency_lambda'][0]:
+            word_udep, type_tuple = NLQCanonical.get_name_type_tuple(neod_lambda_term)
+            args = type_tuple.split(",")
+            word_modifier = word_udep.split(".")
+            word = word_modifier[0]
+            try:
+                modifier = word_modifier[1]
+            except IndexError as e:
+                modifier = None
 
-        # for word in
-        query_string = self.nlq_token_entity_dict
-        return Query(query_string)
+            # if neod_term is Question then use the variable in it to be used as select variables
+            if re.match(r'^QUESTION', word):
+                # Take the arguments inside it and change them into SPARQL Variable, prepend with '?'
+                variables_list.append(f'?{args[0]}')
+
+            if re.match(r'[\d\w]+:[e]\s$', args[0]):
+                if args[0] in event_triple_dict.keys(): # we are going to use index:e as key for the triple dict
+                    # if modifier is not args
+                    if not re.match(r'arg[\d]+', modifier):
+                        if event_triple_dict[args[0]][1] is 'p':
+                            event_triple_dict[args[0]][1] = URIRef(self.nlq_word_kb_predicate_dict[word])
+
+                    else: # the word is argument to the predicate
+                        # extract out the argument and its kb-entity and append
+                        if event_triple_dict[args[0]][0] is 's':
+                            event_triple_dict[args[0]][0]= URIRef(self.nlq_phrase_kbentity_dict[re.split(r'[.]', args[1])[1]])
+
+                        elif event_triple_dict[args[0]][2] is 'o':
+                            event_triple_dict[args[0]][2] = URIRef(self.nlq_phrase_kbentity_dict[re.split(r'[.]', args[1])[1]])
+
+                else:
+                    # the tuple is not initiated yet for the event index:e
+                    if not re.match(r'arg[\d]+', modifier):
+                        # when the neod_term is not argument it's predicate
+                        tuple_list = ['s', 'p', 'o']
+                        tuple_list[1] = URIRef(self.nlq_word_kb_predicate_dict[word])
+                        event_triple_dict[args[0]] = tuple_list
+
+                    else: # the word is argument to the predicate
+                        # extract out the argument and its kb-entity and append
+                        tuple_list = ['s', 'p', 'o']
+                        tuple_list[0] = URIRef(self.nlq_phrase_kbentity_dict[re.split(r'[.]', args[1])[1]])
+                        event_triple_dict[args[0]] =tuple_list
+
+        query.select(variables_list)
+        query.distinct()
+
+        for key, triple_spo in event_triple_dict.items():
+            if triple_spo[0] is 's':
+                triple_spo[0] = BNode(variables_list[0])
+            elif triple_spo[1] is 'p':
+                triple_spo[1] = BNode(variables_list[0])
+            elif triple_spo[2] is 'o':
+                triple_spo[2] = BNode(variables_list[0])
+
+            query.where(triple_spo)
+
+        return query.get_query_string()
 
 
 
@@ -287,9 +356,25 @@ if __name__ == "__main__":
             pickle.dump(nlq_tokens, f)
 
     nlq_canon = nlq_tokens.canonicalize(dependency_parsing=True)
-    nlq_canon.formalize_into_deplambda()
-    nlq_canon.entity_predicate_linker(linker='spotlight', kg='dbpedia')
-    nlq_canon.translate_to_sparql()
-    print(nlq_canon.udep_lambda)
+
+    try:
+        with open("test.pkl", 'rb') as testing_f:
+            nlq_canon = pickle.load(testing_f)
+    except FileNotFoundError as e:
+        nlq_canon.formalize_into_deplambda()
+        with open('test.pkl', 'wb') as testing_f:
+            pickle.dump(nlq_canon, testing_f)
+
+    try:
+        with open("test1.pkl", 'rb') as testing_f:
+            nlq_canon = pickle.load(testing_f)
+    except FileNotFoundError as e:
+        nlq_canon.entity_predicate_linker(linker='spotlight', kg='dbpedia')
+        with open('test1.pkl', 'wb') as testing_f:
+            pickle.dump(nlq_canon, testing_f)
+
+    query = nlq_canon.translate_to_sparql()
+
+    print(query)
 
     # nlq_canon.entity_predicate_linker(linker='spotlight', kg='dbpedia')
