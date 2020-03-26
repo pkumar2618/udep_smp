@@ -169,29 +169,34 @@ class NLQCanonical(object):
                         modifier = word_modifier[1]
                     except IndexError as e:
                         modifier = None
-                    # linking resources
-                    # if neod_term is a event use its name to get dbpedia predicate
-                    if re.match(r'[\d]+:e', args[0]):
-                        # if neod_term is a argument to a predicate the terms inside the bracket is an entity
-                        if re.match(r'arg[\d+]', modifier):
-                            entity_phrase  =  re.split(r'[.]', args[1])[1]
-                            try:
-                                # entities = spotlight.annotate('https://api.dbpedia-spotlight.org/en/annotate', entity_phrase['phrase'],
-                                #                               confidence=0.0, support=0)
-                                # self.nlq_phrase_kbentity_dict[entity_phrase] = entities
-                                self.nlq_phrase_kbentity_dict[entity_phrase] = entity_phrase
 
-                            except spotlight.SpotlightException as e:
-                                self.nlq_phrase_kbentity_dict[entity_phrase] = None
+                    try:
+                        # linking resources
+                        # if neod_term is a event use its name to get dbpedia predicate
+                        if re.match(r'[\d]+:e', args[0]):
+                            # if neod_term is a argument to a predicate the terms inside the bracket is an entity
+                            if re.match(r'arg[\d+]', modifier):
+                                entity_phrase  =  re.split(r'[.]', args[1])[1]
+                                try:
+                                    # entities = spotlight.annotate('https://api.dbpedia-spotlight.org/en/annotate', entity_phrase['phrase'],
+                                    #                               confidence=0.0, support=0)
+                                    # self.nlq_phrase_kbentity_dict[entity_phrase] = entities
+                                    self.nlq_phrase_kbentity_dict[entity_phrase] = entity_phrase
 
-                        else: # when the modifier is a grammar term it emplies the predicate
-                            # use lemma of the word
-                            word_index = ast.literal_eval(re.match(r'^[\d]+', args[0]).group())
-                            # word = self.nlq_canonical.words[word_index].lemma
-                            word = self.nlq_canonical.words[word_index].text
-                            vector = NLQCanonical.glove[word].reshape(1, -1)
-                            value_prefix = get_property_using_cosine_similarity(vector, recalculate_numpy_property_vector=False)
-                            self.nlq_word_kb_predicate_dict[word] = value_prefix['value']
+                                except spotlight.SpotlightException as e:
+                                    self.nlq_phrase_kbentity_dict[entity_phrase] = None
+
+                            else: # when the modifier is a grammar term it emplies the predicate
+                                # use lemma of the word
+                                word_index = ast.literal_eval(re.match(r'^[\d]+', args[0]).group())
+                                # word = self.nlq_canonical.words[word_index].lemma
+                                word = self.nlq_canonical.words[word_index].text
+                                vector = NLQCanonical.glove[word].reshape(1, -1)
+                                value_prefix = get_property_using_cosine_similarity(vector, recalculate_numpy_property_vector=False)
+                                self.nlq_word_kb_predicate_dict[word] = value_prefix['value']
+
+                    except Exception as e:
+                        pass
 
         elif linker == 'custom_linker':
             # todo: may be required to implement
@@ -222,7 +227,7 @@ class NLQCanonical(object):
                     return f"{self.nlq_canonical.words[i].text}_{self.nlq_canonical.words[i+1].text}"
 
 
-    def formalize_into_deplambda(self):
+    def formalize_into_udeplambda(self):
         # This is shortcut, note the we take help from UDepLambda to create lambda logical form
         # from the natural question itself. So all this pipeline from natural language uptil tokenization is
         # now taken care off by the UDepLambda.
@@ -307,7 +312,7 @@ class NLQCanonical(object):
 
             query.where(triple_spo)
 
-        return query.get_query_string()
+        return query
 
 
 
@@ -360,8 +365,9 @@ if __name__ == "__main__":
     try:
         with open("test.pkl", 'rb') as testing_f:
             nlq_canon = pickle.load(testing_f)
+
     except FileNotFoundError as e:
-        nlq_canon.formalize_into_deplambda()
+        nlq_canon.formalize_into_udeplambda()
         with open('test.pkl', 'wb') as testing_f:
             pickle.dump(nlq_canon, testing_f)
 
@@ -375,6 +381,6 @@ if __name__ == "__main__":
 
     query = nlq_canon.translate_to_sparql()
 
-    print(query)
+    print(query.get_query_string())
 
     # nlq_canon.entity_predicate_linker(linker='spotlight', kg='dbpedia')

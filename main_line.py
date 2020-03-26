@@ -1,16 +1,13 @@
-from nl_utils import *
-from ug_utils import *
-from nl_to_ug import *
-from ug_to_g import *
 from parser import Parser
 # from pre_processor import PreProcessor
 import pickle
 import argparse
 import sys
+
 sys.path.insert(0, './dl_modules')
 
 arguments_parser = argparse.ArgumentParser(
-    prog= 'NLQA',
+    prog='NLQA',
     description="Take a Natural Language Question and provide it's answer.")
 
 arguments_parser.add_argument("--questions_file", help="Path to the file containing Natural Language Questions")
@@ -26,7 +23,7 @@ arguments_parser.add_argument("--dependency_parsing", help="Dependency parsing w
                               action="store_true")
 
 arguments_parser.add_argument("--disambiguator", help="select linker for disambiguation among spotlight and "
-                                                       "custom", choices=['spotlight', 'custom'])
+                                                      "custom", choices=['spotlight', 'custom'])
 
 arguments_parser.add_argument("--knowledge_graph", help="select the KG to be used for querying",
                               choices=['dbpedia', 'wikidata', 'freebase'])
@@ -48,47 +45,70 @@ while True:
         Continuously look for input question and spit out Answer to the question,
         unless interrupted. 
         """
-        # print("Enter name of the file containing the questions")
         if args.questions_file:
-            # # # # provide the file name containing the questions
-            # with open(args.questions_file, 'r') as file_obj:
-            #     parser = Parser.from_file(file_obj)
-            #
             # # # # current pipeline,
             # # # # nl_question -> tokenization -> canonicalization(default bypassed)->disambiguation->formalization
             # # # # Tokenize the list of questions.
-            # parser.tokenize(args.dependency_parsing)
-            # # # # for nlq_tokens in parser.nlq_tokens_list:
-            # # # #     print(nlq_tokens)
-            # # #
-            #
-            # # # saving the parser state using pickle
-            # pickle_handle = open('before_canonical.pkl', 'wb')
-            # pickle.dump(parser, pickle_handle)
-            # pickle_handle.close()
+            try:
+                with open('log0_parser.pkl', 'rb') as f:
+                    parser = pickle.load(f)
+            except FileNotFoundError as e:
+                # # # provide the file name containing the questions
+                with open(args.questions_file, 'r') as file_obj:
+                    parser = Parser.from_file(file_obj)
 
-            # # # loading the parser state from canonical form
-            pickle_handle = open('before_canonical.pkl', 'rb')
-            parser = pickle.load(pickle_handle)
-            pickle_handle.close()
+                parser.tokenize(args.dependency_parsing)
+                # for nlq_tokens in parser.nlq_tokens_list:
+                #     print(nlq_tokens)
+
+                # # # saving the parser state using pickle
+                with open('log0_parser.pkl', 'wb') as f:
+                    pickle.dump(parser, f)
+
 
             # # canonicalize based on canonical_form flag and dependency_parsing flag. when canonical_form flag is
             # # disabled the parser sets it's attribute self.canonical_list as copy based on nlq_token_list
-            parser.canonicalize(args.dependency_parsing, args.canonical_form)
+            try:
+                with open('log1_parser.pkl', 'rb') as f:
+                    parser = pickle.load(f)
+            except FileNotFoundError as e:
+                parser.canonicalize(args.dependency_parsing, args.canonical_form)
+                with open('log1_parser.pkl', 'wb') as f:
+                    pickle.dump(parser, f)
 
-            # for nlq_tokens in parser.nlq_tokens_list:
-            #     print(nlq_tokens, '\n')
+            # # convert the question into a Query, the reference to knowledge graph is rquired to provide list of namespace
+            # # prefixes used during creating a query-string
+            try:
+                with open('log2_parser.pkl', 'rb') as f:
+                    parser = pickle.load(f)
+
+            except FileNotFoundError as e:
+                parser.lambda_expression()
+                with open('log2_parser.pkl', 'wb') as f:
+                    pickle.dump(parser, f)
+
 
             # entity linking or disambiguation is an required for the tokens in the questions. The disambiguator
             # provides denotation (entity or resources) for each token,
             # the parser stores a dictionary of token-denotation pairs
-            parser.disambiguate(linker=args.disambiguator, kg=args.knowledge_graph)
+            try:
+                with open('log3_parser.pkl', 'rb') as f:
+                    parser = pickle.load(f)
+            except FileNotFoundError as e:
+                parser.disambiguate(linker=args.disambiguator, kg=args.knowledge_graph)
+                with open('log3_parser.pkl', 'wb') as f:
+                    pickle.dump(parser, f)
 
-            # # convert the question into a Query, the reference to knowledge graph is rquired to provide list of namespace
-            # # prefixes used during creating a query-string
-            parser.formalize(kg=args.knowledge_graph)
+            # translate query in SPARQL
+            try:
+                with open('log4_parser.pkl', 'rb') as f:
+                    parser = pickle.load(f)
+            except FileNotFoundError as e:
+                parser.translate_to_sparql(kg=args.knowledge_graph)
+                with open('log4_parser.pkl', 'wb') as f:
+                    pickle.dump(parser, f)
 
-            parser.query_executor(args.knowledge_graph)
+            # parser.query_executor(args.knowledge_graph)
 
             # Result of Querying the Knowledge Graph
             print("done")

@@ -1,5 +1,4 @@
 from nl_utils import *
-from ug_utils import *
 
 class Parser(object):
     """
@@ -15,7 +14,8 @@ class Parser(object):
         self.nlq_questions_list = [NLQuestion(nl_question) for nl_question in nlqs]
         self.nlq_tokens_list = []
         self.nlq_canonical_list = []
-        self.token_entities_tree = []
+        # self.token_entities_tree = []
+        self.udeplambda_list = []
         self.query_list = []
         self.results_list = []
 
@@ -29,15 +29,19 @@ class Parser(object):
     def canonicalize(self, dependency_parsing=False, canonical_form=False):
         self.nlq_canonical_list = [nlq_tokens.canonicalize(dependency_parsing, canonical_form) for nlq_tokens in self.nlq_tokens_list]
 
-    def disambiguate(self, linker=None, kg=None):
-        self.token_entities_tree_list = [nlq_canonical.entity_predicate_linker(linker, kg) for nlq_canonical in self.nlq_canonical_list]
+    def lambda_expression(self):
+        self.udeplambda_list = [nlq_canonical.formalize_into_udeplambda() for nlq_canonical in self.nlq_canonical_list]
 
-    def formalize(self, kg='dbpedia'):
+    def disambiguate(self, linker=None, kg=None):
+        for nlq_canonical in self.nlq_canonical_list:
+            nlq_canonical.entity_predicate_linker(linker, kg)
+
+    def translate_to_sparql(self, kg='dbpedia'):
         """
         takes the nl_canonical form and formalize it into a query
         :return:
         """
-        self.query_list = [nlq_canonical.formalize_into_sparql(kg) for nlq_canonical in self.nlq_canonical_list]
+        self.query_list = [nlq_canonical.translate_to_sparql(kg) for nlq_canonical in self.nlq_canonical_list]
         # return query_list
 
     def query_executor(self, kg='dbpedia'):
@@ -45,18 +49,19 @@ class Parser(object):
         # query_string = """SELECT DISTINCT xsd:date(?d) WHERE { <http://dbpedia.org/resource/Diana,_Princess_of_Wales>
         # <http://dbpedia.org/ontology/deathDate> ?d}
         # """
-        query_string="""
-        SELECT
-        DISTINCT ?date
-        WHERE
-        { <http://dbpedia.org/resource/Michael_Jackson> < http://dbpedia.org/ontology/deathDate> ?date}"""
+        # query_string="""
+        # SELECT
+        # DISTINCT ?date
+        # WHERE
+        # { <http://dbpedia.org/resource/Michael_Jackson> < http://dbpedia.org/ontology/deathDate> ?date}"""
+        # query = Query(query_string)
+        for query in self.query_list:
+            query.run(kg)
+            result_list_dict  = query.results["results"]["bindings"]
 
-        query = Query(query_string)
-        query.run(kg)
-        result_list_dict  = query.results["results"]["bindings"]
             # print(result["label"]["value"])
-        for result_dict in result_list_dict:
-            print("\t".join(["label: { } \t value: { }".format(key, result_dict[key]) for key in result_dict.keys()]))
+            for result_dict in result_list_dict:
+                print("\t".join(["label: { } \t value: { }".format(key, result_dict[key]) for key in result_dict.keys()]))
 
     @staticmethod
     def nlq_to_ug_form(nlq):
