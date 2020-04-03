@@ -83,7 +83,7 @@ def split_camelcase_predicates(cc_predicate):
 
 
 def dbpedia_property_vectorizer():
-    glove_loading_kv = KeyedVectors.load_word2vec_format("./pt_word_embedding/glove/glove.6B.50d.w2vformat.txt")
+    glove_loading_kv = KeyedVectors.load_word2vec_format("./glove/glove.6B.300d.w2vformat.txt")
     glove_loading_kv.save('./glove_gensim_mmap')
     glove = KeyedVectors.load('./glove_gensim_mmap', mmap='r')
     vector = glove['stuff']
@@ -212,6 +212,28 @@ if __name__ == "__main__":
 
     # # further run don't require refresh, as the numpy 2d array of property_value is loaded from the
     # # first run with recaclulate_numpy_property_vector=True
-    vector = glove['location'].reshape(1,-1)
-    print(get_property_using_cosine_similarity(vector, recalculate_numpy_property_vector=False))
+    # vector = glove['location'].reshape(1,-1)
+    # print(get_property_using_cosine_similarity(vector, recalculate_numpy_property_vector=False))
+    
+    # Analysing Glove embedding for feq predicates taken from simple questions q1
+    with open("./analysis/q1_predicates.txt", 'r') as f:
+        predicates = f.readlines()
 
+    # vector = np.array()
+    for predicate in predicates:
+        word_count = 0
+        for word in predicate.split():
+            try:
+                if word_count ==0:
+                    word_vector = glove[word].reshape(1,-1)
+                    vector = np.array(word_vector)
+                else:
+                    word_vector = glove[word].reshape(1, -1)
+                    vector = np.append(vector, word_vector, axis=0)
+            except KeyError as e:
+                pass
+        predicate_emb = np.average(vector, axis=0)
+        db_property = get_property_using_cosine_similarity(predicate_emb, recalculate_numpy_property_vector=False)
+        # db_property['predicate'] = predicate
+        with open("./analysis/q1_predicate_dbproperty.txt", 'a') as f:
+            f.write(f'{predicate.rstrip()}\t{db_property}\n')

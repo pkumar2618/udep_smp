@@ -1,0 +1,22 @@
+located	{'value_label': 'adjacentTracks', 'prefix': 'dbpprop', 'value': 'http://dbpedia.org/property/adjacentTracks'}
+location	{'value_label': 'location(s)', 'prefix': 'dbpprop', 'value': 'http://dbpedia.org/property/location(s)'}
+situated	{'value_label': 'adjacentTracks', 'prefix': 'dbpprop', 'value': 'http://dbpedia.org/property/adjacentTracks'}
+die	{'value_label': 'deadLift', 'prefix': 'dbpprop', 'value': 'http://dbpedia.org/property/deadLift'}
+passed	{'value_label': 'passedByContinuingResolutionWhichIsNotActuallyANewBudget', 'prefix': 'dbpprop', 'value': 'http://dbpedia.org/property/passedByContinuingResolutionWhichIsNotActuallyANewBudget'}
+founded	{'value_label': 'foundedArea', 'prefix': 'dbpprop', 'value': 'http://dbpedia.org/property/foundedArea'}
+founding year	{'value_label': 'year(s)Active', 'prefix': 'dbpprop', 'value': 'http://dbpedia.org/property/year(s)Active'}
+take place	{'value_label': 'placeDate', 'prefix': 'dbpprop', 'value': 'http://dbpedia.org/property/placeDate'}
+happen	{'value_label': 'doNotShowLink', 'prefix': 'dbpprop', 'value': 'http://dbpedia.org/property/doNotShowLink'}
+located	{'value_label': 'adjacentTracks', 'prefix': 'dbpprop', 'value': 'http://dbpedia.org/property/adjacentTracks'}
+married	{'value_label': 'daughterInLaw', 'prefix': 'dbpprop', 'value': 'http://dbpedia.org/property/daughterInLaw'}
+form of government	{'value_label': 'government2Type', 'prefix': 'dbpprop', 'value': 'http://dbpedia.org/property/government2Type'}
+type of government	{'value_label': 'government2Type', 'prefix': 'dbpprop', 'value': 'http://dbpedia.org/property/government2Type'}
+area	{'value_label': 'area1Note', 'prefix': 'dbpprop', 'value': 'http://dbpedia.org/property/area1Note'}
+die	{'value_label': 'deadLift', 'prefix': 'dbpprop', 'value': 'http://dbpedia.org/property/deadLift'}
+mayor	{'value_label': 'mayorOfOrizaba', 'prefix': 'dbpprop', 'value': 'http://dbpedia.org/property/mayorOfOrizaba'}
+join	{'value_label': 'decided', 'prefix': 'dbpprop', 'value': 'http://dbpedia.org/property/decided'}
+become part of	{'value_label': 'no.ofFloors', 'prefix': 'dbpprop', 'value': 'http://dbpedia.org/property/no.ofFloors'}
+created	{'value_label': 'createdBy.', 'prefix': 'dbpprop', 'value': 'http://dbpedia.org/property/createdBy.'}
+death	{'value_label': 'deathPlace', 'prefix': 'dbpprop', 'value': 'http://dbpedia.org/property/deathPlace'}
+tall	{'value_label': 'heightFeet', 'prefix': 'dbpprop', 'value': 'http://dbpedia.org/property/heightFeet'}
+height	{'value_label': 'heightFeet', 'prefix': 'dbpprop', 'value': 'http://dbpedia.org/property/heightFeet'}

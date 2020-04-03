@@ -27,7 +27,7 @@ class NLQuestion(object):
     def __init__(self, question):
         self.question = question
         if not NLQuestion.sd_nlp_loaded:
-            NLQuestion.nlp = stanfordnlp.Pipeline(processors='tokenize,lemma,pos,depparse', use_gpu=False)
+            NLQuestion.nlp = stanfordnlp.Pipeline(processors='tokenize,lemma,pos,depparse', use_gpu=True)
             NLQuestion.sd_nlp_loaded = True
 
     def tokenize(self, dependency_parsing=False):
@@ -175,25 +175,27 @@ class NLQCanonical(object):
                         # if neod_term is a event use its name to get dbpedia predicate
                         if re.match(r'[\d]+:e', args[0]):
                             # if neod_term is a argument to a predicate the terms inside the bracket is an entity
-                            if re.match(r'arg[\d+]', modifier):
-                                entity_phrase  =  re.split(r'[.]', args[1])[1]
-                                try:
-                                    # entities = spotlight.annotate('https://api.dbpedia-spotlight.org/en/annotate', entity_phrase['phrase'],
-                                    #                               confidence=0.0, support=0)
-                                    # self.nlq_phrase_kbentity_dict[entity_phrase] = entities
-                                    self.nlq_phrase_kbentity_dict[entity_phrase] = entity_phrase
+                            if modifier is not None: # if modifier is not present, it's Question Term or Where term
+                                if re.match(r'arg[\d+]', modifier): # if modifier is an arg[\d] term,
+                                    # it contains entities inside the brackets
+                                    entity_phrase  =  re.split(r'[.]', args[1])[1]
+                                    try:
+                                        entities = spotlight.annotate('https://api.dbpedia-spotlight.org/en/annotate', entity_phrase,
+                                                                      confidence=0.0, support=0)
+                                        self.nlq_phrase_kbentity_dict[entity_phrase] = entities
+                                        # self.nlq_phrase_kbentity_dict[entity_phrase] = entity_phrase
 
-                                except spotlight.SpotlightException as e:
-                                    self.nlq_phrase_kbentity_dict[entity_phrase] = None
+                                    except spotlight.SpotlightException as e:
+                                        self.nlq_phrase_kbentity_dict[entity_phrase] = None
 
-                            else: # when the modifier is a grammar term it emplies the predicate
-                                # use lemma of the word
-                                word_index = ast.literal_eval(re.match(r'^[\d]+', args[0]).group())
-                                # word = self.nlq_canonical.words[word_index].lemma
-                                word = self.nlq_canonical.words[word_index].text
-                                vector = NLQCanonical.glove[word].reshape(1, -1)
-                                value_prefix = get_property_using_cosine_similarity(vector, recalculate_numpy_property_vector=False)
-                                self.nlq_word_kb_predicate_dict[word] = value_prefix['value']
+                                else: # when the modifier is a grammar term it emplies the predicate
+                                    # use lemma of the word
+                                    word_index = ast.literal_eval(re.match(r'^[\d]+', args[0]).group())
+                                    # word = self.nlq_canonical.words[word_index].lemma
+                                    word_temp = self.nlq_canonical.words[word_index].text
+                                    vector = NLQCanonical.glove[word_temp].reshape(1, -1)
+                                    value_prefix = get_property_using_cosine_similarity(vector, recalculate_numpy_property_vector=False)
+                                    self.nlq_word_kb_predicate_dict[word] = value_prefix['value']
 
                     except Exception as e:
                         pass
@@ -344,39 +346,39 @@ if __name__ == "__main__":
 
     # testing entity_predicate_linker
     question = "Where is Fort Knox located ?"
-    dump_name = "fort_knox.pkl"
+    dump_name = "fort_knox"
 
     # question = "Where was Barack Obama Born?"
-    # dump_name = "obama_born.pkl"
+    # dump_name = "obama_born"
 
     try:
         # if the file exist load it
-        with open(dump_name, 'rb') as f:
+        with open(f'{dump_name}.pkl', 'rb') as f:
             nlq_tokens = pickle.load(f)
 
     except FileNotFoundError as e:
         nlq = NLQuestion(question)
         nlq_tokens = nlq.tokenize(dependency_parsing=True)
-        with open(dump_name, 'wb') as f:
+        with open(f'{dump_name}.pkl', 'wb') as f:
             pickle.dump(nlq_tokens, f)
 
     nlq_canon = nlq_tokens.canonicalize(dependency_parsing=True)
 
     try:
-        with open("test.pkl", 'rb') as testing_f:
+        with open(f'{dump_name}_test.pkl', 'rb') as testing_f:
             nlq_canon = pickle.load(testing_f)
 
     except FileNotFoundError as e:
         nlq_canon.formalize_into_udeplambda()
-        with open('test.pkl', 'wb') as testing_f:
+        with open(f'{dump_name}_test.pkl', 'wb') as testing_f:
             pickle.dump(nlq_canon, testing_f)
 
     try:
-        with open("test1.pkl", 'rb') as testing_f:
+        with open(f'{dump_name}_test1.pkl', 'rb') as testing_f:
             nlq_canon = pickle.load(testing_f)
     except FileNotFoundError as e:
         nlq_canon.entity_predicate_linker(linker='spotlight', kg='dbpedia')
-        with open('test1.pkl', 'wb') as testing_f:
+        with open(f'{dump_name}_test1.pkl', 'wb') as testing_f:
             pickle.dump(nlq_canon, testing_f)
 
     query = nlq_canon.translate_to_sparql()
