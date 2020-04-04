@@ -1,0 +1,14 @@
+Where is Fort Knox located ?, Fort_Knox
+Where did Abraham Lincoln die ?, Abraham, Lincoln
+When was Jack Wolfskin founded ?, Jack_Wolfskin, Jack, Wolfskin
+When did the Boston Tea Party take place ?, Boston, Tea, Party, Boston_Tea_Party
+Where is Sungkyunkwan University ?, Sungkyunkwan, University, Sungkyunkwan_University
+Who was married to president Chirac ?, President, Chirac, president_Chirac
+What form of government does Russia have ?, Russia
+How large is the area of UK ?, UK, area
+When did princess Diana die ?, princess_Diana
+Who is the mayor of New York City ?, New_York_City
+When did Latvia join the EU ?, Latvia, EU
+Who created the comic Captain America ?, Captain_America
+When did Michael Jackson die ?, Michael, Jackson, Michael_Jackson
+How tall is Claudia Schiffer ?, Claudia, Schiffer, Claudia_Schiffer
