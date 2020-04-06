@@ -24,25 +24,5 @@ if __name__ == "__main__":
     glove = KeyedVectors.load('./glove_gensim_mmap', mmap='r')
 
     # # if embedding has changed, you may need to delete the numpy_property_vector.pkl file
-    # vector = glove['palace'].reshape((1,-1))
-    # print(get_property_using_cosine_similarity(vector))
-
-    # Analysing Glove embedding for feq predicates taken from simple questions q1
-    with open("scope_questions/q1_predicates.txt", 'r') as f:
-        for predicate in f:
-            word_count = 0
-            for word in predicate.split():
-                try:
-                    if word_count == 0:
-                        word_vector = glove[word].reshape(1, -1)
-                        vector = np.array(word_vector)
-                    else:
-                        word_vector = glove[word].reshape(1, -1)
-                        vector = np.append(vector, word_vector, axis=0)
-                except KeyError as e:
-                    pass
-            predicate_emb = np.average(vector, axis=0)
-            db_property = get_property_using_cosine_similarity(predicate_emb)
-            # db_property['predicate'] = predicate
-            with open("pkg_get_predicate/q1_predicate_dbproperty.txt", 'a') as f:
-                f.write(f'{predicate.rstrip()}\t{db_property}\n')
+    vector = glove['palace'].reshape((1,-1))
+    print(get_property_using_cosine_similarity(vector))
