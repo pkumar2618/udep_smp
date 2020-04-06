@@ -10,13 +10,13 @@ from gensim.models import KeyedVectors
 import pickle
 from sklearn.metrics.pairwise import cosine_similarity
 
-def get_dbpedia_predicates(filename_raw="dbpedia_predicates.csv", filename_pretty="dbpedia_predicates_pretty.csv", namespaces="dbp_namespaces_prefix.csv", refresh=False):
+def get_dbpedia_predicates(filename_raw="dbpedia_predicates.csv", filename_pretty="dbpedia_predicates_pretty.csv", namespaces="dbp_namespaces_prefix.tsv", refresh=False):
     # pull up all the predicates from db_pedia when refresh is True, when refresh is False,
     # use the existing file dbpedia_predicate.csv
 
     if refresh:
         # pulling all the db-pedia properties
-        query = """ SELECT * { ?x a rdf:Property }"""
+        query = " SELECT ?property  where { ?property a rdf:Property }"
         # dbpedia sparql endpoint
         sparql = SPARQLWrapper("http://dbpedia.org/sparql")
         sparql.setQuery(query)
@@ -61,20 +61,30 @@ def get_dbpedia_predicates(filename_raw="dbpedia_predicates.csv", filename_prett
                 value_label = url_path_split[-1]
                 url_base = urlunparse((url_parsed.scheme, url_parsed.netloc, '/'.join(url_path_split[:-1]), "", "", ""))
 
-            for ns_prefix, ns_url in dict_ns_prefix_url.items():
-                # if re.search(rf'^{ns_url}[.]+', url):
-                try:
-                    if re.match(rf'^{url_base}[/#]?',ns_url):
-                        predicate_df.loc[url, 'value_label'] = value_label
-                        predicate_df.loc[url, 'value_label_split'] = split_camelcase_predicates(value_label)
-                        predicate_df.loc[url, 'prefix'] = ns_prefix
-                except:
-                    e = sys.exc_info()[0]
-                    print(f"Exception encountered: {e}")
+            # skipping identifying the namespace prefix
+            predicate_df.loc[url, 'value_label'] = value_label
+            predicate_df.loc[url, 'value_label_split'] = " ".join(split_camelcase_predicates(value_label))
+            # predicate_df.at[url, 'value_label_split'] = split_camelcase_predicates(value_label)
+
+
+            # ns_url_found = False
+            # for ns_prefix, ns_url in dict_ns_prefix_url.items():
+            #     # if re.search(rf'^{ns_url}[.]+', url):
+            #     if re.match(rf'^{url_base}[/#]?',ns_url):
+            #         predicate_df.loc[url, 'value_label'] = value_label
+            #         predicate_df.loc[url, 'value_label_split'] = " ".join(split_camelcase_predicates(value_label))
+            #         predicate_df.loc[url, 'prefix'] = ns_prefix
+            #         ns_url_found=True
+            #
+            # if not ns_url_found:
+            #     predicate_df.loc[url, 'value_label'] = value_label
+            #     predicate_df.loc[url, 'value_label_split'] = " ".join(split_camelcase_predicates(value_label))
+            #     predicate_df.loc[url, 'prefix'] = ""
 
         with open(filename_pretty, 'w') as f_handle:
             predicate_df = predicate_df.drop(columns=['type'])
             predicate_df = predicate_df[['prefix', 'value_label', 'value_label_split', 'value']]
+            # predicate_df = predicate_df[['value_label', 'value_label_split', 'value']]
             predicate_df.to_csv(f_handle, index=False)
 
 
@@ -83,7 +93,7 @@ def split_camelcase_predicates(cc_predicate):
 
 
 def dbpedia_property_vectorizer():
-    glove_loading_kv = KeyedVectors.load_word2vec_format("./glove/glove.6B.300d.w2vformat.txt")
+    glove_loading_kv = KeyedVectors.load_word2vec_format("../glove/glove.6B.300d.w2vformat.txt")
     glove_loading_kv.save('./glove_gensim_mmap')
     glove = KeyedVectors.load('./glove_gensim_mmap', mmap='r')
     vector = glove['stuff']
@@ -98,7 +108,7 @@ def dbpedia_property_vectorizer():
     for index in dbp_property_avgvector_prefix.index.to_list():
         property_words = dbp_property_avgvector_prefix.loc[index, 'value_label_split']
         try:
-            property_words = literal_eval(property_words)
+            property_words = re.split(r'\s', property_words)
             vector_list = []
             for word in property_words:
                 try:
