@@ -4,7 +4,7 @@ import json
 import ast
 json_dict = {}
 json_dict['questions'] = []
-with open('q1_entities.txt', 'r') as f:
+with open('../scope_questions/q1_entities.txt', 'r') as f:
     for line in f:
         splits = re.split(r'[,]+?', line)
         entities =splits[1:]

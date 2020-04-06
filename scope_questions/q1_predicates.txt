@@ -1,0 +1,14 @@
+Where is Fort Knox located ?, located
+Where did Abraham Lincoln die ?, location
+When was Jack Wolfskin founded ?, founded
+When did the Boston Tea Party take place ?, takePlace
+Where is Sungkyunkwan University ?, place
+Who was married to president Chirac ?, spouse
+What form of government does Russia have ?, form_of_government
+How large is the area of UK ?, large
+When did princess Diana die ?, deathTime
+Who is the mayor of New York City ?, mayor
+When did Latvia join the EU ?, join
+Who created the comic Captain America ?, created
+When did Michael Jackson die ?, deathTime
+How tall is Claudia Schiffer ?, height
