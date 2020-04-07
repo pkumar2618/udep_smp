@@ -24,5 +24,7 @@ if __name__ == "__main__":
     glove = KeyedVectors.load('./glove_gensim_mmap', mmap='r')
 
     # # if embedding has changed, you may need to delete the numpy_property_vector.pkl file
-    vector = glove['palace'].reshape((1,-1))
+    vector1 = glove['Birth'].reshape((1,-1))
+    vector2 = glove['place'].reshape((1, -1))
+    vector = (vector1 + vector2)/2
     print(get_property_using_cosine_similarity(vector))

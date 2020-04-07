@@ -92,9 +92,9 @@ def split_camelcase_predicates(cc_predicate):
     return re.findall(r'[a-zA-Z](?:[a-z]+|[A-Z]*(?=[A-Z]|$))', cc_predicate)
 
 
-def dbpedia_property_vectorizer():
+def dbpedia_property_vectorizer(w2v_embedding = "../glove/glove.6B.300d.w2vformat.txt"):
     # # load word2vec embedding
-    glove_loading_kv = KeyedVectors.load_word2vec_format("../glove/glove.6B.300d.w2vformat.txt")
+    glove_loading_kv = KeyedVectors.load_word2vec_format(w2v_embedding)
     # save for speedy access.
     glove_loading_kv.save('./glove_gensim_mmap')
 
@@ -167,7 +167,7 @@ def get_property_using_cosine_similarity(vector, panda_property_vector="dbpedia_
             for row in pd_property_vector.itertuples():
                 try:
                     if row[2].any() == np.nan: # applicable when row_2 is a panda object, else except
-                        row_2 = np.zeros(vector.shape)
+                        row_2 = np.zeros((1, vector.shape[0]))
                         if count == 1:
                             np_property_vector = row_2
                             count += 1
@@ -183,10 +183,10 @@ def get_property_using_cosine_similarity(vector, panda_property_vector="dbpedia_
                             count += 1
 
                 except AttributeError as e: # when not a panda object look for numpy nan
-                    print(e)
+                    # print(e)
                     try:
                         if np.isnan(row[2]): # test for numpy nan, except to a string
-                            row_2 = np.zeros(vector.shape)
+                            row_2 = np.zeros((1, vector.shape[0]))
                             if count == 1:
                                 np_property_vector = row_2
                                 count += 1
@@ -195,7 +195,7 @@ def get_property_using_cosine_similarity(vector, panda_property_vector="dbpedia_
                                 count += 1
                     except Exception as e:
                         if type(row[2]) == str: # test for an empty string
-                            row_2 = np.zeros(vector.shape)
+                            row_2 = np.zeros((1, vector.shape[0]))
                             if count == 1:
                                 np_property_vector = row_2
                                 count += 1

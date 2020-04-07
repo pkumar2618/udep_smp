@@ -2,13 +2,19 @@ import json
 import re
 from gensim.models import KeyedVectors
 import numpy as np
-from db_utils import get_property_using_cosine_similarity, split_camelcase_predicates
+from db_utils import get_property_using_cosine_similarity, split_camelcase_predicates, dbpedia_property_vectorizer
 
+
+try:
+    glove = KeyedVectors.load('./glove_gensim_mmap', mmap='r')
+except FileNotFoundError as ef:
+    # vectorize the dbpedia properties using glove embedding, to be run if the embedding has to be changed.
+    dbpedia_property_vectorizer(w2v_embedding='../glove/glove.840B.300d.w2vformat.txt')
+    glove = KeyedVectors.load('./glove_gensim_mmap', mmap='r')
 
 json_dict = {}
 json_dict['questions'] = []
 # test cosine_smilarity the function will return top-n property based on the cosine similarity
-glove = KeyedVectors.load('./glove_gensim_mmap', mmap='r')
 
 with open('../scope_questions/q1_predicates.txt', 'r') as f:
     for line in f:
@@ -47,5 +53,5 @@ with open('../scope_questions/q1_predicates.txt', 'r') as f:
 
         json_dict['questions'].append(question_dict)
 
-with open('q1_predicate_dbproperty.json', 'w') as f_json:
+with open('q1_predicate_dbproperty-glove.json', 'w') as f_json:
     json.dump(json_dict, f_json, indent=4)
