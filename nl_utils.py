@@ -241,15 +241,16 @@ class NLQCanonical(object):
     def translate_to_sparql(self, kg='dbpedia'):
         """
         The logical form in udep_lambda is translated into SPARQL.
-        Note: Fomalize into SPARQL will note require reference to a Knowledge Graph for the purpose of
-        denotation as that is already done. The KG is required to provide list of namespace for creating query-string
-        during entity_linking stage of the parser.
+        Note: translate into SPARQL will note require reference to a Knowledge Graph for the purpose of
+        denotation, as that is already done.
+
         :return: a Query object
         """
         query = Query()
         variables_list = []
+
+        # # we will create a dictionary of event_id, which is dictionary of dictionary {key:predicate, value:{s_list, o_list}}
         event_triples_dict = {}
-        # tuple_list = [s, p, o]
         for neod_lambda_term in self.udep_lambda['dependency_lambda'][0]:
             # neod_lambda term in the atomic form takes a function name predicate or predicate.dependency
             # or predicate.args
@@ -267,30 +268,37 @@ class NLQCanonical(object):
                 # create new dictionary entry into the event_triples_dict.
                 event_id = type_entity[0]
                 if len(pred_dependency) == 1: # the atomic name only contains predicate
-                    NLQCanonical.update_plist(event_triples_dict, event_id, pred_dependency[0], rdf_type='URIRef')
+                    predicate = pred_dependency[0]
+                    NLQCanonical.update_plist(event_triples_dict, event_id, predicate , rdf_type='URIRef')
 
                 elif len(pred_dependency) == 2: # the atomic name coontains predicate and the dependency-relations
                     # or it contains predicate and arg0-1
                     predicate = pred_dependency[0]
                     dependency_relations = pred_dependency[1]
+                    try:
+                        entity = type_entity[1].split('.')[1]
+                        rdf_type = 'URIRef'
+                    except IndexError as e_index:  # index error
+                        # the term is a varaible
+                        entity = type_entity[1]
+                        rdf_type = 'BNode'
+
                     if not re.match(r'arg[\d]+', dependency_relations): # the term is dependency-relation
                         NLQCanonical.update_plist(event_triples_dict, event_id, predicate, rdf_type='URIRef')
-                        entity = type_entity[1].split('.')[1]
-
                         # check if the entity exist in the s_list before updating it.
-                        if NLQCanonical.exists_in_slist(event_triples_dict, event_id, entity):
-                            NLQCanonical.update_olist(event_triples_dict, event_id, entity, rdf_type='URIRef')
-                        else: # put the entity into slist
-                            NLQCanonical.update_slist(event_triples_dict, event_id, entity, rdf_type='URIRef')
+                        if NLQCanonical.exists_in_slist(event_triples_dict, event_id, predicate, entity):
+                            NLQCanonical.update_olist(event_triples_dict, event_id, predicate, entity, rdf_type=rdf_type)
+                        else: # put the entity into slist, however, check for lenght of the two lists.
+                            # the triple are formed when the list are balanced.
+                            NLQCanonical.update_bw_slist_olist(event_triples_dict, event_id, predicate, entity, rdf_type=rdf_type)
 
                     else: # the second term in atomic_name is arg[\d]
                         NLQCanonical.update_plist(event_triples_dict, event_id, predicate, rdf_type='URIRef')
-                        entity = type_entity[1].split('.')[1]
                         # check if the entity exist in the s_list before updating it.
-                        if NLQCanonical.exists_in_slist(event_triples_dict, event_id, entity):
-                            NLQCanonical.update_olist(event_triples_dict, event_id, entity, rdf_type='URIRef')
+                        if NLQCanonical.exists_in_slist(event_triples_dict, event_id, predicate, entity):
+                            NLQCanonical.update_olist(event_triples_dict, event_id, predicate, entity, rdf_type=rdf_type)
                         else:  # put the entity into slist
-                            NLQCanonical.update_slist(event_triples_dict, event_id, entity, rdf_type='URIRef')
+                            NLQCanonical.update_bw_slist_olist(event_triples_dict, event_id, predicate, entity, rdf_type=rdf_type)
 
                 elif len(pred_dependency) ==3: # the third term is preopositional modifier, TODO
                     pass
@@ -313,7 +321,7 @@ class NLQCanonical(object):
         query.select(variables_list)
         query.distinct()
 
-        for key, triple_spo in event_triple_dict.items():
+        for key, triple_spo in event_triples_dict.items():
             if triple_spo[0] is 's':
                 triple_spo[0] = BNode(variables_list[0])
             elif triple_spo[1] is 'p':
@@ -336,66 +344,93 @@ class NLQCanonical(object):
 
     @staticmethod
     def update_plist(event_triples_dict, event_id, predicate, rdf_type='URIRef'):
-        p_list_len = len(event_triples_dict[event_id]['p_list'])
-        if p_list_len == 0: # create the p_list
-            if rdf_type is 'URIRef':
-                event_triples_dict[event_id]['p_list'] = URIRef(predicate)  # assign the name to p-list in
-            elif rdf_type is 'BNode':
-                event_triples_dict[event_id]['p_list'] = BNode(predicate)  # assign the name to p-list in
+        # we are going to form a dictionary of dictionary of dictionary : event_id:predicate:{s_list, o_list}
+        try:
+            if predicate in event_triples_dict[event_id].keys():
+                pass
+            else :
+                event_triples_dict[event_id][predicate] = {}
+                # if rdf_type is 'URIRef':
+                #     event_triples_dict[event_id][URIRef(predicate)] = {}
+                # elif rdf_type is 'BNode':
+                #         event_triples_dict[event_id][BNode(predicate)] = {}
+        except KeyError as event_error:
+            event_triples_dict[event_id] = {}
+            event_triples_dict[event_id][predicate] = {}
+            # if rdf_type is 'URIRef':
+            #     event_triples_dict[event_id][URIRef(predicate)] = {}
+            # elif rdf_type is 'BNode':
+            #     event_triples_dict[event_id][BNode(predicate)] = {}
 
-        elif p_list_len >= 1:  # the p_list already has a relation corresponding to the event.
-            if predicate not in event_triples_dict[event_id]['p_list']: # using list keeps the order, so that
-                # forming triple patterns may be easy while creating the query.
+    @staticmethod
+    def update_bw_slist_olist(event_triples_dict, event_id, predicate, entity, rdf_type=URIRef):
+        try:
+            s_list_len = len(event_triples_dict[event_id][predicate]['s_list'])
+            o_list_len = len(event_triples_dict[event_id][predicate]['o_list'])
+            if s_list_len == o_list_len:
+                NLQCanonical.update_slist(event_triples_dict, event_id, predicate, entity, rdf_type=rdf_type)
+            elif s_list_len > o_list_len:
+                NLQCanonical.update_olist(event_triples_dict, event_id, predicate, entity, rdf_type=rdf_type)
+            else:
+                NLQCanonical.update_slist(event_triples_dict, event_id, predicate, entity, rdf_type=rdf_type)
+        except KeyError as e_key:
+            if e_key.args[0] is 'o_list':
+                NLQCanonical.update_olist(event_triples_dict, event_id, predicate, entity, rdf_type=rdf_type)
+            elif e_key.args[0] is 's_list':
+                NLQCanonical.update_slist(event_triples_dict, event_id, predicate, entity, rdf_type=rdf_type)
+
+    @staticmethod
+    def update_slist(event_triples_dict, event_id, predicate, subject, rdf_type='URIRef'):
+        try:
+            sub_list_len = len(event_triples_dict[event_id][predicate]['s_list'])
+            if sub_list_len >= 1:  # the subject_list already has a relation corresponding to the event.
                 if rdf_type is 'URIRef':
-                    event_triples_dict[event_id]['p_list'].append(URIRef(predicate))
+                    event_triples_dict[event_id][predicate]['s_list'].append(URIRef(subject))
                 elif rdf_type is 'BNode':
-                    event_triples_dict[event_id]['p_list'].append(BNode(predicate))
+                    event_triples_dict[event_id][predicate]['s_list'].append(BNode(subject))
+        except KeyError as ek:
+            # create s_list
+            if rdf_type is 'URIRef':
+                event_triples_dict[event_id][predicate]['s_list'] = [URIRef(subject)]  # assign the subject
+            elif rdf_type is 'BNode':
+                event_triples_dict[event_id][predicate]['s_list'] = [BNode(subject)]  # assign the subject
 
 
     @staticmethod
-    def update_slist(event_triples_dict, event_id, subject, rdf_type='URIRef'):
-        sub_list_len = len(event_triples_dict[event_id]['s_list'])
-        if sub_list_len == 0: # create s_list
-            if rdf_type is 'URIRef':
-                event_triples_dict[event_id]['s_list'] = URIRef(subject)  # assign the subject
-            elif rdf_type is 'BNode':
-                event_triples_dict[event_id]['s_list'] = BNode(subject)  # assign the subject
-
-        elif sub_list_len >= 1:  # the subject_list already has a relation corresponding to the event.
-            if rdf_type is 'URIRef':
-                event_triples_dict[event_id]['s_list'].append(URIRef(subject))
-            elif rdf_type is 'BNode':
-                event_triples_dict[event_id]['s_list'].append(BNode(subject))
-
-    @staticmethod
-    def exists_in_slist(event_triples_dict, event_id, entity):
-        if entity in event_triples_dict[event_id]['s_list']:
-            return True
-        else:
+    def exists_in_slist(event_triples_dict, event_id, predicate, entity):
+        try:
+            if entity in event_triples_dict[event_id][predicate]['s_list']:
+                return True
+        except KeyError as e_key:
+            # if KeyError is encountered, that mean s_list doesn't exist
             return False
 
 
     @staticmethod
-    def update_olist(event_triples_dict, event_id, object, rdf_type='URIRef'):
-        object_list_len = len(event_triples_dict[event_id]['o_list'])
-        if object_list_len == 0:
+    def update_olist(event_triples_dict, event_id, predicate, object, rdf_type='URIRef'):
+        try:
+            object_list_len = len(event_triples_dict[event_id][predicate]['o_list'])
+            if object_list_len >= 1:  # the object_list already has a entity corresponding to the event.
+                if rdf_type is 'URIRef':
+                    event_triples_dict[event_id][predicate]['s_list'].append(URIRef(object))
+                elif rdf_type is 'BNode':
+                    event_triples_dict[event_id][predicate]['s_list'].append(BNode(object))
+        except KeyError as ek:
+            # create the object_list with entity_id/type_id
             if rdf_type  is 'URIRef':
-                event_triples_dict[event_id]['o_list'] = URIRef(object)  # assign the object
+                event_triples_dict[event_id][predicate]['o_list'] = [URIRef(object)] # assign the object
             elif rdf_type is 'BNode':
-                event_triples_dict[event_id]['o_list'] = BNode(object)  # assign the object
+                event_triples_dict[event_id][predicate]['o_list'] = [BNode(object)]  # assign the object
 
-        elif object_list_len >= 1:  # the object_list already has a entity corresponding to the event.
-            if rdf_type is 'URIRef':
-                event_triples_dict[event_id]['s_list'].append(URIRef(object))
-            elif rdf_type is 'BNode':
-                event_triples_dict[event_id]['s_list'].append(BNode(object))
 
 
     @staticmethod
-    def exists_in_olist(event_triples_dict, event_id, entity):
-        if entity in event_triples_dict[event_id]['o_list']:
-            return True
-        else:
+    def exists_in_olist(event_triples_dict, event_id, predicate, entity):
+        try:
+            if entity in event_triples_dict[event_id][predicate]['o_list']:
+                return True
+        except KeyError as e_key:
+            # when KeyError encountered, that mean object_list doen't exists.
             return False
 
 
