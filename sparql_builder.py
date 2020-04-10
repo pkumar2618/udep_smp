@@ -90,7 +90,7 @@ class Query(object):
         """
         self._data.add(spo_tuple)
 
-    def where(self, spo_tuple):
+    def where(self, spo_triples):
         """
         Where clause for the select query
         :param tripple_pattern:
@@ -99,7 +99,8 @@ class Query(object):
         # take spo_tuple and add to the graph-patern
         # if self._validate_triple_pattern(spo_tuple):
         self._where = "WHERE"
-        self._data.add(spo_tuple)
+        for spo_tuple in spo_triples:
+            self._data.add(spo_tuple)
 
     def optional_group(self, optional_tripple):
         """

@@ -303,8 +303,8 @@ class NLQCanonical(object):
                 elif len(pred_dependency) ==3: # the third term is preopositional modifier, TODO
                     pass
 
-            # if atomic expression is of type ':0' i.e. a type relations
-            elif re.match(r'[\d]+:s$', type_entity[0]):
+            # if atomic expression is of type ':s' i.e. a type relations
+            elif re.match(r'[\s]*[\d]+:s[\s]*$', type_entity[0]):
                 # the atomic_expression is of type ':s'
                 type_id = type_entity[0]
                 variable_name = type_entity[1]
@@ -312,24 +312,26 @@ class NLQCanonical(object):
 
                 if len(pred_dependency) == 1: # only the type name is given, and the atomic_args contain variable
                     NLQCanonical.update_plist(event_triples_dict, type_id, 'a', rdf_type='URIRef') # dbpedia uses a for type
-                    NLQCanonical.update_olist(event_triples_dict, type_id, type_label, rdf_type='URIRef')
-                    NLQCanonical.update_plist(event_triples_dict, type_id, variable_name, rdf_type='BNode')
+                    NLQCanonical.update_olist(event_triples_dict, type_id, 'a', type_label, rdf_type='URIRef')
+                    NLQCanonical.update_slist(event_triples_dict, type_id, 'a', variable_name, rdf_type='BNode')
 
                 elif len(pred_dependency) == 2: # atomic expression for type ':s' don't have arg[\d]
                     pass
 
         query.select(variables_list)
         query.distinct()
+        spo_triples = []
+        for neod_type, kp_vso in event_triples_dict.items(): # kp_vso a dictionary of predicate as key and s_list, o_list as value
+            # if neod_type is an event
+            if re.match(r'[\d]+:e[\s]*', neod_type):
+                # kp_vso: note that there may be many predicates and each predicate will have an associated s_list
+                # and o_list, which in turn may form many subject-object pairs. There fore we create a different static
+                # function to process it.
+                spo_triples = spo_triples + NLQCanonical.create_spo_triples(kp_vso)
+            elif re.match(r'\s*[\d]+:s[\s]*', neod_type):
+                spo_triples = spo_triples + NLQCanonical.create_spo_triples(kp_vso)
 
-        for key, triple_spo in event_triples_dict.items():
-            if triple_spo[0] is 's':
-                triple_spo[0] = BNode(variables_list[0])
-            elif triple_spo[1] is 'p':
-                triple_spo[1] = BNode(variables_list[0])
-            elif triple_spo[2] is 'o':
-                triple_spo[2] = BNode(variables_list[0])
-
-            query.where(triple_spo)
+        query.where(spo_triples)
 
         return query
 
@@ -432,6 +434,19 @@ class NLQCanonical(object):
         except KeyError as e_key:
             # when KeyError encountered, that mean object_list doen't exists.
             return False
+
+
+    @staticmethod
+    def create_spo_triples(kp_vso):
+    # kp_vso: note that there may be many predicates and each predicate will have an associated s_list
+    # and o_list, which in turn may form many subject-object pairs.
+        spo_triples = []
+        for predicate, slist_olist_dict in kp_vso.items():
+            assert len(slist_olist_dict['s_list']) == len(slist_olist_dict['o_list']), "hanging edge: missing subject or object node"
+            predicate = URIRef(predicate)
+            spo_triples = spo_triples + [(s, predicate, o) for s,o in zip(slist_olist_dict['s_list'], slist_olist_dict['o_list'])]
+
+        return spo_triples
 
 
     @staticmethod
