@@ -67,7 +67,7 @@ while True:
 
 
             # # canonicalize based on canonical_form flag and dependency_parsing flag. when canonical_form flag is
-            # # disabled the parser sets it's attribute self.canonical_list as copy based on nlq_token_list
+            # # disabled the parser sets it's attribute self.canonical_list as copy of self.nlq_token_list
             try:
                 with open('log1_parser.pkl', 'rb') as f:
                     parser = pickle.load(f)
@@ -76,15 +76,25 @@ while True:
                 with open('log1_parser.pkl', 'wb') as f:
                     pickle.dump(parser, f)
 
+
             # # convert the question into a Query, the reference to knowledge graph is rquired to provide list of namespace
             # # prefixes used during creating a query-string
             try:
                 with open('log2_parser.pkl', 'rb') as f:
                     parser = pickle.load(f)
-
             except FileNotFoundError as e:
-                parser.lambda_expression()
+                parser.ungrounded_logical_form()
                 with open('log2_parser.pkl', 'wb') as f:
+                    pickle.dump(parser, f)
+
+
+            # translate logical form into graphical representation using SPARQL basic graph pattern (BGP)
+            try:
+                with open('log3_parser.pkl', 'rb') as f:
+                    parser = pickle.load(f)
+            except FileNotFoundError as e:
+                parser.grounded_logical_form(kg=args.knowledge_graph)
+                with open('log3_parser.pkl', 'wb') as f:
                     pickle.dump(parser, f)
 
 
@@ -92,19 +102,10 @@ while True:
             # provides denotation (entity or resources) for each token,
             # the parser stores a dictionary of token-denotation pairs
             try:
-                with open('log3_parser.pkl', 'rb') as f:
-                    parser = pickle.load(f)
-            except FileNotFoundError as e:
-                parser.disambiguate(linker=args.disambiguator, kg=args.knowledge_graph)
-                with open('log3_parser.pkl', 'wb') as f:
-                    pickle.dump(parser, f)
-
-            # translate query in SPARQL
-            try:
                 with open('log4_parser.pkl', 'rb') as f:
                     parser = pickle.load(f)
             except FileNotFoundError as e:
-                parser.translate_to_sparql(kg=args.knowledge_graph)
+                parser.disambiguate(linker=args.disambiguator, kg=args.knowledge_graph)
                 with open('log4_parser.pkl', 'wb') as f:
                     pickle.dump(parser, f)
 

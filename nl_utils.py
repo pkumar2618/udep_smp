@@ -14,7 +14,8 @@ from db_utils import get_property_using_cosine_similarity
 import ast
 from rdflib import URIRef, BNode
 
-
+# Object may be created empty and later on modified using a bunch of operations on them. Or it get's created in its
+# final form by some other class.
 class NLQuestion(object):
     """
     This class will take Natural Language Question and create an object.
@@ -120,107 +121,8 @@ class NLQCanonical(object):
     Wrapper Class for Canonical form of the Natural Language Questions
     """
 
-    # Using GloVe-6B trained on 6Billion tokens, contains 400k vocabulary
-    # loading once for the object is created, and later to be used by entity linker
-    # or predicate linker
-    glove_loaded = False # flag to load the keyedvector from file once
-    glove = None # the keyedvector stored using memory map for fast access
-
-
-
     def __init__(self, canonical_form):
         self.nlq_canonical = canonical_form
-        self.udep_lambda = None
-        self.nlq_phrase_kbentity_dict = {}
-        self.nlq_word_kb_predicate_dict = {}
-        if not NLQCanonical.glove_loaded:
-            try:
-                NLQCanonical.glove = KeyedVectors.load('./glove_gensim_mmap', mmap='r')
-                NLQCanonical.glove_loaded = True
-            except Exception as e:
-                glove_loading_kv = KeyedVectors.load_word2vec_format("./pt_word_embedding/glove/glove.6B.50d.w2vformat.txt")
-                glove_loading_kv.save('./glove_gensim_mmap')
-                NLQCanonical.glove = KeyedVectors.load('./glove_gensim_mmap', mmap='r')
-                # NLQCanonical.glove.syn0norm = NLQCanonical.glove.syn0  # prevent recalc of normed vectors
-                # NLQCanonical.glove.most_similar('stuff')  # any word will do: just to page all in
-                # Semaphore(0).acquire()  # just hang until process killed
-                NLQCanonical.glove_loaded = True
-
-    def entity_predicate_linker(self, linker=None, kg=None):
-        """
-        entity linking using dbpedia Spotlight
-        Entity linker by definition must have reference to Knowledge Graph, whence it bring list of denotation for
-        the token.
-        :return:
-        """
-        if linker == 'spotlight' and kg == 'dbpedia':
-            if self.udep_lambda: # if the formalization was true. start the linker
-                # linking entities using dbpedia sptolight
-                # identify entity phrase from the predicate arguments
-                # and
-                # linking dbpedia_predicate using cosine similarity on word2vec
-                # find the event type tokens according to Neo-Davidsonia grammar
-                for neod_lambda_term in self.udep_lambda['dependency_lambda'][0]:
-                    word_udep, type_tuple = NLQCanonical.get_name_type_tuple(neod_lambda_term)
-                    args = type_tuple.split(",")
-                    word_modifier = word_udep.split(".")
-                    word = word_modifier[0]
-                    try:
-                        modifier = word_modifier[1]
-                    except IndexError as e:
-                        modifier = None
-
-                    try:
-                        # linking resources
-                        # if neod_term is a event use its name to get dbpedia predicate
-                        if re.match(r'[\d]+:e', args[0]):
-                            # if neod_term is a argument to a predicate the terms inside the bracket is an entity
-                            if modifier is not None: # if modifier is not present, it's Question Term or Where term
-                                if re.match(r'arg[\d+]', modifier): # if modifier is an arg[\d] term,
-                                    # it contains entities inside the brackets
-                                    entity_phrase  =  re.split(r'[.]', args[1])[1]
-                                    try:
-                                        entities = spotlight.annotate('https://api.dbpedia-spotlight.org/en/annotate', entity_phrase,
-                                                                      confidence=0.0, support=0)
-                                        self.nlq_phrase_kbentity_dict[entity_phrase] = entities
-                                        # self.nlq_phrase_kbentity_dict[entity_phrase] = entity_phrase
-
-                                    except spotlight.SpotlightException as e:
-                                        self.nlq_phrase_kbentity_dict[entity_phrase] = None
-
-                                else: # when the modifier is a grammar term it emplies the predicate
-                                    # use lemma of the word
-                                    word_index = ast.literal_eval(re.match(r'^[\d]+', args[0]).group())
-                                    # word = self.nlq_canonical.words[word_index].lemma
-                                    word_temp = self.nlq_canonical.words[word_index].text
-                                    vector = NLQCanonical.glove[word_temp].reshape(1, -1)
-                                    value_prefix = get_property_using_cosine_similarity(vector, recalculate_numpy_property_vector=False)
-                                    self.nlq_word_kb_predicate_dict[word] = value_prefix['value']
-
-                    except Exception as e:
-                        pass
-
-        elif linker == 'custom_linker':
-            # todo: may be required to implement
-            self.nlq_token_entity_dict = {token.text: token.text for token in self.nlq_canonical.words}
-
-        else:
-            # no entity linking
-            self.nlq_token_entity_dict = {k:v for (k, v) in zip([word.text for word in self.nlq_canonical.words],
-                                                                [word.text for word in self.nlq_canonical.words])}
-    
-
-    def join_fnln_based_on_dependency(self, start_index, next_nwords=1):
-        n_words = len(self.nlq_canonical.words)
-        # skip_nwords = 0
-        # for word in self.nlq_canonical.words[start_index:start_index+next_nwords]:
-        for i in range(start_index,start_index+next_nwords):
-            # compare universal dependency.
-            if self.nlq_canonical.words[i].upos == self.nlq_canonical.words[i+1].upos:
-                # check if the two words also has dependency relations
-                if (self.nlq_canonical.words[i].governor == self.nlq_canonical.words[i+1].index) or (self.nlq_canonical.words[i].index == self.nlq_canonical.words[i+1].governor):
-                    return f"{self.nlq_canonical.words[i].text}_{self.nlq_canonical.words[i+1].text}"
-
 
     def formalize_into_udeplambda(self):
         # This is shortcut, note the we take help from UDepLambda to create lambda logical form
@@ -235,8 +137,11 @@ class NLQCanonical(object):
 
         # convert the bytecode into dictionary.
         self.udep_lambda = json.loads(res.decode('utf-8'))
+        return UGLogicalForm(self.udep_lambda)
 
-
+class UGLogicalForm():
+    def __init__(self, udep_lambda):
+        self.udep_lambda = udep_lambda
 
     def translate_to_sparql(self, kg='dbpedia'):
         """
@@ -254,7 +159,7 @@ class NLQCanonical(object):
         for neod_lambda_term in self.udep_lambda['dependency_lambda'][0]:
             # neod_lambda term in the atomic form takes a function name predicate or predicate.dependency
             # or predicate.args
-            pred_dependency, type_entity = NLQCanonical.get_atomic_name_atomic_args(neod_lambda_term)
+            pred_dependency, type_entity = UGLogicalForm.get_atomic_name_atomic_args(neod_lambda_term)
             type_entity = type_entity.split(",")
             pred_dependency = pred_dependency.split(".")
 
@@ -269,7 +174,7 @@ class NLQCanonical(object):
                 event_id = type_entity[0]
                 if len(pred_dependency) == 1: # the atomic name only contains predicate
                     predicate = pred_dependency[0]
-                    NLQCanonical.update_plist(event_triples_dict, event_id, predicate , rdf_type='URIRef')
+                    UGLogicalForm.update_plist(event_triples_dict, event_id, predicate , rdf_type='URIRef')
 
                 elif len(pred_dependency) == 2: # the atomic name coontains predicate and the dependency-relations
                     # or it contains predicate and arg0-1
@@ -284,21 +189,21 @@ class NLQCanonical(object):
                         rdf_type = 'BNode'
 
                     if not re.match(r'arg[\d]+', dependency_relations): # the term is dependency-relation
-                        NLQCanonical.update_plist(event_triples_dict, event_id, predicate, rdf_type='URIRef')
+                        UGLogicalForm.update_plist(event_triples_dict, event_id, predicate, rdf_type='URIRef')
                         # check if the entity exist in the s_list before updating it.
-                        if NLQCanonical.exists_in_slist(event_triples_dict, event_id, predicate, entity):
-                            NLQCanonical.update_olist(event_triples_dict, event_id, predicate, entity, rdf_type=rdf_type)
+                        if UGLogicalForm.exists_in_slist(event_triples_dict, event_id, predicate, entity):
+                            UGLogicalForm.update_olist(event_triples_dict, event_id, predicate, entity, rdf_type=rdf_type)
                         else: # put the entity into slist, however, check for lenght of the two lists.
                             # the triple are formed when the list are balanced.
-                            NLQCanonical.update_bw_slist_olist(event_triples_dict, event_id, predicate, entity, rdf_type=rdf_type)
+                            UGLogicalForm.update_bw_slist_olist(event_triples_dict, event_id, predicate, entity, rdf_type=rdf_type)
 
                     else: # the second term in atomic_name is arg[\d]
-                        NLQCanonical.update_plist(event_triples_dict, event_id, predicate, rdf_type='URIRef')
+                        UGLogicalForm.update_plist(event_triples_dict, event_id, predicate, rdf_type='URIRef')
                         # check if the entity exist in the s_list before updating it.
-                        if NLQCanonical.exists_in_slist(event_triples_dict, event_id, predicate, entity):
-                            NLQCanonical.update_olist(event_triples_dict, event_id, predicate, entity, rdf_type=rdf_type)
+                        if UGLogicalForm.exists_in_slist(event_triples_dict, event_id, predicate, entity):
+                            UGLogicalForm.update_olist(event_triples_dict, event_id, predicate, entity, rdf_type=rdf_type)
                         else:  # put the entity into slist
-                            NLQCanonical.update_bw_slist_olist(event_triples_dict, event_id, predicate, entity, rdf_type=rdf_type)
+                            UGLogicalForm.update_bw_slist_olist(event_triples_dict, event_id, predicate, entity, rdf_type=rdf_type)
 
                 elif len(pred_dependency) ==3: # the third term is preopositional modifier, TODO
                     pass
@@ -311,9 +216,9 @@ class NLQCanonical(object):
                 type_label = pred_dependency[0]
 
                 if len(pred_dependency) == 1: # only the type name is given, and the atomic_args contain variable
-                    NLQCanonical.update_plist(event_triples_dict, type_id, 'a', rdf_type='URIRef') # dbpedia uses a for type
-                    NLQCanonical.update_olist(event_triples_dict, type_id, 'a', type_label, rdf_type='URIRef')
-                    NLQCanonical.update_slist(event_triples_dict, type_id, 'a', variable_name, rdf_type='BNode')
+                    UGLogicalForm.update_plist(event_triples_dict, type_id, 'a', rdf_type='URIRef') # dbpedia uses a for type
+                    UGLogicalForm.update_olist(event_triples_dict, type_id, 'a', type_label, rdf_type='URIRef')
+                    UGLogicalForm.update_slist(event_triples_dict, type_id, 'a', variable_name, rdf_type='BNode')
 
                 elif len(pred_dependency) == 2: # atomic expression for type ':s' don't have arg[\d]
                     pass
@@ -327,13 +232,12 @@ class NLQCanonical(object):
                 # kp_vso: note that there may be many predicates and each predicate will have an associated s_list
                 # and o_list, which in turn may form many subject-object pairs. There fore we create a different static
                 # function to process it.
-                spo_triples = spo_triples + NLQCanonical.create_spo_triples(kp_vso)
+                spo_triples = spo_triples + UGLogicalForm.create_spo_triples(kp_vso)
             elif re.match(r'\s*[\d]+:s[\s]*', neod_type):
-                spo_triples = spo_triples + NLQCanonical.create_spo_triples(kp_vso)
+                spo_triples = spo_triples + UGLogicalForm.create_spo_triples(kp_vso)
 
         query.where(spo_triples)
-
-        return query
+        return GroundedLogicalForm(query)
 
     @staticmethod
     def get_atomic_name_atomic_args(neod_lambda_term):
@@ -370,16 +274,16 @@ class NLQCanonical(object):
             s_list_len = len(event_triples_dict[event_id][predicate]['s_list'])
             o_list_len = len(event_triples_dict[event_id][predicate]['o_list'])
             if s_list_len == o_list_len:
-                NLQCanonical.update_slist(event_triples_dict, event_id, predicate, entity, rdf_type=rdf_type)
+                UGLogicalForm.update_slist(event_triples_dict, event_id, predicate, entity, rdf_type=rdf_type)
             elif s_list_len > o_list_len:
-                NLQCanonical.update_olist(event_triples_dict, event_id, predicate, entity, rdf_type=rdf_type)
+                UGLogicalForm.update_olist(event_triples_dict, event_id, predicate, entity, rdf_type=rdf_type)
             else:
-                NLQCanonical.update_slist(event_triples_dict, event_id, predicate, entity, rdf_type=rdf_type)
+                UGLogicalForm.update_slist(event_triples_dict, event_id, predicate, entity, rdf_type=rdf_type)
         except KeyError as e_key:
             if e_key.args[0] is 'o_list':
-                NLQCanonical.update_olist(event_triples_dict, event_id, predicate, entity, rdf_type=rdf_type)
+                UGLogicalForm.update_olist(event_triples_dict, event_id, predicate, entity, rdf_type=rdf_type)
             elif e_key.args[0] is 's_list':
-                NLQCanonical.update_slist(event_triples_dict, event_id, predicate, entity, rdf_type=rdf_type)
+                UGLogicalForm.update_slist(event_triples_dict, event_id, predicate, entity, rdf_type=rdf_type)
 
     @staticmethod
     def update_slist(event_triples_dict, event_id, predicate, subject, rdf_type='URIRef'):
@@ -442,9 +346,12 @@ class NLQCanonical(object):
     # and o_list, which in turn may form many subject-object pairs.
         spo_triples = []
         for predicate, slist_olist_dict in kp_vso.items():
-            assert len(slist_olist_dict['s_list']) == len(slist_olist_dict['o_list']), "hanging edge: missing subject or object node"
-            predicate = URIRef(predicate)
-            spo_triples = spo_triples + [(s, predicate, o) for s,o in zip(slist_olist_dict['s_list'], slist_olist_dict['o_list'])]
+            try:
+                assert len(slist_olist_dict['s_list']) == len(slist_olist_dict['o_list']), "hanging edge: missing subject or object node"
+                predicate = URIRef(predicate)
+                spo_triples = spo_triples + [(s, predicate, o) for s,o in zip(slist_olist_dict['s_list'], slist_olist_dict['o_list'])]
+            except (AssertionError, KeyError) as e:
+                return  [('a', 'b', 'c')]
 
         return spo_triples
 
@@ -454,17 +361,111 @@ class NLQCanonical(object):
         pass
 
 
-class NLQDependencyTree(NLQuestion):
-    """
-    Take the Natural Langugage Question and return an dependy parsed tree.
-    """
-    pass
-    # def __init__(self, *args, **kwargs):
-    #     if kwargs.get(parser):
-    #         self.dep_tree = standford_ud(args[0])
-    #
-    #     elif kwargs.get(parser == "stanford_parser"):
-    #         self.dep_tree = stanford_parser(args[0])
+class GroundedLogicalForm:
+    # Grounded_logical_form will take in a sparql query object, which can also be treated as a graph object.
+    # There are a bunch of operation that would be performed on the graph object to get it into a
+    # final grounded logical form using predicate and entity linking.
+
+    # Using GloVe-6B trained on 6Billion tokens, contains 400k vocabulary
+    # loading once for the object is created, and later to be used by entity linker
+    # or predicate linker
+    glove_loaded = False  # flag to load the keyedvector from file once
+    glove = None  # the keyedvector stored using memory map for fast access
+
+    def __init__(self, ug_query):
+        self.query_graph = ug_query
+        self.nlq_phrase_kbentity_dict = {}
+        self.nlq_word_kb_predicate_dict = {}
+        if not GroundedLogicalForm.glove_loaded:
+            try:
+                GroundedLogicalForm.glove = KeyedVectors.load('./glove_gensim_mmap', mmap='r')
+                GroundedLogicalForm.glove_loaded = True
+            except Exception as e:
+                glove_loading_kv = KeyedVectors.load_word2vec_format(
+                    "./pt_word_embedding/glove/glove.6B.50d.w2vformat.txt")
+                glove_loading_kv.save('./glove_gensim_mmap')
+                GroundedLogicalForm.glove = KeyedVectors.load('./glove_gensim_mmap', mmap='r')
+                # NLQGroundedLogicalForm.glove.syn0norm = NLQCanonical.glove.syn0  # prevent recalc of normed vectors
+                # NLQGroundedLogicalForm.glove.most_similar('stuff')  # any word will do: just to page all in
+                # Semaphore(0).acquire()  # just hang until process killed
+                GroundedLogicalForm.glove_loaded = True
+
+    def ground_entity(self, linker=None, kg=None):
+        """
+        entity linking using dbpedia Spotlight
+        Entity linker by definition must have reference to Knowledge Graph, whence it bring list of denotation for
+        the token.
+        :return:
+        """
+        if linker == 'spotlight' and kg == 'dbpedia':
+            if self.udep_lambda:  # if the formalization was true. start the linker
+                # linking entities using dbpedia sptolight
+                # identify entity phrase from the predicate arguments
+                # and
+                # linking dbpedia_predicate using cosine similarity on word2vec
+                # find the event type tokens according to Neo-Davidsonia grammar
+                for neod_lambda_term in self.udep_lambda['dependency_lambda'][0]:
+                    word_udep, type_tuple = NLQCanonical.get_name_type_tuple(neod_lambda_term)
+                    args = type_tuple.split(",")
+                    word_modifier = word_udep.split(".")
+                    word = word_modifier[0]
+                    try:
+                        modifier = word_modifier[1]
+                    except IndexError as e:
+                        modifier = None
+
+                    try:
+                        # linking resources
+                        # if neod_term is a event use its name to get dbpedia predicate
+                        if re.match(r'[\d]+:e', args[0]):
+                            # if neod_term is a argument to a predicate the terms inside the bracket is an entity
+                            if modifier is not None:  # if modifier is not present, it's Question Term or Where term
+                                if re.match(r'arg[\d+]', modifier):  # if modifier is an arg[\d] term,
+                                    # it contains entities inside the brackets
+                                    entity_phrase = re.split(r'[.]', args[1])[1]
+                                    try:
+                                        entities = spotlight.annotate('https://api.dbpedia-spotlight.org/en/annotate',
+                                                                      entity_phrase,
+                                                                      confidence=0.0, support=0)
+                                        self.nlq_phrase_kbentity_dict[entity_phrase] = entities
+                                        # self.nlq_phrase_kbentity_dict[entity_phrase] = entity_phrase
+
+                                    except spotlight.SpotlightException as e:
+                                        self.nlq_phrase_kbentity_dict[entity_phrase] = None
+
+                                else:  # when the modifier is a grammar term it emplies the predicate
+                                    # use lemma of the word
+                                    word_index = ast.literal_eval(re.match(r'^[\d]+', args[0]).group())
+                                    # word = self.nlq_canonical.words[word_index].lemma
+                                    word_temp = self.nlq_canonical.words[word_index].text
+                                    vector = NLQCanonical.glove[word_temp].reshape(1, -1)
+                                    value_prefix = get_property_using_cosine_similarity(vector,
+                                                                                        recalculate_numpy_property_vector=False)
+                                    self.nlq_word_kb_predicate_dict[word] = value_prefix['value']
+
+                    except Exception as e:
+                        pass
+
+        elif linker == 'custom_linker':
+            # todo: may be required to implement
+            self.nlq_token_entity_dict = {token.text: token.text for token in self.nlq_canonical.words}
+
+        else:
+            # no entity linking
+            self.nlq_token_entity_dict = {k: v for (k, v) in zip([word.text for word in self.nlq_canonical.words],
+                                                                 [word.text for word in self.nlq_canonical.words])}
+
+    def join_fnln_based_on_dependency(self, start_index, next_nwords=1):
+        n_words = len(self.nlq_canonical.words)
+        # skip_nwords = 0
+        # for word in self.nlq_canonical.words[start_index:start_index+next_nwords]:
+        for i in range(start_index, start_index + next_nwords):
+            # compare universal dependency.
+            if self.nlq_canonical.words[i].upos == self.nlq_canonical.words[i + 1].upos:
+                # check if the two words also has dependency relations
+                if (self.nlq_canonical.words[i].governor == self.nlq_canonical.words[i + 1].index) or (
+                        self.nlq_canonical.words[i].index == self.nlq_canonical.words[i + 1].governor):
+                    return f"{self.nlq_canonical.words[i].text}_{self.nlq_canonical.words[i + 1].text}"
 
 
 if __name__ == "__main__":

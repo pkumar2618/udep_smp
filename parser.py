@@ -1,5 +1,6 @@
 from nl_utils import *
 
+
 class Parser(object):
     """
     Takes as input a list NLQuestion(one or more)
@@ -14,9 +15,8 @@ class Parser(object):
         self.nlq_questions_list = [NLQuestion(nl_question) for nl_question in nlqs]
         self.nlq_tokens_list = []
         self.nlq_canonical_list = []
-        # self.token_entities_tree = []
-        self.udeplambda_list = []
-        self.query_list = []
+        self.ug_logical_form_list = []
+        self.grounded_form_list = []
         self.results_list = []
 
     def tokenize(self, dependency_parsing):
@@ -29,20 +29,21 @@ class Parser(object):
     def canonicalize(self, dependency_parsing=False, canonical_form=False):
         self.nlq_canonical_list = [nlq_tokens.canonicalize(dependency_parsing, canonical_form) for nlq_tokens in self.nlq_tokens_list]
 
-    def lambda_expression(self):
-        self.udeplambda_list = [nlq_canonical.formalize_into_udeplambda() for nlq_canonical in self.nlq_canonical_list]
+    def ungrounded_logical_form(self):
+        self.ug_logical_form_list = [nlq_canonical.formalize_into_udeplambda() for nlq_canonical in self.nlq_canonical_list]
 
-    def disambiguate(self, linker=None, kg=None):
-        for nlq_canonical in self.nlq_canonical_list:
-            nlq_canonical.entity_predicate_linker(linker, kg)
-
-    def translate_to_sparql(self, kg='dbpedia'):
+    def grounded_logical_form(self, kg='dbpedia'):
         """
-        takes the nl_canonical form and formalize it into a query
+        takes the the sparql query object obtained from the ug_logical_form.
         :return:
         """
-        self.query_list = [nlq_canonical.translate_to_sparql(kg) for nlq_canonical in self.nlq_canonical_list]
+        self.grounded_logical_form_list = [ug_logical_form.translate_to_sparql(kg) for ug_logical_form in self.ug_logical_form_list]
         # return query_list
+
+    def disambiguate(self, linker=None, kg=None):
+        for grounded_graph in self.grounded_logical_form_list:
+            grounded_graph.ground_entity(linker=linker, kg=kg)
+
 
     def query_executor(self, kg='dbpedia'):
         # self.results_list = [query.run(kg) for query in self.query_list]
@@ -63,13 +64,16 @@ class Parser(object):
             for result_dict in result_list_dict:
                 print("\t".join(["label: { } \t value: { }".format(key, result_dict[key]) for key in result_dict.keys()]))
 
+
     @staticmethod
     def nlq_to_ug_form(nlq):
         return nlq
 
+
     @staticmethod
     def ug_to_g_form(ug_form):
         return ug_form
+
 
     @classmethod
     def from_file(cls, file_obj):
@@ -79,6 +83,7 @@ class Parser(object):
         :return:
         """
         return cls(file_obj.readlines())
+
 
     # @classmethod
     # def from_list(cls, question_list):
