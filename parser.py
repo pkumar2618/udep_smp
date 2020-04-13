@@ -1,3 +1,5 @@
+from typing import List, Any
+
 from nl_utils import *
 
 
@@ -6,6 +8,7 @@ class Parser(object):
     Takes as input a list NLQuestion(one or more)
     and parse it.
     """
+    ug_sparql_graph_list: List[Any]
 
     def __init__(self, nlqs):
         """
@@ -16,7 +19,8 @@ class Parser(object):
         self.nlq_tokens_list = []
         self.nlq_canonical_list = []
         self.ug_logical_form_list = []
-        self.grounded_form_list = []
+        self.ug_sparql_graph_list = []
+        self.g_sparql_graph_list = []
         self.results_list = []
 
     def tokenize(self, dependency_parsing):
@@ -32,18 +36,19 @@ class Parser(object):
     def ungrounded_logical_form(self):
         self.ug_logical_form_list = [nlq_canonical.formalize_into_udeplambda() for nlq_canonical in self.nlq_canonical_list]
 
-    def grounded_logical_form(self, kg='dbpedia'):
+    def ungrounded_sparql_graph(self, kg='dbpedia'):
         """
         takes the the sparql query object obtained from the ug_logical_form.
         :return:
         """
-        self.grounded_logical_form_list = [ug_logical_form.translate_to_sparql(kg) for ug_logical_form in self.ug_logical_form_list]
-        # return query_list
+        for ug_logical_form in self.ug_logical_form_list:
+            self.ug_sparql_graph_list.append(ug_logical_form.translate_to_sparql(kg))
 
-    def disambiguate(self, linker=None, kg=None):
-        for grounded_graph in self.grounded_logical_form_list:
-            grounded_graph.ground_entity(linker=linker, kg=kg)
-
+    def grounded_sparql_graph(self, linker=None, kg=None):
+        for ug_sparql_graph in self.ug_sparql_graph_list:
+            ug_sparql_graph.ground_entity(linker=linker, kg=kg)
+            ug_sparql_graph.ground_predicates(linker = linker, kg=kg)
+            self.g_sparql_graph_list.append(ug_sparql_graph.get_g_sparql_graph())
 
     def query_executor(self, kg='dbpedia'):
         # self.results_list = [query.run(kg) for query in self.query_list]
@@ -56,7 +61,7 @@ class Parser(object):
         # WHERE
         # { <http://dbpedia.org/resource/Michael_Jackson> < http://dbpedia.org/ontology/deathDate> ?date}"""
         # query = Query(query_string)
-        for query in self.query_list:
+        for query in self.g_sparql_graph_list:
             query.run(kg)
             result_list_dict  = query.results["results"]["bindings"]
 

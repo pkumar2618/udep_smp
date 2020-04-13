@@ -93,7 +93,7 @@ while True:
                 with open('log3_parser.pkl', 'rb') as f:
                     parser = pickle.load(f)
             except FileNotFoundError as e:
-                parser.grounded_logical_form(kg=args.knowledge_graph)
+                parser.ungrounded_sparql_graph(kg=args.knowledge_graph)
                 with open('log3_parser.pkl', 'wb') as f:
                     pickle.dump(parser, f)
 
@@ -105,7 +105,7 @@ while True:
                 with open('log4_parser.pkl', 'rb') as f:
                     parser = pickle.load(f)
             except FileNotFoundError as e:
-                parser.disambiguate(linker=args.disambiguator, kg=args.knowledge_graph)
+                parser.grounded_sparql_graph(linker=args.disambiguator, kg=args.knowledge_graph)
                 with open('log4_parser.pkl', 'wb') as f:
                     pickle.dump(parser, f)
 

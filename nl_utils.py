@@ -205,8 +205,39 @@ class UGLogicalForm():
                         else:  # put the entity into slist
                             UGLogicalForm.update_bw_slist_olist(event_triples_dict, event_id, predicate, entity, rdf_type=rdf_type)
 
-                elif len(pred_dependency) ==3: # the third term is preopositional modifier, TODO
-                    pass
+                elif len(pred_dependency) ==3: # the third term is preopositional modifier,
+                    # second term the dependency relations
+                    predicate = pred_dependency[0]
+                    dependency_relations = pred_dependency[1]
+                    prepositional_modifier = pred_dependency[2]
+                    try:
+                        entity = type_entity[1].split('.')[1]
+                        rdf_type = 'URIRef'
+                    except IndexError as e_index:  # index error
+                        # the term is a varaible
+                        entity = type_entity[1]
+                        rdf_type = 'BNode'
+
+                    if not re.match(r'arg[\d]+', dependency_relations):  # the term is dependency-relation
+                        UGLogicalForm.update_plist(event_triples_dict, event_id, predicate, rdf_type='URIRef')
+                        # check if the entity exist in the s_list before updating it.
+                        if UGLogicalForm.exists_in_slist(event_triples_dict, event_id, predicate, entity):
+                            UGLogicalForm.update_olist(event_triples_dict, event_id, predicate, entity,
+                                                       rdf_type=rdf_type)
+                        else:  # put the entity into slist, however, check for length of the two lists.
+                            # the triple are formed when the list are balanced.
+                            UGLogicalForm.update_bw_slist_olist(event_triples_dict, event_id, predicate, entity,
+                                                                rdf_type=rdf_type)
+
+                    else:  # the second term in atomic_name is arg[\d]
+                        UGLogicalForm.update_plist(event_triples_dict, event_id, predicate, rdf_type='URIRef')
+                        # check if the entity exist in the s_list before updating it.
+                        if UGLogicalForm.exists_in_slist(event_triples_dict, event_id, predicate, entity):
+                            UGLogicalForm.update_olist(event_triples_dict, event_id, predicate, entity,
+                                                       rdf_type=rdf_type)
+                        else:  # put the entity into slist
+                            UGLogicalForm.update_bw_slist_olist(event_triples_dict, event_id, predicate, entity,
+                                                                rdf_type=rdf_type)
 
             # if atomic expression is of type ':s' i.e. a type relations
             elif re.match(r'[\s]*[\d]+:s[\s]*$', type_entity[0]):
@@ -237,7 +268,7 @@ class UGLogicalForm():
                 spo_triples = spo_triples + UGLogicalForm.create_spo_triples(kp_vso)
 
         query.where(spo_triples)
-        return GroundedLogicalForm(query)
+        return UGSPARQLGraph(query), # query.get_query_string()
 
     @staticmethod
     def get_atomic_name_atomic_args(neod_lambda_term):
@@ -301,7 +332,6 @@ class UGLogicalForm():
             elif rdf_type is 'BNode':
                 event_triples_dict[event_id][predicate]['s_list'] = [BNode(subject)]  # assign the subject
 
-
     @staticmethod
     def exists_in_slist(event_triples_dict, event_id, predicate, entity):
         try:
@@ -310,7 +340,6 @@ class UGLogicalForm():
         except KeyError as e_key:
             # if KeyError is encountered, that mean s_list doesn't exist
             return False
-
 
     @staticmethod
     def update_olist(event_triples_dict, event_id, predicate, object, rdf_type='URIRef'):
@@ -328,8 +357,6 @@ class UGLogicalForm():
             elif rdf_type is 'BNode':
                 event_triples_dict[event_id][predicate]['o_list'] = [BNode(object)]  # assign the object
 
-
-
     @staticmethod
     def exists_in_olist(event_triples_dict, event_id, predicate, entity):
         try:
@@ -338,7 +365,6 @@ class UGLogicalForm():
         except KeyError as e_key:
             # when KeyError encountered, that mean object_list doen't exists.
             return False
-
 
     @staticmethod
     def create_spo_triples(kp_vso):
@@ -351,18 +377,13 @@ class UGLogicalForm():
                 predicate = URIRef(predicate)
                 spo_triples = spo_triples + [(s, predicate, o) for s,o in zip(slist_olist_dict['s_list'], slist_olist_dict['o_list'])]
             except (AssertionError, KeyError) as e:
-                return  [('a', 'b', 'c')]
+                pass
 
         return spo_triples
 
 
-    @staticmethod
-    def dbpedia_property_similarity():
-        pass
-
-
-class GroundedLogicalForm:
-    # Grounded_logical_form will take in a sparql query object, which can also be treated as a graph object.
+class UGSPARQLGraph:
+    # UGSPARQLGraph will take in a sparql query object, which can also be treated as a graph object.
     # There are a bunch of operation that would be performed on the graph object to get it into a
     # final grounded logical form using predicate and entity linking.
 
@@ -376,19 +397,22 @@ class GroundedLogicalForm:
         self.query_graph = ug_query
         self.nlq_phrase_kbentity_dict = {}
         self.nlq_word_kb_predicate_dict = {}
-        if not GroundedLogicalForm.glove_loaded:
+        if not UGSPARQLGraph.glove_loaded:
             try:
-                GroundedLogicalForm.glove = KeyedVectors.load('./glove_gensim_mmap', mmap='r')
-                GroundedLogicalForm.glove_loaded = True
+                UGSPARQLGraph.glove = KeyedVectors.load('./glove_gensim_mmap', mmap='r')
+                UGSPARQLGraph.glove_loaded = True
             except Exception as e:
                 glove_loading_kv = KeyedVectors.load_word2vec_format(
                     "./pt_word_embedding/glove/glove.6B.50d.w2vformat.txt")
                 glove_loading_kv.save('./glove_gensim_mmap')
-                GroundedLogicalForm.glove = KeyedVectors.load('./glove_gensim_mmap', mmap='r')
-                # NLQGroundedLogicalForm.glove.syn0norm = NLQCanonical.glove.syn0  # prevent recalc of normed vectors
-                # NLQGroundedLogicalForm.glove.most_similar('stuff')  # any word will do: just to page all in
+                UGSPARQLGraph.glove = KeyedVectors.load('./glove_gensim_mmap', mmap='r')
+                # UGSPARQLGraph.glove.syn0norm = NLQCanonical.glove.syn0  # prevent recalc of normed vectors
+                # UGSPARQLGraph.glove.most_similar('stuff')  # any word will do: just to page all in
                 # Semaphore(0).acquire()  # just hang until process killed
-                GroundedLogicalForm.glove_loaded = True
+                UGSPARQLGraph.glove_loaded = True
+
+    def __str__(self):
+        return self.query_graph.get_query_string()
 
     def ground_entity(self, linker=None, kg=None):
         """
@@ -455,6 +479,9 @@ class GroundedLogicalForm:
             self.nlq_token_entity_dict = {k: v for (k, v) in zip([word.text for word in self.nlq_canonical.words],
                                                                  [word.text for word in self.nlq_canonical.words])}
 
+    def ground_predicate(self, linker=None, kg=None): #todo
+        pass
+
     def join_fnln_based_on_dependency(self, start_index, next_nwords=1):
         n_words = len(self.nlq_canonical.words)
         # skip_nwords = 0
@@ -466,6 +493,14 @@ class GroundedLogicalForm:
                 if (self.nlq_canonical.words[i].governor == self.nlq_canonical.words[i + 1].index) or (
                         self.nlq_canonical.words[i].index == self.nlq_canonical.words[i + 1].governor):
                     return f"{self.nlq_canonical.words[i].text}_{self.nlq_canonical.words[i + 1].text}"
+
+    def get_g_sparql_graph(self): #todo
+        # return GroundedSPARQLGraph(sparql_query)
+        pass
+
+
+class GroundedSPARQLGraph: #todo
+    pass
 
 
 if __name__ == "__main__":
