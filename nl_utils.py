@@ -159,7 +159,12 @@ class UGLogicalForm():
         for neod_lambda_term in self.udep_lambda['dependency_lambda'][0]:
             # neod_lambda term in the atomic form takes a function name predicate or predicate.dependency
             # or predicate.args
-            pred_dependency, type_entity = UGLogicalForm.get_atomic_name_atomic_args(neod_lambda_term)
+            try:
+                pred_dependency, type_entity = UGLogicalForm.get_atomic_name_atomic_args(neod_lambda_term)
+            except TypeError as e_type:
+                continue # when the name of the neod_lambda_term could n't be split into atomic_name and
+                # atomic_arguments, better skip that term.
+
             type_entity = type_entity.split(",")
             pred_dependency = pred_dependency.split(".")
 
@@ -272,7 +277,8 @@ class UGLogicalForm():
 
     @staticmethod
     def get_atomic_name_atomic_args(neod_lambda_term):
-        pattern = r'(\w[\w\d._]*)\((.*)\)$'
+        # pattern = r'(\w[\w\d._]*)\((.*)\)$'
+        pattern = r'(\w[\w\d._\']*)\((.*)\)$' # to include apostrophe 's
         match = re.match(pattern, neod_lambda_term)
         if match:
             return match.group(1), match.group(2)
