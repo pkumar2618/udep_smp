@@ -214,8 +214,11 @@ def get_property_using_cosine_similarity(vector, panda_property_vector="dbpedia_
 
         # calculate cosine similarity and return top-n properties
         res = cosine_similarity(np.array(vector).reshape((1, -1)), np_property_vector)
-        index_topn = np.argmax(res)
-        res_property_prefix_uri = property_vector_df.loc[index_topn, ['value_label', 'prefix', 'value']]
+        # index_topn = np.argmax(res)
+        index_topn = np.argpartition(res[0,:], -top_n)[-top_n:] # get the indices of the top_n similar predicate,
+        # not yet sorted. To get the sorted values
+        index_topn_sorted_increasing = index_topn[np.argsort(res[0, index_topn])]
+        res_property_prefix_uri = property_vector_df.loc[index_topn_sorted_increasing, ['value_label', 'prefix', 'value']]
         return res_property_prefix_uri.to_dict()
 
 
@@ -239,11 +242,6 @@ if __name__ == "__main__":
     # # test cosine_smilarity the function will return top-n property based on the cosine similarity
     glove = KeyedVectors.load('./glove_gensim_mmap', mmap='r')
 
-    # # you may need to run this once to get numpy array of property_vector
     # vector = glove['stuff'].reshape((1,-1))
-    # get_property_using_cosine_similarity(vector, recalculate_numpy_property_vector=True)
-
-    # # further run don't require refresh, as the numpy 2d array of property_value is loaded from the
-    # # first run with recaclulate_numpy_property_vector=True
-    # vector = glove['location'].reshape(1,-1)
-    # print(get_property_using_cosine_similarity(vector, recalculate_numpy_property_vector=False))
+    vector = glove['location'].reshape(1,-1)
+    print(get_property_using_cosine_similarity(vector, top_n=3))
