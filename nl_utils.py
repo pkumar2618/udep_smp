@@ -13,6 +13,7 @@ import json
 from db_utils import get_property_using_cosine_similarity
 import ast
 from rdflib import URIRef, BNode
+import copy
 
 # Object may be created empty and later on modified using a bunch of operations on them. Or it get's created in its
 # final form by some other class.
@@ -273,7 +274,7 @@ class UGLogicalForm():
                 spo_triples = spo_triples + UGLogicalForm.create_spo_triples(kp_vso)
 
         query.where(spo_triples)
-        return UGSPARQLGraph(query), # query.get_query_string()
+        return UGSPARQLGraph(query) # query.get_query_string()
 
     @staticmethod
     def get_atomic_name_atomic_args(neod_lambda_term):
@@ -401,6 +402,9 @@ class UGSPARQLGraph:
 
     def __init__(self, ug_query):
         self.query_graph = ug_query
+        self.g_query = copy.deepcopy(ug_query) # this is just to get the various attribute copied.
+        # and remote the basic graph pattern
+        self.g_query.empty_bgp()
         self.nlq_phrase_kbentity_dict = {}
         self.nlq_word_kb_predicate_dict = {}
         if not UGSPARQLGraph.glove_loaded:
@@ -420,7 +424,7 @@ class UGSPARQLGraph:
     def __str__(self):
         return self.query_graph.get_query_string()
 
-    def ground_entity(self, linker=None, kg=None):
+    def ground_spo(self, linker=None, kg=None):
         """
         entity linking using dbpedia Spotlight
         Entity linker by definition must have reference to Knowledge Graph, whence it bring list of denotation for
@@ -428,86 +432,50 @@ class UGSPARQLGraph:
         :return:
         """
         if linker == 'spotlight' and kg == 'dbpedia':
-            if self.udep_lambda:  # if the formalization was true. start the linker
+            if self.query_graph:  # if the formalization was true. start the linker
                 # linking entities using dbpedia sptolight
                 # identify entity phrase from the predicate arguments
                 # and
                 # linking dbpedia_predicate using cosine similarity on word2vec
                 # find the event type tokens according to Neo-Davidsonia grammar
-                for neod_lambda_term in self.udep_lambda['dependency_lambda'][0]:
-                    word_udep, type_tuple = NLQCanonical.get_name_type_tuple(neod_lambda_term)
-                    args = type_tuple.split(",")
-                    word_modifier = word_udep.split(".")
-                    word = word_modifier[0]
+                for subject, predicate, object in self.query_graph._data:
                     try:
-                        modifier = word_modifier[1]
-                    except IndexError as e:
-                        modifier = None
+                        subject_entities = spotlight.annotate('https://api.dbpedia-spotlight.org/en/annotate',
+                                                      subject,
+                                                      confidence=0.0, support=0)
+                    except spotlight.SpotlightException as e:
+                        subject_entities = subject
 
                     try:
-                        # linking resources
-                        # if neod_term is a event use its name to get dbpedia predicate
-                        if re.match(r'[\d]+:e', args[0]):
-                            # if neod_term is a argument to a predicate the terms inside the bracket is an entity
-                            if modifier is not None:  # if modifier is not present, it's Question Term or Where term
-                                if re.match(r'arg[\d+]', modifier):  # if modifier is an arg[\d] term,
-                                    # it contains entities inside the brackets
-                                    entity_phrase = re.split(r'[.]', args[1])[1]
-                                    try:
-                                        entities = spotlight.annotate('https://api.dbpedia-spotlight.org/en/annotate',
-                                                                      entity_phrase,
-                                                                      confidence=0.0, support=0)
-                                        self.nlq_phrase_kbentity_dict[entity_phrase] = entities
-                                        # self.nlq_phrase_kbentity_dict[entity_phrase] = entity_phrase
+                        object_entities = spotlight.annotate('https://api.dbpedia-spotlight.org/en/annotate',
+                                                              object,
+                                                              confidence=0.0, support=0)
+                    except spotlight.SpotlightException as e:
+                        object_entities = object
 
-                                    except spotlight.SpotlightException as e:
-                                        self.nlq_phrase_kbentity_dict[entity_phrase] = None
-
-                                else:  # when the modifier is a grammar term it emplies the predicate
-                                    # use lemma of the word
-                                    word_index = ast.literal_eval(re.match(r'^[\d]+', args[0]).group())
-                                    # word = self.nlq_canonical.words[word_index].lemma
-                                    word_temp = self.nlq_canonical.words[word_index].text
-                                    vector = NLQCanonical.glove[word_temp].reshape(1, -1)
-                                    value_prefix = get_property_using_cosine_similarity(vector,
-                                                                                        recalculate_numpy_property_vector=False)
-                                    self.nlq_word_kb_predicate_dict[word] = value_prefix['value']
-
+                    try:
+                        vector = UGSPARQLGraph.glove[predicate].reshape(1, -1)
+                        value_prefix = get_property_using_cosine_similarity(vector, top_n=1)
+                        predicate_property = value_prefix['value']
                     except Exception as e:
-                        pass
+                        predicate_property = predicate
+
+                    self.g_query.add_triple((subject_entities, predicate_property, object_entities))
 
         elif linker == 'custom_linker':
             # todo: may be required to implement
-            self.nlq_token_entity_dict = {token.text: token.text for token in self.nlq_canonical.words}
-
-        else:
-            # no entity linking
-            self.nlq_token_entity_dict = {k: v for (k, v) in zip([word.text for word in self.nlq_canonical.words],
-                                                                 [word.text for word in self.nlq_canonical.words])}
-
-    def ground_predicate(self, linker=None, kg=None): #todo
-        pass
-
-    def join_fnln_based_on_dependency(self, start_index, next_nwords=1):
-        n_words = len(self.nlq_canonical.words)
-        # skip_nwords = 0
-        # for word in self.nlq_canonical.words[start_index:start_index+next_nwords]:
-        for i in range(start_index, start_index + next_nwords):
-            # compare universal dependency.
-            if self.nlq_canonical.words[i].upos == self.nlq_canonical.words[i + 1].upos:
-                # check if the two words also has dependency relations
-                if (self.nlq_canonical.words[i].governor == self.nlq_canonical.words[i + 1].index) or (
-                        self.nlq_canonical.words[i].index == self.nlq_canonical.words[i + 1].governor):
-                    return f"{self.nlq_canonical.words[i].text}_{self.nlq_canonical.words[i + 1].text}"
+            pass
 
     def get_g_sparql_graph(self): #todo
-        # return GroundedSPARQLGraph(sparql_query)
-        pass
+        return GroundedSPARQLGraph(self.g_query)
 
 
 class GroundedSPARQLGraph: #todo
-    pass
+    def __init__(self, g_query):
+        self.g_query = g_query
 
+    def __str__(self):
+        return self.g_query.get_query_string()
 
 if __name__ == "__main__":
     # NLQCanonical object should be created first to load and save the glove word2vec data

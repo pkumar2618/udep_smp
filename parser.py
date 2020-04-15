@@ -46,8 +46,7 @@ class Parser(object):
 
     def grounded_sparql_graph(self, linker=None, kg=None):
         for ug_sparql_graph in self.ug_sparql_graph_list:
-            ug_sparql_graph.ground_entity(linker=linker, kg=kg)
-            ug_sparql_graph.ground_predicates(linker = linker, kg=kg)
+            ug_sparql_graph.ground_spo(linker=linker, kg=kg)
             self.g_sparql_graph_list.append(ug_sparql_graph.get_g_sparql_graph())
 
     def query_executor(self, kg='dbpedia'):

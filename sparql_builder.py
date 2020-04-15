@@ -90,6 +90,14 @@ class Query(object):
         """
         self._data.add(spo_tuple)
 
+    def empty_bgp(self):
+        """
+        empty the basic graph pattern
+        :return:
+        """
+        self._data = Graph()
+
+
     def where(self, spo_triples):
         """
         Where clause for the select query
