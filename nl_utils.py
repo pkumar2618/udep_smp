@@ -440,10 +440,10 @@ class UGSPARQLGraph:
                 # find the event type tokens according to Neo-Davidsonia grammar
                 for subject, predicate, object in self.query_graph._data:
                     # ground subject
-                    subject_entities = UGSPARQLGraph.ground_so_spotlight(self.query_graph, subject.strip())
+                    subject_entities = UGSPARQLGraph.ground_so_spotlight(self.query_graph, subject)
 
                     # ground object, before passing them over strip off any white space.
-                    object_entities = UGSPARQLGraph.ground_so_spotlight(self.query_graph, object.strip())
+                    object_entities = UGSPARQLGraph.ground_so_spotlight(self.query_graph, object)
 
                     # ground predicate
                     predicate_property = UGSPARQLGraph.ground_predicate_w2v(predicate)
@@ -459,6 +459,11 @@ class UGSPARQLGraph:
 
     @staticmethod
     def ground_so_spotlight(query_graph, so):
+        if isinstance(so, BNode):
+            rdf_type = 'BNode'
+        elif isinstance(so, URIRef):
+            rdf_type = 'URIRef'
+
         try:
             if query_graph.has_variable(so.strip()):
                 so_entities = so
@@ -469,10 +474,11 @@ class UGSPARQLGraph:
         except spotlight.SpotlightException as e:
             so_entities = so
 
-        if isinstance(so, BNode):
+        if rdf_type == 'BNode':
             return BNode(so_entities)
-        elif isinstance(so, URIRef):
+        elif rdf_type == 'URIRef':
             return URIRef(so_entities)
+
 
     @staticmethod
     def ground_predicate_w2v(predicate):

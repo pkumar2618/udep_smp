@@ -50,7 +50,7 @@ class Query(object):
 
     def has_variable(self, variable):
         variable = f'?{variable}'
-        if variable in self._data:
+        if variable in self._vars:
             return True
         else:
             return False
