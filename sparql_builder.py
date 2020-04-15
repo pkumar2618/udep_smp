@@ -48,6 +48,13 @@ class Query(object):
             else:
                 raise ValueError(f"Not a Variable:{var} should start with ?")
 
+    def has_variable(self, variable):
+        variable = f'?{variable}'
+        if variable in self._data:
+            return True
+        else:
+            return False
+
     def _validate_triple_pattern(self, spo_tuple):
         if type(spo_tuple) in [list, tuple]:
             try:

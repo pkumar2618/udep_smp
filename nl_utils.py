@@ -439,26 +439,14 @@ class UGSPARQLGraph:
                 # linking dbpedia_predicate using cosine similarity on word2vec
                 # find the event type tokens according to Neo-Davidsonia grammar
                 for subject, predicate, object in self.query_graph._data:
-                    try:
-                        subject_entities = spotlight.annotate('https://api.dbpedia-spotlight.org/en/annotate',
-                                                      subject,
-                                                      confidence=0.0, support=0)
-                    except spotlight.SpotlightException as e:
-                        subject_entities = subject
+                    # ground subject
+                    subject_entities = UGSPARQLGraph.ground_so_spotlight(self.query_graph, subject.strip())
 
-                    try:
-                        object_entities = spotlight.annotate('https://api.dbpedia-spotlight.org/en/annotate',
-                                                              object,
-                                                              confidence=0.0, support=0)
-                    except spotlight.SpotlightException as e:
-                        object_entities = object
+                    # ground object, before passing them over strip off any white space.
+                    object_entities = UGSPARQLGraph.ground_so_spotlight(self.query_graph, object.strip())
 
-                    try:
-                        vector = UGSPARQLGraph.glove[predicate].reshape(1, -1)
-                        value_prefix = get_property_using_cosine_similarity(vector, top_n=1)
-                        predicate_property = value_prefix['value']
-                    except Exception as e:
-                        predicate_property = predicate
+                    # ground predicate
+                    predicate_property = UGSPARQLGraph.ground_predicate_w2v(predicate)
 
                     self.g_query.add_triple((subject_entities, predicate_property, object_entities))
 
@@ -469,6 +457,44 @@ class UGSPARQLGraph:
     def get_g_sparql_graph(self): #todo
         return GroundedSPARQLGraph(self.g_query)
 
+    @staticmethod
+    def ground_so_spotlight(query_graph, so):
+        try:
+            if query_graph.has_variable(so.strip()):
+                so_entities = so
+            else:
+                so_entities = spotlight.annotate('https://api.dbpedia-spotlight.org/en/annotate',
+                                                      so,
+                                                      confidence=0.0, support=0)
+        except spotlight.SpotlightException as e:
+            so_entities = so
+
+        if isinstance(so, BNode):
+            return BNode(so_entities)
+        elif isinstance(so, URIRef):
+            return URIRef(so_entities)
+
+    @staticmethod
+    def ground_predicate_w2v(predicate):
+        try:
+            glove = KeyedVectors.load('./glove_gensim_mmap', mmap='r')
+        except Exception as e:
+            glove_loading_kv = KeyedVectors.load_word2vec_format(
+                "./glove/glove.840B.300d.w2vformat.txt")
+            glove_loading_kv.save('./glove_gensim_mmap')
+            glove = KeyedVectors.load('./glove_gensim_mmap', mmap='r')
+
+        try:
+            if predicate == 'a':
+                predicate_property = predicate
+            else:
+                vector = glove[predicate].reshape(1, -1)
+                value_prefix = get_property_using_cosine_similarity(vector, top_n=1)
+                predicate_property = URIRef(value_prefix['value'])
+        except Exception as e:
+            predicate_property = predicate
+
+        return predicate_property
 
 class GroundedSPARQLGraph: #todo
     def __init__(self, g_query):
