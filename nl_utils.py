@@ -140,6 +140,20 @@ class NLQCanonical(object):
         self.udep_lambda = json.loads(res.decode('utf-8'))
         return UGLogicalForm(self.udep_lambda)
 
+    def direct_to_udeplambda(self, sentence):
+        """
+        here instead we will directly provide sentences to udeplambda
+        :return: UGLogicalForm
+        """
+        with open("udepl_nlq.txt", 'w') as f:
+            f.write(f'{{"sentence":"{sentence}"}}')
+
+        res = subprocess.check_output("./run_udep_lambda.sh")
+
+        # convert the bytecode into dictionary.
+        self.udep_lambda = json.loads(res.decode('utf-8'))
+        return UGLogicalForm(self.udep_lambda)
+
 class UGLogicalForm():
     def __init__(self, udep_lambda):
         self.udep_lambda = udep_lambda
@@ -397,31 +411,34 @@ class UGSPARQLGraph:
     # Using GloVe-6B trained on 6Billion tokens, contains 400k vocabulary
     # loading once for the object is created, and later to be used by entity linker
     # or predicate linker
-    glove_loaded = False  # flag to load the keyedvector from file once
-    glove = None  # the keyedvector stored using memory map for fast access
+    # glove_loaded = False  # flag to load the keyedvector from file once
+    # glove = None  # the keyedvector stored using memory map for fast access
 
     def __init__(self, ug_query):
         self.query_graph = ug_query
         self.g_query = copy.deepcopy(ug_query) # this is just to get the various attribute copied.
         # and remote the basic graph pattern
         self.g_query.empty_bgp()
-        self.nlq_phrase_kbentity_dict = {}
-        self.nlq_word_kb_predicate_dict = {}
-        if not UGSPARQLGraph.glove_loaded:
-            try:
-                UGSPARQLGraph.glove = KeyedVectors.load('./glove_gensim_mmap', mmap='r')
-                UGSPARQLGraph.glove_loaded = True
-            except Exception as e:
-                glove_loading_kv = KeyedVectors.load_word2vec_format(
-                    "./pt_word_embedding/glove/glove.6B.50d.w2vformat.txt")
-                glove_loading_kv.save('./glove_gensim_mmap')
-                UGSPARQLGraph.glove = KeyedVectors.load('./glove_gensim_mmap', mmap='r')
+        # self.nlq_phrase_kbentity_dict = {}
+        # self.nlq_word_kb_predicate_dict = {}
+        # if not UGSPARQLGraph.glove_loaded:
+        #     try:
+        #         UGSPARQLGraph.glove = KeyedVectors.load('./glove_gensim_mmap', mmap='r')
+        #         UGSPARQLGraph.glove_loaded = True
+        #     except Exception as e:
+                # glove_loading_kv = KeyedVectors.load_word2vec_format(
+                #     "./pt_word_embedding/glove/glove.6B.50d.w2vformat.txt")
+                # glove_loading_kv.save('./glove_gensim_mmap')
+                # UGSPARQLGraph.glove = KeyedVectors.load('./glove_gensim_mmap', mmap='r')
                 # UGSPARQLGraph.glove.syn0norm = NLQCanonical.glove.syn0  # prevent recalc of normed vectors
                 # UGSPARQLGraph.glove.most_similar('stuff')  # any word will do: just to page all in
                 # Semaphore(0).acquire()  # just hang until process killed
-                UGSPARQLGraph.glove_loaded = True
+                # UGSPARQLGraph.glove_loaded = True
 
     def __str__(self):
+        return self.query_graph.get_query_string()
+
+    def get_ug_sparql_query_string(self):
         return self.query_graph.get_query_string()
 
     def ground_spo(self, linker=None, kg=None):
@@ -468,9 +485,10 @@ class UGSPARQLGraph:
             if query_graph.has_variable(so.strip()):
                 so_entities = so
             else:
-                so_entities = spotlight.annotate('https://api.dbpedia-spotlight.org/en/annotate',
-                                                      so,
-                                                      confidence=0.0, support=0)
+                # so_entities = spotlight.annotate('https://api.dbpedia-spotlight.org/en/annotate',
+                #                                       so,
+                #                                       confidence=0.0, support=0)
+                so_entities = so
         except spotlight.SpotlightException as e:
             so_entities = so
 
