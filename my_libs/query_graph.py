@@ -13,7 +13,7 @@ from rdflib.namespace import FOAF
 from rdflib.graph import Graph, ConjunctiveGraph, plugin
 from rdflib.compare import isomorphic, similar
 from rdflib.tools.rdf2dot import rdf2dot
-from graphviz import Source
+# from graphviz import Source
 from rdflib.tools.graphisomorphism import IsomorphicTestableGraph
 from rdflib.serializer import Serializer
 
@@ -23,76 +23,80 @@ class QueryGraph:
         """sparql_query is query string, which will be converted into sparqlAlgebra
         during construction.
         """
+        self.algebra = None
+        self.query_type = None
+        self.parameter_variables = None
+        self.triples_list = None
 
         ## using direct algebra
-        query_algebra = prepareQuery(sparql_query, initNs=prefix_bindings)
-        # pprintAlgebra(query_algebra)
-
-        self.algebra = query_algebra.algebra
-
-        self.query_type = query_algebra.algebra.name
-        # print(query_type)
-
-        self.parameter_variables = query_algebra.algebra['PV']
-        # print(*parameter_variables, sep=', ')
-
-        bgp_expression = self.find_p_name_list('BGP')
-        # self.bgp_variables = query_algebra.algebra['p']['p']['p']['_vars']
-
         try:
-            # Create queryGraph
-            # self.graph = Graph()
-            # for triple in triples_list:
-            #     self.graph.add(triple)
+            query_algebra = prepareQuery(sparql_query, initNs=prefix_bindings)
+            # pprintAlgebra(query_algebra)
+            self.algebra = query_algebra.algebra
 
-            # Create processed queryGraph
-            self.processed_graph = Graph()
+            self.query_type = query_algebra.algebra.name
+            # print(query_type)
 
-            self.bgp_variables = bgp_expression['_vars']
-            self.triples_list = bgp_expression['triples']
-            self.processed_triples = []
+            self.parameter_variables = query_algebra.algebra['PV']
+            # print(*parameter_variables, sep=', ')
+            self.triples_list = self.get_triples()
+            bgp_expression = self.find_p_name_list('BGP')
+            # self.bgp_variables = query_algebra.algebra['p']['p']['p']['_vars']
+            try:
+                # Create processed queryGraph
+                self.processed_graph = Graph()
 
-            bgp_variables_dict = {}
-            var_count = 0
-            param_variables_dict = {}
-            param_var_count = 0
+                self.bgp_variables = bgp_expression['_vars']
+                # self.triples_list = bgp_expression['triples']
+                self.processed_triples = []
 
-            for variable in self.bgp_variables:
-                if variable not in self.parameter_variables:
-                    var_count += 1
-                    bgp_variables_dict[variable] = "var%d" % var_count
+                bgp_variables_dict = {}
+                var_count = 0
+                param_variables_dict = {}
+                param_var_count = 0
 
-            for pv in self.parameter_variables:
-                param_var_count += 1
-                param_variables_dict[pv] = "param_var%d" % param_var_count
+                # giving canonical names to variables as var_#
+                for variable in self.bgp_variables:
+                    if variable not in self.parameter_variables:
+                        var_count += 1
+                        bgp_variables_dict[variable] = "var%d" % var_count
 
-            # anonymizing uri's
-            uri_seen_dict = {}
-            uri_seen_count = 0
-            for tuple_spo in self.triples_list:
-                processed_tuple_spo = []
-                for item in tuple_spo:
-                    if item in param_variables_dict.keys():
-                        processed_tuple_spo.append(URIRef(param_variables_dict[item]))
+                for pv in self.parameter_variables:
+                    param_var_count += 1
+                    param_variables_dict[pv] = "param_var%d" % param_var_count
 
-                    elif item in bgp_variables_dict.keys():
-                        processed_tuple_spo.append(URIRef(bgp_variables_dict[item]))
+                # anonymizing uri's
+                uri_seen_dict = {}
+                uri_seen_count = 0
+                for tuple_spo in self.triples_list:
+                    processed_tuple_spo = []
+                    for item in tuple_spo:
+                        # the variables should either be BNodes or URIRef
+                        if item in param_variables_dict.keys():
+                            processed_tuple_spo.append(URIRef(param_variables_dict[item]))
 
-                    elif isinstance(item, URIRef):
-                        # processed_tuple_spo.append(item)
-                        if item not in uri_seen_dict.keys():
-                            uri_seen_count += 1
-                            uri_seen_dict[item] = "uri_ref_%d" %uri_seen_count
-                            processed_tuple_spo.append(URIRef(uri_seen_dict[item]))
-                        elif item in uri_seen_dict.keys():
-                            processed_tuple_spo.append(URIRef(uri_seen_dict[item]))
+                        elif item in bgp_variables_dict.keys():
+                            processed_tuple_spo.append(URIRef(bgp_variables_dict[item]))
 
-                processed_tuple_spo = tuple(processed_tuple_spo)
-                self.processed_triples.append(processed_tuple_spo)
-                self.processed_graph.add(processed_tuple_spo)
+                        elif isinstance(item, URIRef):
+                            # processed_tuple_spo.append(item)
+                            if item not in uri_seen_dict.keys():
+                                uri_seen_count += 1
+                                uri_seen_dict[item] = "uri_ref_%d" % uri_seen_count
+                                processed_tuple_spo.append(URIRef(uri_seen_dict[item]))
+                            elif item in uri_seen_dict.keys():
+                                processed_tuple_spo.append(URIRef(uri_seen_dict[item]))
 
-        except Exception as e:
+                    processed_tuple_spo = tuple(processed_tuple_spo)
+                    self.processed_triples.append(processed_tuple_spo)
+                    self.processed_graph.add(processed_tuple_spo)
+
+            except Exception as e_variable_canon:
+                pass
+        except Exception as e_parse:
             pass
+
+
 
 
     def find_p_name_list(self, p_name):
@@ -101,8 +105,10 @@ class QueryGraph:
             if not isinstance(algebra_expression, CompValue):
                 raise Exception('query algebra format not found')
             elif isinstance(algebra_expression, CompValue):
+                # base case
                 if algebra_expression.name == p_name:
-                    return algebra_expression
+                    return algebra_expression['triples'] # this is a list of tuples
+                #recurse
                 else:
                     return find_p_name(algebra_expression['p'], p_name)
 
@@ -110,6 +116,30 @@ class QueryGraph:
 
         try:
              return find_p_name(algebra_expresison, p_name)
+
+        except Exception:
+            pass
+
+    def get_triples(self):
+
+        def get_list_of_triples(algebra_expression):
+            # base case
+            if not isinstance(algebra_expression, CompValue):
+                return
+                # raise Exception('query algebra format not found')
+            elif algebra_expression.name == 'BGP':
+                return algebra_expression['triples']
+
+            my_triples = []
+            for k in algebra_expression:
+                my_triples.append(get_list_of_triples(algebra_expression[k]))
+
+            return my_triples
+
+        algebra_expresison = self.algebra
+
+        try:
+             return get_list_of_triples(algebra_expresison)
 
         except Exception:
             pass
@@ -143,14 +173,14 @@ class QueryGraph:
         # by a singular mock bnode (the _MOCK_BNODE).
         return similar(self.processed_graph, template_graph.processed_graph)
 
-    def write_image(self, display=False):
-        """" to do """
-
-        with open("%s.dot" % str(self.graph), 'w') as f:
-            rdf2dot(Graph(self.graph), f)
-            if display == "True":
-                Source.main(f)
-            # print(done)
+    # def write_image(self, display=False):
+    #     """" to do """
+    #
+    #     with open("%s.dot" % str(self.graph), 'w') as f:
+    #         rdf2dot(Graph(self.graph), f)
+    #         if display == "True":
+    #             Source.main(f)
+    #         # print(done)
 def triples_list_to_graph(triples_list):
     q_graph = Graph()
     for tuple in triples_list:
