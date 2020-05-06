@@ -122,7 +122,6 @@ class QueryGraph:
 
     def get_triples(self):
         def get_list_of_triples(algebra_expression):
-            triples_flattened = []
             # base case
             if not isinstance(algebra_expression, CompValue):
                 return
