@@ -28,8 +28,9 @@ with open('qald_combined.json', 'r') as f_read:
 
         # SPO triples are in bgp. We need to use rdflib to parse and get us the spo triples.
         q_graph = QueryGraph(query, {})
-        json_item = {'question':question_query_dict['question'], 'spos':q_graph.triples_list}
+        json_item = {'question': question_query_dict['question'], 'spos': q_graph.triples_list}
         json_qspo.append(json_item)
 
 with open('qald_input.json', 'w') as f_write:
     json.dump(json_qspo, f_write, indent=4)
+

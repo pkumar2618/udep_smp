@@ -121,28 +121,42 @@ class QueryGraph:
             pass
 
     def get_triples(self):
-
         def get_list_of_triples(algebra_expression):
+            triples_flattened = []
             # base case
             if not isinstance(algebra_expression, CompValue):
                 return
-                # raise Exception('query algebra format not found')
-            elif algebra_expression.name == 'BGP':
-                return algebra_expression['triples']
 
-            my_triples = []
-            for k in algebra_expression:
-                my_triples.append(get_list_of_triples(algebra_expression[k]))
+            elif isinstance(algebra_expression, CompValue):
+                if algebra_expression.name == 'BGP':
+                    # return [tuple(triple) for triple in algebra_expression['triples']]
+                    return algebra_expression['triples']
+                else:
+                    # recurse
+                    return [get_list_of_triples(algebra_expression[k]) for k in algebra_expression]
 
-            return my_triples
+        def flatten(triples_in_nested_list):
+            result = []
+            if not triples_in_nested_list:
+                return
 
+            for element in triples_in_nested_list:
+                if isinstance(element, tuple):
+                    result.append(element)
+                elif not element:  # element is NoneType
+                    continue
+                else:
+                    result = result + flatten(element)
+            return result
+
+
+        ## calling the recursive function
         algebra_expresison = self.algebra
-
-        try:
-             return get_list_of_triples(algebra_expresison)
-
-        except Exception:
-            pass
+        all_triples = get_list_of_triples(algebra_expresison)
+        ## the triples retruned by get_list_of_triples is a nested list of triples
+        # we need to flatten it into list of tuples
+        return flatten(all_triples)
+        # return all_triples
 
     def get_graph(self):
         return self.graph
