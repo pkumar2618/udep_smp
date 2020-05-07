@@ -3,15 +3,13 @@ from nltk.tokenize import word_tokenize
 import string
 import spotlight
 import stanfordnlp
-from sparql_builder import Query
+from udeplib.sparql_builder import Query
 from gensim.models import KeyedVectors
-from threading import Semaphore
 import pickle
 import subprocess
 import re
 import json
-from db_utils import get_property_using_cosine_similarity
-import ast
+from dbpedialib.db_utils import get_property_using_cosine_similarity
 from rdflib import URIRef, BNode
 import copy
 
@@ -131,7 +129,7 @@ class NLQCanonical(object):
         # now taken care off by the UDepLambda.
         # the lambda form is stored in the self.udep_lambda object variable.
         nlq = " ".join([word.text for word in self.nlq_canonical.words])
-        with open("udepl_nlq.txt", 'w') as f:
+        with open("../udepl_nlq.txt", 'w') as f:
             f.write(f'{{"sentence":"{nlq}"}}')
 
         res = subprocess.check_output("./run_udep_lambda.sh")
@@ -145,7 +143,7 @@ class NLQCanonical(object):
         here instead we will directly provide sentences to udeplambda
         :return: UGLogicalForm
         """
-        with open("udepl_nlq.txt", 'w') as f:
+        with open("../udepl_nlq.txt", 'w') as f:
             f.write(f'{{"sentence":"{sentence}"}}')
 
         res = subprocess.check_output("./run_udep_lambda.sh")
@@ -528,7 +526,7 @@ class GroundedSPARQLGraph: #todo
         return self.g_query.get_query_string()
 
 if __name__ == "__main__":
-    # NLQCanonical object should be created first to load and save the glove word2vec data
+    # NLQCanonical object should be created first to load and save the glove word2vec dataset_qald
     # nlq_canon = NLQCanonical("glove_testing")
     # print(NLQCanonical.glove['the'])
     # print(NLQCanonical.glove['lesson'])

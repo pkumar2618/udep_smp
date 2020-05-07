@@ -1,6 +1,6 @@
 from typing import List, Any
 
-from nl_utils import *
+from udeplib.nl_utils import *
 
 
 class Parser(object):

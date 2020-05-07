@@ -1,7 +1,7 @@
-from nl_utils import *
+from udeplib.nl_utils import *
 import pandas as pd
-file_input='kr2ml_select.tsv'
-file_output='question_sparql_pairs.tsv'
+file_input= 'kr2ml_select.tsv'
+file_output= '../question_sparql_pairs.tsv'
 question_sparql_pair= pd.DataFrame(columns=['question_id', 'gold_sparql',
                                             'para0', 'para0_deplambda', 'para0_sparql',
                                             'para1', 'para1_deplambda', 'para1_sparql',

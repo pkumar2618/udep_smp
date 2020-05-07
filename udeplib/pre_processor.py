@@ -1,11 +1,7 @@
-from nl_utils import *
+from udeplib.nl_utils import *
 from ug_utils import *
-from gensim import corpora
-from gensim.utils import simple_preprocess
 from nltk.tokenize import word_tokenize
-from pprint import pprint
 import string
-from io import IOBase
 
 """
 Design Choice: gensim is a grate package for handling large file, provide support for word2vec and topic modelling

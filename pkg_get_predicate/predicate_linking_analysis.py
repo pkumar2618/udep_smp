@@ -2,7 +2,7 @@ import json
 import re
 from gensim.models import KeyedVectors
 import numpy as np
-from db_utils import get_property_using_cosine_similarity, split_camelcase_predicates, dbpedia_property_vectorizer
+from dbpedialib.db_utils import get_property_using_cosine_similarity, split_camelcase_predicates, dbpedia_property_vectorizer
 
 
 try:

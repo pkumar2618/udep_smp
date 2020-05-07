@@ -1,3 +1,8 @@
+## Load Configuration settings
+from configparser import ConfigParser
+config = ConfigParser()
+config.read('bert_clf_config.ini')
+
 class Vocabulary(object):
     """
     this Class maintains token to index mapping and index to token,

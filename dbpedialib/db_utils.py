@@ -150,7 +150,7 @@ def get_property_using_cosine_similarity(vector, panda_property_vector="dbpedia_
         # gives similarity between a vector and list of other vectors
         try:
             # loading the numpy_property_vector
-            with open("numpy_property_vector.pkl", 'rb') as f:
+            with open("../numpy_property_vector.pkl", 'rb') as f:
                 np_property_vector = pickle.load(f)
 
         except FileNotFoundError as ef:
@@ -204,7 +204,7 @@ def get_property_using_cosine_similarity(vector, panda_property_vector="dbpedia_
                                 count += 1
 
             # save the np_property_vector matrix for repeated use
-            with open("numpy_property_vector.pkl", 'wb') as f:
+            with open("../numpy_property_vector.pkl", 'wb') as f:
                 pickle.dump(np_property_vector, f)
 
 

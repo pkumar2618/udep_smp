@@ -1,4 +1,4 @@
-from parser import Parser
+from udeplib.parser import Parser
 # from pre_processor import PreProcessor
 import pickle
 import argparse
