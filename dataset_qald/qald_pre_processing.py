@@ -32,11 +32,11 @@ with open('qald_combined.json', 'r') as f_read:
         try:
             if (len(query) == 0 or query == '{}'):
                 json_item = {'question': question_query_dict['question'], 'spos': None}
-                json_qspo.append(json_item)
+                # json_qspo.append(json_item)
                 continue
             elif re.match(r'[\s*]OUT OF SCOPE[\s*]', query):
                 json_item = {'question': question_query_dict['question'], 'spos': None}
-                json_qspo.append(json_item)
+                # json_qspo.append(json_item)
                 continue
         except Exception as may_be_dict:
             try:
@@ -54,13 +54,20 @@ with open('qald_combined.json', 'r') as f_read:
             for uri_tuple in q_graph.triples_list:
                 spos_label.append(tuple([get_label_from_uri(uri) for uri in uri_tuple]))
 
-            # append all the tuples of spo_labels
+            # append all the tuples of spo_labels to json_item
             json_item['spos_label'] = spos_label
-
+            json_qspo.append(json_item)
         except TypeError as e_uri_label:
-            json_item['spos_label'] = None
+            pass
+            #todo need to look out why there are zero tuples.
+            # json_item['spos_label'] = None
 
-        json_qspo.append(json_item)
+        # don't create json_item with None label in spos_label
+        # if json_item['spos'] is not None: # non zero length of triple
+        #     if len(spos_label): # non zero length
+        #         json_qspo.append(json_item)
+        # else: #zero triples in the label
+        #     continue
 
 with open('qald_input.json', 'w') as f_write:
     json.dump(json_qspo, f_write, indent=4)
