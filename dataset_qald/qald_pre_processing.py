@@ -71,4 +71,3 @@ with open('qald_combined.json', 'r') as f_read:
 
 with open('qald_input.json', 'w') as f_write:
     json.dump(json_qspo, f_write, indent=4)
-

@@ -1,7 +1,7 @@
 import torch
 from pathlib import Path
 from configparser import ConfigParser
-
+import pickle
 
 class Config(dict):
     def __init__(self, **kwargs):
@@ -122,13 +122,122 @@ def bert_tokenizer(s: str):
 # creating the dataset reader
 # from dl_modules.data_loader import QuestionSPOReader, tokenizer, token_indexer
 # from dl_modules.data_loader import *
-reader = QuestionSPOReader(my_tokenizer=bert_tokenizer,
+# load the text to instance if already done
+try:
+    with open('train_ds.pkl', 'rb') as f_read:
+        train_ds = pickle.load(f_read)
+        print(len(train_ds))
+except FileNotFoundError as err_file:
+    reader = QuestionSPOReader(my_tokenizer=bert_tokenizer,
                            my_token_indexers={"sentence_tokens": bert_token_indexer, "spo_tokens": bert_token_indexer})
 
-# loading test_set data
-train_ds = reader.read("../dataset_qald/qald_input.json")
-val_ds = None
+    # loading test_set data
+    train_ds = reader.read("../dataset_qald/qald_input.json")
+    val_ds = None
+    with open('train_ds.pkl', 'wb') as f_write:
+        pickle.dump(train_ds, f_write)
 
-print(len(train_ds))
-
+### the iterator is used to batch the data and prepare it for input to the model
+from allennlp.data.iterators import BucketIterator
+iterator = BucketIterator(batch_size=config.batch_size,
+                          sorting_keys=[('sentence_tokens', 'num_tokens')])
+# # the iterator has to be informed about how the indexing has to be done, indexing require the vocabulary
+# # of all the tokens (may be trimmed if the vocab size is huge).
+iterator.index_with(vocab)
+# # example batch
+# batch = next(iter(iterator(train_ds)))
+# print(batch)
+# print(batch['sentence_tokens']['sentence_tokens'].shape)
 ## running the trainier
+
+## creating the Model now
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from allennlp.modules.seq2vec_encoders import Seq2VecEncoder, PytorchSeq2VecWrapper
+from allennlp.nn.util import get_text_field_mask
+from allennlp.models import Model
+from allennlp.modules.text_field_embedders import TextFieldEmbedder
+
+
+class ContextSPOCrossEmbModel(Model):
+    def __init__(self, word_embeddings: TextFieldEmbedder,
+                 cls_token_rep: Seq2VecEncoder,
+                 out_sz: int = 1):
+        super().__init__(vocab)
+        self.word_embeddings = word_embeddings
+        self.cls_token_rep = cls_token_rep
+        self.cross_emb_score = nn.Linear(self.cls_token_rep.get_output_dim(), out_sz)
+        self.loss = nn.BCEWithLogitsLoss()
+
+    def forward(self, sentence_tokens: Dict[str, torch.Tensor]) -> torch.Tensor:
+        mask = get_text_field_mask(sentence_tokens)
+        bert_embedding = self.word_embeddings(sentence_tokens)
+        cls_token_rep = self.cls_token_rep(bert_embedding, mask)
+        cross_emb_score_logit = self.cross_emb_score(cls_token_rep)
+        output = {"cross_emb_score": cross_emb_score_logit}
+        output["loss"] = self.loss(cross_emb_score_logit) # how to add logits for negative samples
+        return output
+
+# The embedder for TextField is not changed, it's basic and Text Field embedder
+from allennlp.modules.text_field_embedders import BasicTextFieldEmbedder
+# We need to use BERT pre-trained model to create the embedding for the input tokens
+from allennlp.modules.token_embedders.bert_token_embedder import PretrainedBertEmbedder
+
+bert_embedder = PretrainedBertEmbedder(
+        pretrained_model="bert-large-uncased",
+        top_layer_only=True, # conserve memory
+)
+# The embedder gets us an embedding, here a werd embedding.
+word_embeddings: TextFieldEmbedder = BasicTextFieldEmbedder({"sentence_tokens": bert_embedder},
+                                                            # we'll be ignoring masks so we'll need to set this to True
+                                                           allow_unmatched_keys = True)
+
+BERT_DIM = word_embeddings.get_output_dim()
+# After we have the embedding vectors for all the tokens in the sentence, we need to reduce
+# this sequence of vectors into a single vector (Humeau 2019 poly-encoder).
+# we are going to use the representation of [CLS] token
+class ClsTokenRep(Seq2VecEncoder):
+    def forward(self, emb_seq: torch.tensor,
+                mask: torch.tensor = None) -> torch.tensor:
+        # extract first token tensor
+        return emb_seq[:, 0]
+
+    def get_output_dim(self) -> int:
+        return BERT_DIM
+
+
+cls_token_emb = ClsTokenRep(vocab)
+model = ContextSPOCrossEmbModel(word_embeddings, cls_token_emb)
+
+if USE_GPU: model.cuda()
+else: model
+
+# Sanity Check
+# # example batch
+batch = next(iter(iterator(train_ds)))
+sentence_tokens = batch["sentence_tokens"]
+mask = get_text_field_mask(sentence_tokens)
+embeddings = model.word_embeddings(sentence_tokens)
+cls_rep = model.cls_token_rep(embeddings, mask)
+class_logits = model.cross_emb_score(cls_rep)
+loss = model(**batch)["loss"]
+print(loss)
+# Do we need training? with representation of [cls] tokens.
+# Batch negative samples.
+
+
+
+# training
+optimizer = optim.Adam(model.parameters(), lr=config.lr)
+from allennlp.training.trainer import Trainer
+
+trainer = Trainer(
+    model=model,
+    optimizer=optimizer,
+    iterator=iterator,
+    train_dataset=train_ds,
+    cuda_device=0 if USE_GPU else -1,
+    num_epochs=config.epochs,
+)
+metrics = trainer.train()
