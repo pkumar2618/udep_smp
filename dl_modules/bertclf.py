@@ -18,7 +18,7 @@ config = Config(
     testing=True,
     testing_sample=100,
     seed=1,
-    batch_size=64,
+    batch_size=4,
     lr=3e-4,
     epochs=2,
     hidden_sz=64,
@@ -54,22 +54,21 @@ class QuestionSPOReader(DatasetReader):
             self,
             my_tokenizer,
             my_token_indexers: Dict[str, TokenIndexer] = None,
-            passage_length_limit: int = None,
-            question_length_limit: int = None,
-            skip_invalid_examples: bool = False,
+            # passage_length_limit: int = None,
+            # question_length_limit: int = None,
+            # skip_invalid_examples: bool = False,
     ) -> None:
         super().__init__(lazy=False)
         self.tokenizer = my_tokenizer
         self.token_indexers = my_token_indexers or {"tokens": SingleIdTokenIndexer()}
-        self.passage_length_limit = passage_length_limit
-        self.question_length_limit = question_length_limit
-        self.skip_invalid_examples = skip_invalid_examples
+        # self.passage_length_limit = passage_length_limit
+        # self.question_length_limit = question_length_limit
+        # self.skip_invalid_examples = skip_invalid_examples
 
     # @overrides
-    def text_to_instance(self, sentence_tokens: List[Token], spo_tokens: List[Token]):
-        sentence_field = TextField(sentence_tokens, self.token_indexers)
-        spo_field = TextField(spo_tokens, self.token_indexers)
-        fields = {"sentence_tokens": sentence_field, "spo_tokens": spo_field}
+    def text_to_instance(self, sentence_spo_tokens: List[Token]):
+        sentence_spo_field = TextField(sentence_spo_tokens, self.token_indexers)
+        fields = {"sentence_spo_tokens": sentence_spo_field}
         return Instance(fields)
 
     # @overrides
@@ -82,20 +81,14 @@ class QuestionSPOReader(DatasetReader):
 
             for question_spos in json_dict:
                 question = question_spos['question']
-                try:
-                    question_tokens = self.tokenizer(question)
-                    # question_tokens = [Token(word) for word in question]
-                    try:
-                        for spo_list in question_spos['spos_label']:
-                            spo_label_joined = ' '.join(spo_list)
-                            spo_tokens = self.tokenizer(spo_label_joined)
-                            # spo_tokens = [Token(word) for word in spo_label_joined]
-                            yield self.text_to_instance([Token(x) for x in question_tokens],
-                                                        [Token(x) for x in spo_tokens])
-                    except TypeError as err_iterator:
-                        pass
-                except TypeError as e_question_not_a_string:
-                    pass
+                question_tokens = self.tokenizer(question)
+                # question_tokens = [Token(word) for word in question]
+                for spo_list in question_spos['spos_label']:
+                    spo_label_joined = ' '.join(spo_list)
+                    spo_tokens = self.tokenizer(spo_label_joined)
+                    # spo_tokens = [Token(word) for word in spo_label_joined]
+                    question_spo_tokens = ["[CLS]"] + question_tokens + ["[SEP]"] + spo_tokens
+                    yield self.text_to_instance([Token(x) for x in question_spo_tokens])
 
 
 
@@ -123,31 +116,30 @@ def bert_tokenizer(s: str):
 # from dl_modules.data_loader import QuestionSPOReader, tokenizer, token_indexer
 # from dl_modules.data_loader import *
 # load the text to instance if already done
-try:
-    with open('train_ds.pkl', 'rb') as f_read:
-        train_ds = pickle.load(f_read)
-        print(len(train_ds))
-except FileNotFoundError as err_file:
-    reader = QuestionSPOReader(my_tokenizer=bert_tokenizer,
-                           my_token_indexers={"sentence_tokens": bert_token_indexer, "spo_tokens": bert_token_indexer})
-
-    # loading test_set data
-    train_ds = reader.read("../dataset_qald/qald_input.json")
-    val_ds = None
-    with open('train_ds.pkl', 'wb') as f_write:
-        pickle.dump(train_ds, f_write)
+# try:
+#     with open('train_ds.pkl', 'rb') as f_read:
+#         train_ds = pickle.load(f_read)
+#         print(len(train_ds))
+# except FileNotFoundError as err_file:
+reader = QuestionSPOReader(my_tokenizer=bert_tokenizer,
+                       my_token_indexers={"sentence_spo_tokens": bert_token_indexer})
+# loading test_set data
+train_ds = reader.read("../dataset_qald/qald_input.json")
+val_ds = None
+# with open('train_ds.pkl', 'wb') as f_write:
+#     pickle.dump(train_ds, f_write)
 
 ### the iterator is used to batch the data and prepare it for input to the model
 from allennlp.data.iterators import BucketIterator
 iterator = BucketIterator(batch_size=config.batch_size,
-                          sorting_keys=[('sentence_tokens', 'num_tokens')])
+                          sorting_keys=[('sentence_spo_tokens', 'num_tokens')])
 # # the iterator has to be informed about how the indexing has to be done, indexing require the vocabulary
 # # of all the tokens (may be trimmed if the vocab size is huge).
 iterator.index_with(vocab)
 # # example batch
 # batch = next(iter(iterator(train_ds)))
 # print(batch)
-# print(batch['sentence_tokens']['sentence_tokens'].shape)
+# print(batch['sentence_spo_tokens']['sentence_spo_tokens'].shape)
 ## running the trainier
 
 ## creating the Model now
@@ -160,7 +152,7 @@ from allennlp.models import Model
 from allennlp.modules.text_field_embedders import TextFieldEmbedder
 
 
-class ContextSPOCrossEmbModel(Model):
+class CrossEncoderModel(Model):
     def __init__(self, word_embeddings: TextFieldEmbedder,
                  cls_token_rep: Seq2VecEncoder,
                  out_sz: int = 1):
@@ -168,15 +160,16 @@ class ContextSPOCrossEmbModel(Model):
         self.word_embeddings = word_embeddings
         self.cls_token_rep = cls_token_rep
         self.cross_emb_score = nn.Linear(self.cls_token_rep.get_output_dim(), out_sz)
-        self.loss = nn.BCEWithLogitsLoss()
+        # self.loss = nn.BCEWithLogitsLoss()
 
-    def forward(self, sentence_tokens: Dict[str, torch.Tensor]) -> torch.Tensor:
-        mask = get_text_field_mask(sentence_tokens)
-        bert_embedding = self.word_embeddings(sentence_tokens)
+    def forward(self, sentence_spo_tokens: Dict[str, torch.Tensor]) -> torch.Tensor:
+        mask = get_text_field_mask(sentence_spo_tokens)
+        bert_embedding = self.word_embeddings(sentence_spo_tokens)
         cls_token_rep = self.cls_token_rep(bert_embedding, mask)
         cross_emb_score_logit = self.cross_emb_score(cls_token_rep)
         output = {"cross_emb_score": cross_emb_score_logit}
-        output["loss"] = self.loss(cross_emb_score_logit) # how to add logits for negative samples
+        output["loss"] = cross_emb_score_logit  # todo how to add logits for negative samples
+        # output["loss"] = self.loss(cross_emb_score_logit) # todo how to add logits for negative samples
         return output
 
 # The embedder for TextField is not changed, it's basic and Text Field embedder
@@ -189,7 +182,7 @@ bert_embedder = PretrainedBertEmbedder(
         top_layer_only=True, # conserve memory
 )
 # The embedder gets us an embedding, here a werd embedding.
-word_embeddings: TextFieldEmbedder = BasicTextFieldEmbedder({"sentence_tokens": bert_embedder},
+word_embeddings: TextFieldEmbedder = BasicTextFieldEmbedder({"sentence_spo_tokens": bert_embedder},
                                                             # we'll be ignoring masks so we'll need to set this to True
                                                            allow_unmatched_keys = True)
 
@@ -208,7 +201,7 @@ class ClsTokenRep(Seq2VecEncoder):
 
 
 cls_token_emb = ClsTokenRep(vocab)
-model = ContextSPOCrossEmbModel(word_embeddings, cls_token_emb)
+model = CrossEncoderModel(word_embeddings, cls_token_emb)
 
 if USE_GPU: model.cuda()
 else: model
@@ -216,9 +209,9 @@ else: model
 # Sanity Check
 # # example batch
 batch = next(iter(iterator(train_ds)))
-sentence_tokens = batch["sentence_tokens"]
-mask = get_text_field_mask(sentence_tokens)
-embeddings = model.word_embeddings(sentence_tokens)
+sentence_spo_tokens = batch["sentence_spo_tokens"]
+mask = get_text_field_mask(sentence_spo_tokens)
+embeddings = model.word_embeddings(sentence_spo_tokens)
 cls_rep = model.cls_token_rep(embeddings, mask)
 class_logits = model.cross_emb_score(cls_rep)
 loss = model(**batch)["loss"]
@@ -241,3 +234,4 @@ trainer = Trainer(
     num_epochs=config.epochs,
 )
 metrics = trainer.train()
+print(metrics)
