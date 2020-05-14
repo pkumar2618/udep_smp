@@ -156,8 +156,9 @@ def bert_tokenizer(s: str):
 # creating the dataset reader
 reader = QuestionSPOReader(my_tokenizer=bert_tokenizer,
                        my_token_indexers={"sentence_spo": bert_token_indexer})
-train_ds = reader.read("../dataset_qald/qald_input.json")
-val_ds = None
+
+train_ds = reader.read("../dataset_qald/qald_train.json")
+val_ds = reader.read("../dataset_qald/qald_val.json")
 
 ### the iterator is used to batch the data and prepare it for input to the model
 from allennlp.data.iterators import BucketIterator
@@ -266,6 +267,7 @@ trainer = Trainer(
     optimizer=optimizer,
     iterator=iterator,
     train_dataset=train_ds,
+    validation_dataset=val_ds,
     cuda_device=0 if USE_GPU else -1,
     num_epochs=config.epochs,
 )

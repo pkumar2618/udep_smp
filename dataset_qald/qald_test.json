@@ -1,0 +1,4590 @@
+[
+    {
+        "question": "Give me all types of eating disorders.",
+        "spos": [
+            [
+                "uri",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/class/yago/EatingDisorders"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "type",
+                "Eating Disorders"
+            ]
+        ]
+    },
+    {
+        "question": "What is the largest metropolitan area in Washington state?",
+        "spos": [
+            [
+                "http://dbpedia.org/resource/Washington_(state)",
+                "http://dbpedia.org/property/largestmetro",
+                "uri"
+            ]
+        ],
+        "spos_label": [
+            [
+                "Washington state",
+                "largestmetro",
+                "uri"
+            ]
+        ]
+    },
+    {
+        "question": "Where did Hillel Slovak die?",
+        "spos": [
+            [
+                "http://dbpedia.org/resource/Hillel_Slovak",
+                "http://dbpedia.org/ontology/deathPlace",
+                "uri"
+            ]
+        ],
+        "spos_label": [
+            [
+                "Hillel Slovak",
+                "death Place",
+                "uri"
+            ]
+        ]
+    },
+    {
+        "question": "What is the most frequent death cause?",
+        "spos": [
+            [
+                "uri",
+                "http://dbpedia.org/ontology/deathCause",
+                "x"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "death Cause",
+                "x"
+            ]
+        ]
+    },
+    {
+        "question": "Which spaceflights were launched from Baikonur?",
+        "spos": [
+            [
+                "uri",
+                "http://dbpedia.org/ontology/launchPad",
+                "http://dbpedia.org/resource/Baikonur_Cosmodrome"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "launch Pad",
+                "Baikonur Cosmodrome"
+            ]
+        ]
+    },
+    {
+        "question": "What does CPU stand for?",
+        "spos": [
+            [
+                "uri",
+                "http://dbpedia.org/ontology/abbreviation",
+                "CPU"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "abbreviation",
+                "CPU"
+            ]
+        ]
+    },
+    {
+        "question": "Are there any castles in the United States?",
+        "spos": [
+            [
+                "uri",
+                "http://purl.org/dc/terms/subject",
+                "http://dbpedia.org/resource/Category:Castles_in_the_United_States"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "subject",
+                "Category Castles in the United States"
+            ]
+        ]
+    },
+    {
+        "question": "Can you find frescoes in Crete?",
+        "spos": [
+            [
+                "museum",
+                "http://dbpedia.org/ontology/location",
+                "http://dbpedia.org/resource/Crete"
+            ],
+            [
+                "uri",
+                "http://dbpedia.org/property/museum",
+                "museum"
+            ],
+            [
+                "uri",
+                "http://purl.org/dc/terms/subject",
+                "http://dbpedia.org/resource/Category:Minoan_frescos"
+            ]
+        ],
+        "spos_label": [
+            [
+                "museum",
+                "location",
+                "Crete"
+            ],
+            [
+                "uri",
+                "museum",
+                "museum"
+            ],
+            [
+                "uri",
+                "subject",
+                "Category Minoan frescos"
+            ]
+        ]
+    },
+    {
+        "question": "Do Urdu and Persian have a common root?",
+        "spos": [
+            [
+                "http://dbpedia.org/resource/Persian_language",
+                "http://dbpedia.org/ontology/languageFamily",
+                "uri"
+            ],
+            [
+                "http://dbpedia.org/resource/Urdu",
+                "http://dbpedia.org/ontology/languageFamily",
+                "uri"
+            ]
+        ],
+        "spos_label": [
+            [
+                "Persian language",
+                "language Family",
+                "uri"
+            ],
+            [
+                "Urdu",
+                "language Family",
+                "uri"
+            ]
+        ]
+    },
+    {
+        "question": "Does the Ford Motor Company have a manufacturing plant in Malaysia?",
+        "spos": [
+            [
+                "uri",
+                "http://dbpedia.org/ontology/assembly",
+                "http://dbpedia.org/resource/Malaysia"
+            ],
+            [
+                "uri",
+                "http://dbpedia.org/ontology/manufacturer",
+                "http://dbpedia.org/resource/Ford_Motor_Company"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "assembly",
+                "Malaysia"
+            ],
+            [
+                "uri",
+                "manufacturer",
+                "Ford Motor Company"
+            ]
+        ]
+    },
+    {
+        "question": "How many years was the Ford Model T manufactured?",
+        "spos": [
+            [
+                "http://dbpedia.org/resource/Ford_Model_T",
+                "http://dbpedia.org/ontology/productionEndYear",
+                "end"
+            ],
+            [
+                "http://dbpedia.org/resource/Ford_Model_T",
+                "http://dbpedia.org/ontology/productionStartYear",
+                "start"
+            ]
+        ],
+        "spos_label": [
+            [
+                "Ford Model T",
+                "production End Year",
+                "end"
+            ],
+            [
+                "Ford Model T",
+                "production Start Year",
+                "start"
+            ]
+        ]
+    },
+    {
+        "question": "Give me all gangsters from the prohibition era.",
+        "spos": [
+            [
+                "uri",
+                "http://dbpedia.org/ontology/occupation",
+                "http://dbpedia.org/resource/Gangster"
+            ],
+            [
+                "uri",
+                "http://purl.org/dc/terms/subject",
+                "http://dbpedia.org/resource/Category:Prohibition-era_gangsters"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "occupation",
+                "Gangster"
+            ],
+            [
+                "uri",
+                "subject",
+                "Category Prohibition era gangsters"
+            ]
+        ]
+    },
+    {
+        "question": "Give me all Seven Wonders of the Ancient World.",
+        "spos": [
+            [
+                "uri",
+                "http://purl.org/dc/terms/subject",
+                "http://dbpedia.org/resource/Category:Seven_Wonders_of_the_Ancient_World"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "subject",
+                "Category Seven Wonders of the Ancient World"
+            ]
+        ]
+    },
+    {
+        "question": "Give me all chemical elements.",
+        "spos": [
+            [
+                "uri",
+                "http://purl.org/dc/terms/subject",
+                "http://dbpedia.org/resource/Category:Chemical_elements"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://www.w3.org/2002/07/owl#Thing"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "subject",
+                "Category Chemical elements"
+            ],
+            [
+                "uri",
+                "type",
+                "Thing"
+            ]
+        ]
+    },
+    {
+        "question": "How many rivers and lakes are in South Carolina?",
+        "spos": [
+            [
+                "uri",
+                "http://dbpedia.org/ontology/location",
+                "http://dbpedia.org/resource/South_Carolina"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/ontology/Lake"
+            ],
+            [
+                "uri",
+                "http://purl.org/dc/terms/subject",
+                "http://dbpedia.org/resource/Category:Rivers_and_streams_of_South_Carolina"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "location",
+                "South Carolina"
+            ],
+            [
+                "uri",
+                "type",
+                "Lake"
+            ],
+            [
+                "uri",
+                "subject",
+                "Category Rivers and streams of South Carolina"
+            ]
+        ]
+    },
+    {
+        "question": "How many states are in Mexico?",
+        "spos": [
+            [
+                "uri",
+                "http://dbpedia.org/ontology/type",
+                "http://dbpedia.org/resource/States_of_Mexico"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "type",
+                "States of Mexico"
+            ]
+        ]
+    },
+    {
+        "question": "How many theories did Albert Einstein come up with?",
+        "spos": [
+            [
+                "http://dbpedia.org/resource/Albert_Einstein",
+                "http://dbpedia.org/ontology/knownFor",
+                "uri"
+            ]
+        ],
+        "spos_label": [
+            [
+                "Albert Einstein",
+                "known For",
+                "uri"
+            ]
+        ]
+    },
+    {
+        "question": "Is horse racing a sport?",
+        "spos": [
+            [
+                "http://dbpedia.org/resource/Horse_racing",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/ontology/Sport"
+            ]
+        ],
+        "spos_label": [
+            [
+                "Horse racing",
+                "type",
+                "Sport"
+            ]
+        ]
+    },
+    {
+        "question": "Is Pluto really a planet?",
+        "spos": [
+            [
+                "http://dbpedia.org/resource/Pluto",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/ontology/Planet"
+            ]
+        ],
+        "spos_label": [
+            [
+                "Pluto",
+                "type",
+                "Planet"
+            ]
+        ]
+    },
+    {
+        "question": "Was Sigmund Freud married?",
+        "spos": [
+            [
+                "http://dbpedia.org/resource/Sigmund_Freud",
+                "http://dbpedia.org/ontology/spouse",
+                "uri"
+            ]
+        ],
+        "spos_label": [
+            [
+                "Sigmund Freud",
+                "spouse",
+                "uri"
+            ]
+        ]
+    },
+    {
+        "question": "What form of government is found in South Africa?",
+        "spos": [
+            [
+                "http://dbpedia.org/resource/South_Africa",
+                "http://dbpedia.org/ontology/governmentType",
+                "uri"
+            ]
+        ],
+        "spos_label": [
+            [
+                "South Africa",
+                "government Type",
+                "uri"
+            ]
+        ]
+    },
+    {
+        "question": "What is the largest state in the United States?",
+        "spos": [
+            [
+                "uri",
+                "http://purl.org/dc/terms/subject",
+                "http://dbpedia.org/resource/Category:States_of_the_United_States"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/ontology/AdministrativeRegion"
+            ],
+            [
+                "uri",
+                "http://dbpedia.org/ontology/areaTotal",
+                "area"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "subject",
+                "Category States of the United States"
+            ],
+            [
+                "uri",
+                "type",
+                "Administrative Region"
+            ],
+            [
+                "uri",
+                "area Total",
+                "area"
+            ]
+        ]
+    },
+    {
+        "question": "What is the longest river in the world?",
+        "spos": [
+            [
+                "uri",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/ontology/BodyOfWater"
+            ],
+            [
+                "uri",
+                "http://dbpedia.org/ontology/length",
+                "length"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "type",
+                "Body Of Water"
+            ],
+            [
+                "uri",
+                "length",
+                "length"
+            ]
+        ]
+    },
+    {
+        "question": "Which building after the Burj Khalifa has the most floors?",
+        "spos": [
+            [
+                "uri",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/ontology/Building"
+            ],
+            [
+                "http://dbpedia.org/resource/Burj_Khalifa",
+                "http://dbpedia.org/ontology/floorCount",
+                "burj"
+            ],
+            [
+                "uri",
+                "http://dbpedia.org/ontology/floorCount",
+                "proj"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "type",
+                "Building"
+            ],
+            [
+                "Burj Khalifa",
+                "floor Count",
+                "burj"
+            ],
+            [
+                "uri",
+                "floor Count",
+                "proj"
+            ]
+        ]
+    },
+    {
+        "question": "What is the wavelength of indigo?",
+        "spos": [
+            [
+                "http://dbpedia.org/resource/Indigo",
+                "http://dbpedia.org/ontology/wavelength",
+                "n"
+            ]
+        ],
+        "spos_label": [
+            [
+                "Indigo",
+                "wavelength",
+                "n"
+            ]
+        ]
+    },
+    {
+        "question": "What was the name of the famous battle in 1836 in San Antonio?",
+        "spos": [
+            [
+                "uri",
+                "http://dbpedia.org/ontology/place",
+                "http://dbpedia.org/resource/San_Antonio"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/ontology/MilitaryConflict"
+            ],
+            [
+                "uri",
+                "http://dbpedia.org/ontology/date",
+                "date"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "place",
+                "San Antonio"
+            ],
+            [
+                "uri",
+                "type",
+                "Military Conflict"
+            ],
+            [
+                "uri",
+                "date",
+                "date"
+            ]
+        ]
+    },
+    {
+        "question": "What were the names of the three ships used by Columbus?",
+        "spos": [
+            [
+                "uri",
+                "http://purl.org/dc/terms/subject",
+                "http://dbpedia.org/resource/Category:Christopher_Columbus"
+            ],
+            [
+                "uri",
+                "http://purl.org/dc/terms/subject",
+                "http://dbpedia.org/resource/Category:Exploration_ships"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/ontology/Ship"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "subject",
+                "Category Christopher Columbus"
+            ],
+            [
+                "uri",
+                "subject",
+                "Category Exploration ships"
+            ],
+            [
+                "uri",
+                "type",
+                "Ship"
+            ]
+        ]
+    },
+    {
+        "question": "When did Muhammad die?",
+        "spos": [
+            [
+                "http://dbpedia.org/resource/Muhammad",
+                "http://dbpedia.org/ontology/deathDate",
+                "date"
+            ]
+        ],
+        "spos_label": [
+            [
+                "Muhammad",
+                "death Date",
+                "date"
+            ]
+        ]
+    },
+    {
+        "question": "When was the De Beers company founded?",
+        "spos": [
+            [
+                "http://dbpedia.org/resource/De_Beers",
+                "http://dbpedia.org/ontology/foundingYear",
+                "date"
+            ]
+        ],
+        "spos_label": [
+            [
+                "De Beers",
+                "founding Year",
+                "date"
+            ]
+        ]
+    },
+    {
+        "question": "When was John Adams born?",
+        "spos": [
+            [
+                "http://dbpedia.org/resource/John_Adams",
+                "http://dbpedia.org/ontology/birthDate",
+                "date"
+            ]
+        ],
+        "spos_label": [
+            [
+                "John Adams",
+                "birth Date",
+                "date"
+            ]
+        ]
+    },
+    {
+        "question": "Which American presidents were in office during the Vietnam War?",
+        "spos": [
+            [
+                "uri",
+                "http://purl.org/dc/terms/subject",
+                "http://dbpedia.org/resource/Category:Presidents_of_the_United_States"
+            ],
+            [
+                "http://dbpedia.org/resource/Vietnam_War",
+                "http://dbpedia.org/ontology/commander",
+                "uri"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "subject",
+                "Category Presidents of the United States"
+            ],
+            [
+                "Vietnam War",
+                "commander",
+                "uri"
+            ]
+        ]
+    },
+    {
+        "question": "Which city has the oldest running metro?",
+        "spos": [
+            [
+                "uri",
+                "http://dbpedia.org/ontology/type",
+                "http://dbpedia.org/resource/Rapid_transit"
+            ],
+            [
+                "uri",
+                "http://dbpedia.org/ontology/location",
+                "loc"
+            ],
+            [
+                "loc",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/ontology/City"
+            ],
+            [
+                "uri",
+                "http://dbpedia.org/ontology/openingYear",
+                "date"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "type",
+                "Rapid transit"
+            ],
+            [
+                "uri",
+                "location",
+                "loc"
+            ],
+            [
+                "loc",
+                "type",
+                "City"
+            ],
+            [
+                "uri",
+                "opening Year",
+                "date"
+            ]
+        ]
+    },
+    {
+        "question": "Which holidays are celebrated around the world?",
+        "spos": [
+            [
+                "uri",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/ontology/Holiday"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "type",
+                "Holiday"
+            ]
+        ]
+    },
+    {
+        "question": "Who assassinated President McKinley?",
+        "spos": [
+            [
+                "uri",
+                "http://purl.org/dc/terms/subject",
+                "http://dbpedia.org/resource/Category:American_assassins"
+            ],
+            [
+                "uri",
+                "http://purl.org/dc/terms/subject",
+                "http://dbpedia.org/resource/Category:Assassination_of_William_McKinley"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/ontology/Person"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "subject",
+                "Category American assassins"
+            ],
+            [
+                "uri",
+                "subject",
+                "Category Assassination of William Mc Kinley"
+            ],
+            [
+                "uri",
+                "type",
+                "Person"
+            ]
+        ]
+    },
+    {
+        "question": "Who discovered Pluto?",
+        "spos": [
+            [
+                "http://dbpedia.org/resource/Pluto",
+                "http://dbpedia.org/ontology/discoverer",
+                "uri"
+            ]
+        ],
+        "spos_label": [
+            [
+                "Pluto",
+                "discoverer",
+                "uri"
+            ]
+        ]
+    },
+    {
+        "question": "Who killed Caesar?",
+        "spos": [
+            [
+                "uri",
+                "http://purl.org/dc/terms/subject",
+                "http://dbpedia.org/resource/Category:Assassins_of_Julius_Caesar"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "subject",
+                "Category Assassins of Julius Caesar"
+            ]
+        ]
+    },
+    {
+        "question": "Who was buried in the Great Pyramid of Giza?",
+        "spos": [
+            [
+                "uri",
+                "http://dbpedia.org/ontology/restingPlace",
+                "http://dbpedia.org/resource/Great_Pyramid_of_Giza"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "resting Place",
+                "Great Pyramid of Giza"
+            ]
+        ]
+    },
+    {
+        "question": "Who was the first King of England?",
+        "spos": [
+            [
+                "uri",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/class/yago/WikicatEnglishMonarchs"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/ontology/Royalty"
+            ],
+            [
+                "uri",
+                "http://dbpedia.org/ontology/activeYearsStartYear",
+                "date"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "type",
+                "Wikicat English Monarchs"
+            ],
+            [
+                "uri",
+                "type",
+                "Royalty"
+            ],
+            [
+                "uri",
+                "active Years Start Year",
+                "date"
+            ]
+        ]
+    },
+    {
+        "question": "What was the final result of the War of the Roses?",
+        "spos": [
+            [
+                "uri",
+                "http://dbpedia.org/ontology/isPartOfMilitaryConflict",
+                "http://dbpedia.org/resource/Wars_of_the_Roses"
+            ],
+            [
+                "uri",
+                "http://dbpedia.org/ontology/date",
+                "date"
+            ],
+            [
+                "uri",
+                "http://dbpedia.org/ontology/result",
+                "result"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "is Part Of Military Conflict",
+                "Wars of the Roses"
+            ],
+            [
+                "uri",
+                "date",
+                "date"
+            ],
+            [
+                "uri",
+                "result",
+                "result"
+            ]
+        ]
+    },
+    {
+        "question": "Who writes the Farmers' Almanac?",
+        "spos": [
+            [
+                "http://dbpedia.org/resource/Farmers'_Almanac",
+                "http://dbpedia.org/property/editor",
+                "uri"
+            ]
+        ],
+        "spos_label": [
+            [
+                "Farmers Almanac",
+                "editor",
+                "uri"
+            ]
+        ]
+    },
+    {
+        "question": "How big is the earth's diameter?",
+        "spos": [
+            [
+                "http://dbpedia.org/resource/Earth",
+                "http://dbpedia.org/ontology/meanRadius",
+                "radius"
+            ]
+        ],
+        "spos_label": [
+            [
+                "Earth",
+                "mean Radius",
+                "radius"
+            ]
+        ]
+    },
+    {
+        "question": "How many people live in Eurasia?",
+        "spos": [
+            [
+                "http://dbpedia.org/resource/Eurasia",
+                "http://dbpedia.org/ontology/populationTotal",
+                "population"
+            ]
+        ],
+        "spos_label": [
+            [
+                "Eurasia",
+                "population Total",
+                "population"
+            ]
+        ]
+    },
+    {
+        "question": "Give me the runtime of Toy Story.",
+        "spos": [
+            [
+                "http://dbpedia.org/resource/Toy_Story",
+                "http://dbpedia.org/ontology/runtime",
+                "runtime"
+            ]
+        ],
+        "spos_label": [
+            [
+                "Toy Story",
+                "runtime",
+                "runtime"
+            ]
+        ]
+    },
+    {
+        "question": "What was the first name of the band Queens of the Stone Age?",
+        "spos": [
+            [
+                "http://dbpedia.org/resource/Queens_of_the_Stone_Age",
+                "http://dbpedia.org/ontology/alias",
+                "name"
+            ]
+        ],
+        "spos_label": [
+            [
+                "Queens of the Stone Age",
+                "alias",
+                "name"
+            ]
+        ]
+    },
+    {
+        "question": "Give me the birth place of Frank Sinatra.",
+        "spos": [
+            [
+                "http://dbpedia.org/resource/Frank_Sinatra",
+                "http://dbpedia.org/ontology/birthPlace",
+                "place"
+            ]
+        ],
+        "spos_label": [
+            [
+                "Frank Sinatra",
+                "birth Place",
+                "place"
+            ]
+        ]
+    },
+    {
+        "question": "Which university did Angela Merkel attend?",
+        "spos": [
+            [
+                "http://dbpedia.org/resource/Angela_Merkel",
+                "http://dbpedia.org/ontology/almaMater",
+                "university"
+            ]
+        ],
+        "spos_label": [
+            [
+                "Angela Merkel",
+                "alma Mater",
+                "university"
+            ]
+        ]
+    },
+    {
+        "question": "List all boardgames by GMT.",
+        "spos": [
+            [
+                "uri",
+                "http://dbpedia.org/ontology/publisher",
+                "http://dbpedia.org/resource/GMT_Games"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "publisher",
+                "GM Games"
+            ]
+        ]
+    },
+    {
+        "question": "Who developed Skype?",
+        "spos": [
+            [
+                "http://dbpedia.org/resource/Skype",
+                "http://dbpedia.org/ontology/developer",
+                "uri"
+            ]
+        ],
+        "spos_label": [
+            [
+                "Skype",
+                "developer",
+                "uri"
+            ]
+        ]
+    },
+    {
+        "question": "Which people were born in Heraklion?",
+        "spos": [
+            [
+                "uri",
+                "http://dbpedia.org/ontology/birthPlace",
+                "http://dbpedia.org/resource/Heraklion"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/ontology/Person"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "birth Place",
+                "Heraklion"
+            ],
+            [
+                "uri",
+                "type",
+                "Person"
+            ]
+        ]
+    },
+    {
+        "question": "In which U.S. state is Area 51 located?",
+        "spos": [
+            [
+                "uri",
+                "http://dbpedia.org/ontology/country",
+                "http://dbpedia.org/resource/United_States"
+            ],
+            [
+                "http://dbpedia.org/resource/Area_51",
+                "http://dbpedia.org/ontology/location",
+                "uri"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "country",
+                "United States"
+            ],
+            [
+                "Area",
+                "location",
+                "uri"
+            ]
+        ]
+    },
+    {
+        "question": "Who is the mayor of New York City?",
+        "spos": [
+            [
+                "http://dbpedia.org/resource/New_York_City",
+                "http://dbpedia.org/ontology/leaderName",
+                "uri"
+            ]
+        ],
+        "spos_label": [
+            [
+                "New York City",
+                "leader Name",
+                "uri"
+            ]
+        ]
+    },
+    {
+        "question": "Which countries have places with more than two caves?",
+        "spos": [
+            [
+                "cave",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/ontology/Cave"
+            ],
+            [
+                "cave",
+                "http://dbpedia.org/ontology/location",
+                "uri"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/ontology/Country"
+            ]
+        ],
+        "spos_label": [
+            [
+                "cave",
+                "type",
+                "Cave"
+            ],
+            [
+                "cave",
+                "location",
+                "uri"
+            ],
+            [
+                "uri",
+                "type",
+                "Country"
+            ]
+        ]
+    },
+    {
+        "question": "Where did Abraham Lincoln die?",
+        "spos": [
+            [
+                "http://dbpedia.org/resource/Abraham_Lincoln",
+                "http://dbpedia.org/ontology/deathPlace",
+                "uri"
+            ]
+        ],
+        "spos_label": [
+            [
+                "Abraham Lincoln",
+                "death Place",
+                "uri"
+            ]
+        ]
+    },
+    {
+        "question": "Give me all actors starring in movies directed by and starring William Shatner.",
+        "spos": [
+            [
+                "x",
+                "http://dbpedia.org/ontology/director",
+                "http://dbpedia.org/resource/William_Shatner"
+            ],
+            [
+                "x",
+                "http://dbpedia.org/ontology/starring",
+                "http://dbpedia.org/resource/William_Shatner"
+            ],
+            [
+                "x",
+                "http://dbpedia.org/ontology/starring",
+                "uri"
+            ],
+            [
+                "x",
+                "http://dbpedia.org/property/starring",
+                "uri"
+            ]
+        ],
+        "spos_label": [
+            [
+                "x",
+                "director",
+                "William Shatner"
+            ],
+            [
+                "x",
+                "starring",
+                "William Shatner"
+            ],
+            [
+                "x",
+                "starring",
+                "uri"
+            ],
+            [
+                "x",
+                "starring",
+                "uri"
+            ]
+        ]
+    },
+    {
+        "question": "What are the official languages of the Philippines?",
+        "spos": [
+            [
+                "http://dbpedia.org/resource/Philippines",
+                "http://dbpedia.org/ontology/officialLanguage",
+                "uri"
+            ]
+        ],
+        "spos_label": [
+            [
+                "Philippines",
+                "official Language",
+                "uri"
+            ]
+        ]
+    },
+    {
+        "question": "Give me all Danish films.",
+        "spos": [
+            [
+                "uri",
+                "http://dbpedia.org/ontology/country",
+                "http://dbpedia.org/resource/Denmark"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/ontology/Film"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "country",
+                "Denmark"
+            ],
+            [
+                "uri",
+                "type",
+                "Film"
+            ]
+        ]
+    },
+    {
+        "question": "Which movies starring Brad Pitt were directed by Guy Ritchie?",
+        "spos": [
+            [
+                "uri",
+                "http://dbpedia.org/ontology/director",
+                "http://dbpedia.org/resource/Guy_Ritchie"
+            ],
+            [
+                "uri",
+                "http://dbpedia.org/ontology/starring",
+                "http://dbpedia.org/resource/Brad_Pitt"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/ontology/Film"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "director",
+                "Guy Ritchie"
+            ],
+            [
+                "uri",
+                "starring",
+                "Brad Pitt"
+            ],
+            [
+                "uri",
+                "type",
+                "Film"
+            ]
+        ]
+    },
+    {
+        "question": "Who is the owner of Universal Studios?",
+        "spos": [
+            [
+                "http://dbpedia.org/resource/Universal_Studios",
+                "http://dbpedia.org/ontology/owner",
+                "uri"
+            ]
+        ],
+        "spos_label": [
+            [
+                "Universal Studios",
+                "owner",
+                "uri"
+            ]
+        ]
+    },
+    {
+        "question": "Which state of the USA has the highest population density?",
+        "spos": [
+            [
+                "uri",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/class/yago/WikicatStatesOfTheUnitedStates"
+            ],
+            [
+                "uri",
+                "http://dbpedia.org/property/densityrank",
+                "rank"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "type",
+                "Wikicat States Of The United States"
+            ],
+            [
+                "uri",
+                "densityrank",
+                "rank"
+            ]
+        ]
+    },
+    {
+        "question": "Which organizations were founded in 1950?",
+        "spos": [
+            [
+                "uri",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/ontology/Organisation"
+            ],
+            [
+                "uri",
+                "http://dbpedia.org/ontology/formationYear",
+                "date"
+            ],
+            [
+                "uri",
+                "http://dbpedia.org/ontology/foundingYear",
+                "date"
+            ],
+            [
+                "uri",
+                "http://dbpedia.org/property/foundation",
+                "date"
+            ],
+            [
+                "uri",
+                "http://dbpedia.org/property/formation",
+                "date"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "type",
+                "Organisation"
+            ],
+            [
+                "uri",
+                "formation Year",
+                "date"
+            ],
+            [
+                "uri",
+                "founding Year",
+                "date"
+            ],
+            [
+                "uri",
+                "foundation",
+                "date"
+            ],
+            [
+                "uri",
+                "formation",
+                "date"
+            ]
+        ]
+    },
+    {
+        "question": "Give me the Apollo 14 astronauts.",
+        "spos": [
+            [
+                "uri",
+                "http://dbpedia.org/ontology/mission",
+                "http://dbpedia.org/resource/Apollo_14"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "mission",
+                "Apollo"
+            ]
+        ]
+    },
+    {
+        "question": "Who wrote the book The pillars of the Earth?",
+        "spos": [
+            [
+                "http://dbpedia.org/resource/The_Pillars_of_the_Earth",
+                "http://dbpedia.org/ontology/author",
+                "uri"
+            ]
+        ],
+        "spos_label": [
+            [
+                "The Pillars of the Earth",
+                "author",
+                "uri"
+            ]
+        ]
+    },
+    {
+        "question": "Which state of the United States of America has the highest density?",
+        "spos": [
+            [
+                "uri",
+                "http://dbpedia.org/property/densityrank",
+                "density"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "densityrank",
+                "density"
+            ]
+        ]
+    },
+    {
+        "question": "Give me a list of all trumpet players that were bandleaders.",
+        "spos": [
+            [
+                "uri",
+                "http://dbpedia.org/ontology/instrument",
+                "http://dbpedia.org/resource/Trumpet"
+            ],
+            [
+                "uri",
+                "http://dbpedia.org/ontology/occupation",
+                "http://dbpedia.org/resource/Bandleader"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "instrument",
+                "Trumpet"
+            ],
+            [
+                "uri",
+                "occupation",
+                "Bandleader"
+            ]
+        ]
+    },
+    {
+        "question": "Which U.S. states are in the same timezone as Utah?",
+        "spos": [
+            [
+                "uri",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/class/yago/WikicatStatesOfTheUnitedStates"
+            ],
+            [
+                "uri",
+                "http://dbpedia.org/property/timezone",
+                "x"
+            ],
+            [
+                "http://dbpedia.org/resource/Utah",
+                "http://dbpedia.org/property/timezone",
+                "x"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "type",
+                "Wikicat States Of The United States"
+            ],
+            [
+                "uri",
+                "timezone",
+                "x"
+            ],
+            [
+                "Utah",
+                "timezone",
+                "x"
+            ]
+        ]
+    },
+    {
+        "question": "Which U.S. states possess gold minerals?",
+        "spos": [
+            [
+                "uri",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/class/yago/WikicatStatesOfTheUnitedStates"
+            ],
+            [
+                "uri",
+                "http://dbpedia.org/property/mineral",
+                "mineral"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "type",
+                "Wikicat States Of The United States"
+            ],
+            [
+                "uri",
+                "mineral",
+                "mineral"
+            ]
+        ]
+    },
+    {
+        "question": "Who is the daughter of Ingrid Bergman married to?",
+        "spos": [
+            [
+                "http://dbpedia.org/resource/Ingrid_Bergman",
+                "http://dbpedia.org/ontology/child",
+                "child"
+            ],
+            [
+                "child",
+                "http://dbpedia.org/property/spouse",
+                "uri"
+            ]
+        ],
+        "spos_label": [
+            [
+                "Ingrid Bergman",
+                "child",
+                "child"
+            ],
+            [
+                "child",
+                "spouse",
+                "uri"
+            ]
+        ]
+    },
+    {
+        "question": "Give me all Swiss non-profit organizations.",
+        "spos": [
+            [
+                "uri",
+                "http://dbpedia.org/ontology/type",
+                "http://dbpedia.org/resource/Nonprofit_organization"
+            ],
+            [
+                "uri",
+                "http://dbpedia.org/ontology/location",
+                "http://dbpedia.org/resource/Switzerland"
+            ],
+            [
+                "x",
+                "http://dbpedia.org/ontology/country",
+                "http://dbpedia.org/resource/Switzerland"
+            ],
+            [
+                "uri",
+                "http://dbpedia.org/ontology/location",
+                "x"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "type",
+                "Nonprofit organization"
+            ],
+            [
+                "uri",
+                "location",
+                "Switzerland"
+            ],
+            [
+                "x",
+                "country",
+                "Switzerland"
+            ],
+            [
+                "uri",
+                "location",
+                "x"
+            ]
+        ]
+    },
+    {
+        "question": "Which volcanos in Japan erupted since 2000?",
+        "spos": [
+            [
+                "uri",
+                "http://dbpedia.org/ontology/locatedInArea",
+                "http://dbpedia.org/resource/Japan"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/ontology/Volcano"
+            ],
+            [
+                "uri",
+                "http://dbpedia.org/ontology/eruptionYear",
+                "date"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "located In Area",
+                "Japan"
+            ],
+            [
+                "uri",
+                "type",
+                "Volcano"
+            ],
+            [
+                "uri",
+                "eruption Year",
+                "date"
+            ]
+        ]
+    },
+    {
+        "question": "Where did the architect of the Eiffel Tower study?",
+        "spos": [
+            [
+                "http://dbpedia.org/resource/Eiffel_Tower",
+                "http://dbpedia.org/ontology/architect",
+                "x"
+            ],
+            [
+                "x",
+                "http://dbpedia.org/property/almaMater",
+                "uri"
+            ]
+        ],
+        "spos_label": [
+            [
+                "Eiffel Tower",
+                "architect",
+                "x"
+            ],
+            [
+                "x",
+                "alma Mater",
+                "uri"
+            ]
+        ]
+    },
+    {
+        "question": "Give me all ESA astronauts.",
+        "spos": [
+            [
+                "uri",
+                "http://dbpedia.org/property/type",
+                "http://dbpedia.org/resource/European_Space_Agency"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/ontology/Astronaut"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "type",
+                "European Space Agency"
+            ],
+            [
+                "uri",
+                "type",
+                "Astronaut"
+            ]
+        ]
+    },
+    {
+        "question": "Show me everyone who was born on Halloween.",
+        "spos": [
+            [
+                "uri",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/ontology/Person"
+            ],
+            [
+                "uri",
+                "http://dbpedia.org/ontology/birthDate",
+                "date"
+            ],
+            [
+                "uri",
+                "http://dbpedia.org/property/birthDate",
+                "date"
+            ],
+            [
+                "http://dbpedia.org/resource/Halloween",
+                "http://dbpedia.org/property/date",
+                "date"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "type",
+                "Person"
+            ],
+            [
+                "uri",
+                "birth Date",
+                "date"
+            ],
+            [
+                "uri",
+                "birth Date",
+                "date"
+            ],
+            [
+                "Halloween",
+                "date",
+                "date"
+            ]
+        ]
+    },
+    {
+        "question": "What is the net income of Apple?",
+        "spos": [
+            [
+                "http://dbpedia.org/resource/Apple_Inc.",
+                "http://dbpedia.org/ontology/netIncome",
+                "ni"
+            ]
+        ],
+        "spos_label": [
+            [
+                "Apple Inc",
+                "net Income",
+                "ni"
+            ]
+        ]
+    },
+    {
+        "question": "Give me all Swedish holidays.",
+        "spos": [
+            [
+                "uri",
+                "http://dbpedia.org/ontology/country",
+                "http://dbpedia.org/resource/Sweden"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/ontology/Holiday"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "country",
+                "Sweden"
+            ],
+            [
+                "uri",
+                "type",
+                "Holiday"
+            ]
+        ]
+    },
+    {
+        "question": "List all the musicals with music by Leonard Bernstein.",
+        "spos": [
+            [
+                "uri",
+                "http://dbpedia.org/ontology/musicBy",
+                "http://dbpedia.org/resource/Leonard_Bernstein"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/ontology/Musical"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "music By",
+                "Leonard Bernstein"
+            ],
+            [
+                "uri",
+                "type",
+                "Musical"
+            ]
+        ]
+    },
+    {
+        "question": "Who killed John Lennon?",
+        "spos": [
+            [
+                "uri",
+                "http://dbpedia.org/property/conviction",
+                "http://dbpedia.org/resource/Death_of_John_Lennon"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/ontology/Person"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "conviction",
+                "Death of John Lennon"
+            ],
+            [
+                "uri",
+                "type",
+                "Person"
+            ]
+        ]
+    },
+    {
+        "question": "Which programming languages were influenced by Perl?",
+        "spos": [
+            [
+                "uri",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/ontology/ProgrammingLanguage"
+            ],
+            [
+                "uri",
+                "http://dbpedia.org/ontology/influencedBy",
+                "http://dbpedia.org/resource/Perl"
+            ],
+            [
+                "http://dbpedia.org/resource/Perl",
+                "http://dbpedia.org/ontology/influenced",
+                "uri"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "type",
+                "Programming Language"
+            ],
+            [
+                "uri",
+                "influenced By",
+                "Perl"
+            ],
+            [
+                "Perl",
+                "influenced",
+                "uri"
+            ]
+        ]
+    },
+    {
+        "question": "What other books have been written by the author of The Fault in Our Stars?",
+        "spos": [
+            [
+                "books",
+                "http://dbpedia.org/ontology/author",
+                "http://dbpedia.org/resource/John_Green_(author)"
+            ]
+        ],
+        "spos_label": [
+            [
+                "books",
+                "author",
+                "John Green author"
+            ]
+        ]
+    },
+    {
+        "question": "Which musician wrote the most books?",
+        "spos": [
+            [
+                "uri",
+                "http://dbpedia.org/ontology/occupation",
+                "http://dbpedia.org/resource/Musician"
+            ],
+            [
+                "x",
+                "http://dbpedia.org/ontology/author",
+                "uri"
+            ],
+            [
+                "x",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/ontology/Book"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "occupation",
+                "Musician"
+            ],
+            [
+                "x",
+                "author",
+                "uri"
+            ],
+            [
+                "x",
+                "type",
+                "Book"
+            ]
+        ]
+    },
+    {
+        "question": "How many airlines are members of the Star Alliance?",
+        "spos": [
+            [
+                "uri",
+                "http://dbpedia.org/ontology/alliance",
+                "http://dbpedia.org/resource/Star_Alliance"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/ontology/Airline"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "alliance",
+                "Star Alliance"
+            ],
+            [
+                "uri",
+                "type",
+                "Airline"
+            ]
+        ]
+    },
+    {
+        "question": "Which soccer players were born on Malta?",
+        "spos": [
+            [
+                "uri",
+                "http://dbpedia.org/ontology/birthPlace",
+                "http://dbpedia.org/resource/Malta"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/ontology/SoccerPlayer"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "birth Place",
+                "Malta"
+            ],
+            [
+                "uri",
+                "type",
+                "Soccer Player"
+            ]
+        ]
+    },
+    {
+        "question": "How many children does Eddie Murphy have?",
+        "spos": [
+            [
+                "http://dbpedia.org/resource/Eddie_Murphy",
+                "http://dbpedia.org/property/children",
+                "n"
+            ]
+        ],
+        "spos_label": [
+            [
+                "Eddie Murphy",
+                "children",
+                "n"
+            ]
+        ]
+    },
+    {
+        "question": "Who is the manager of Real Madrid?",
+        "spos": [
+            [
+                "http://dbpedia.org/resource/Real_Madrid_C.F.",
+                "http://dbpedia.org/ontology/manager",
+                "uri"
+            ]
+        ],
+        "spos_label": [
+            [
+                "Real Madrid",
+                "manager",
+                "uri"
+            ]
+        ]
+    },
+    {
+        "question": "Which weapons did Heckler & Koch develop?",
+        "spos": [
+            [
+                "uri",
+                "http://dbpedia.org/property/designer",
+                "http://dbpedia.org/resource/Heckler_&_Koch"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/ontology/Weapon"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "designer",
+                "Heckler Koch"
+            ],
+            [
+                "uri",
+                "type",
+                "Weapon"
+            ]
+        ]
+    },
+    {
+        "question": "What is the smallest city by area in Germany?",
+        "spos": [
+            [
+                "m",
+                "http://www.w3.org/2004/02/skos/core#broader",
+                "http://dbpedia.org/resource/Category:Cities_in_Germany"
+            ],
+            [
+                "city",
+                "http://purl.org/dc/terms/subject",
+                "m"
+            ],
+            [
+                "city",
+                "http://dbpedia.org/ontology/areaTotal",
+                "area"
+            ]
+        ],
+        "spos_label": [
+            [
+                "m",
+                "broader",
+                "Category Cities in Germany"
+            ],
+            [
+                "city",
+                "subject",
+                "m"
+            ],
+            [
+                "city",
+                "area Total",
+                "area"
+            ]
+        ]
+    },
+    {
+        "question": "What does ICRO stand for?",
+        "spos": [
+            [
+                "uri",
+                "http://dbpedia.org/ontology/abbreviation",
+                "ICRO"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "abbreviation",
+                "ICRO"
+            ]
+        ]
+    },
+    {
+        "question": "Which Greek parties are pro-European?",
+        "spos": [
+            [
+                "uri",
+                "http://dbpedia.org/ontology/country",
+                "http://dbpedia.org/resource/Greece"
+            ],
+            [
+                "uri",
+                "http://dbpedia.org/ontology/ideology",
+                "http://dbpedia.org/resource/Pro-Europeanism"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/ontology/PoliticalParty"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "country",
+                "Greece"
+            ],
+            [
+                "uri",
+                "ideology",
+                "Pro Europeanism"
+            ],
+            [
+                "uri",
+                "type",
+                "Political Party"
+            ]
+        ]
+    },
+    {
+        "question": "When was Olof Palme shot?",
+        "spos": [
+            [
+                "http://dbpedia.org/resource/Olof_Palme",
+                "http://dbpedia.org/ontology/deathDate",
+                "date"
+            ]
+        ],
+        "spos_label": [
+            [
+                "Olof Palme",
+                "death Date",
+                "date"
+            ]
+        ]
+    },
+    {
+        "question": "List the seven kings of Rome.",
+        "spos": [
+            [
+                "uri",
+                "http://dbpedia.org/property/title",
+                "http://dbpedia.org/resource/King_of_Rome"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "title",
+                "King of Rome"
+            ]
+        ]
+    },
+    {
+        "question": "Is Darth Vader Luke\u2019s father?",
+        "spos": [
+            [
+                "http://dbpedia.org/resource/Darth_Vader",
+                "http://dbpedia.org/ontology/child",
+                "http://dbpedia.org/resource/Luke_Skywalker"
+            ]
+        ],
+        "spos_label": [
+            [
+                "Darth Vader",
+                "child",
+                "Luke Skywalker"
+            ]
+        ]
+    },
+    {
+        "question": "Who is the heaviest player of the Chicago Bulls?",
+        "spos": [
+            [
+                "uri",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/ontology/Person"
+            ],
+            [
+                "uri",
+                "http://dbpedia.org/ontology/weight",
+                "num"
+            ],
+            [
+                "uri",
+                "http://dbpedia.org/property/team",
+                "http://dbpedia.org/resource/Chicago_Bulls"
+            ],
+            [
+                "uri",
+                "http://dbpedia.org/property/draftTeam",
+                "http://dbpedia.org/resource/Chicago_Bulls"
+            ],
+            [
+                "uri",
+                "http://dbpedia.org/ontology/draftTeam",
+                "http://dbpedia.org/resource/Chicago_Bulls"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "type",
+                "Person"
+            ],
+            [
+                "uri",
+                "weight",
+                "num"
+            ],
+            [
+                "uri",
+                "team",
+                "Chicago Bulls"
+            ],
+            [
+                "uri",
+                "draft Team",
+                "Chicago Bulls"
+            ],
+            [
+                "uri",
+                "draft Team",
+                "Chicago Bulls"
+            ]
+        ]
+    },
+    {
+        "question": "What is the largest city in america?",
+        "spos": [
+            [
+                "http://dbpedia.org/resource/United_States",
+                "http://dbpedia.org/ontology/largestCity",
+                "lcity"
+            ]
+        ],
+        "spos_label": [
+            [
+                "United States",
+                "largest City",
+                "lcity"
+            ]
+        ]
+    },
+    {
+        "question": "What is the alma mater of the chancellor of Germany Angela Merkel?",
+        "spos": [
+            [
+                "http://dbpedia.org/resource/Angela_Merkel",
+                "http://dbpedia.org/ontology/almaMater",
+                "Almamater"
+            ]
+        ],
+        "spos_label": [
+            [
+                "Angela Merkel",
+                "alma Mater",
+                "Almamater"
+            ]
+        ]
+    },
+    {
+        "question": "Where is the birthplace of Goethe?",
+        "spos": [
+            [
+                "http://dbpedia.org/resource/Johann_Wolfgang_von_Goethe",
+                "http://dbpedia.org/ontology/birthPlace",
+                "Goethe"
+            ]
+        ],
+        "spos_label": [
+            [
+                "Johann Wolfgang von Goethe",
+                "birth Place",
+                "Goethe"
+            ]
+        ]
+    },
+    {
+        "question": "What is the highest mountain in Saxony Germany?",
+        "spos": [
+            [
+                "m",
+                "http://dbpedia.org/ontology/mountainRange",
+                "http://dbpedia.org/resource/Ore_Mountains"
+            ],
+            [
+                "m",
+                "http://dbpedia.org/ontology/elevation",
+                "height"
+            ]
+        ],
+        "spos_label": [
+            [
+                "m",
+                "mountain Range",
+                "Ore Mountains"
+            ],
+            [
+                "m",
+                "elevation",
+                "height"
+            ]
+        ]
+    },
+    {
+        "question": "Who is the current federal minister of finance in Germany?",
+        "spos": [
+            [
+                "http://dbpedia.org/resource/Federal_Ministry_of_Finance_(Germany)",
+                "http://dbpedia.org/ontology/leader",
+                "leader"
+            ]
+        ],
+        "spos_label": [
+            [
+                "Federal Ministry of Finance Germany",
+                "leader",
+                "leader"
+            ]
+        ]
+    },
+    {
+        "question": "In which state Penn State University is located?",
+        "spos": [
+            [
+                "http://dbpedia.org/resource/Pennsylvania_State_University",
+                "http://dbpedia.org/ontology/state",
+                "s"
+            ]
+        ],
+        "spos_label": [
+            [
+                "Pennsylvania State University",
+                "state",
+                "s"
+            ]
+        ]
+    },
+    {
+        "question": "How large is the area of UK?",
+        "spos": [
+            [
+                "http://dbpedia.org/resource/United_Kingdom",
+                "http://dbpedia.org/ontology/areaTotal",
+                "area"
+            ]
+        ],
+        "spos_label": [
+            [
+                "United Kingdom",
+                "area Total",
+                "area"
+            ]
+        ]
+    },
+    {
+        "question": "how much is the elevation of D\u00fcsseldorf Airport ?",
+        "spos": [
+            [
+                "http://dbpedia.org/resource/D\u00fcsseldorf_Airport",
+                "http://dbpedia.org/ontology/elevation",
+                "ele"
+            ]
+        ],
+        "spos_label": [
+            [
+                "sseldorf Airport",
+                "elevation",
+                "ele"
+            ]
+        ]
+    },
+    {
+        "question": "How much is the population of mexico city ?",
+        "spos": [
+            [
+                "http://dbpedia.org/resource/Mexico_City",
+                "http://dbpedia.org/ontology/populationTotal",
+                "Mexico_City"
+            ]
+        ],
+        "spos_label": [
+            [
+                "Mexico City",
+                "population Total",
+                "Mexico_City"
+            ]
+        ]
+    },
+    {
+        "question": "when was the founding date of french fifth republic?",
+        "spos": [
+            [
+                "http://dbpedia.org/resource/French_Fifth_Republic",
+                "http://dbpedia.org/ontology/foundingDate",
+                "ff"
+            ]
+        ],
+        "spos_label": [
+            [
+                "French Fifth Republic",
+                "founding Date",
+                "ff"
+            ]
+        ]
+    },
+    {
+        "question": "When was the last episode of the TV series Friends aired?",
+        "spos": [
+            [
+                "http://dbpedia.org/resource/Friends",
+                "http://dbpedia.org/ontology/completionDate",
+                "date"
+            ]
+        ],
+        "spos_label": [
+            [
+                "Friends",
+                "completion Date",
+                "date"
+            ]
+        ]
+    },
+    {
+        "question": "Who is 8th president of US?",
+        "spos": [
+            [
+                "http://dbpedia.org/resource/8th_President_of_the_United_States",
+                "http://dbpedia.org/ontology/wikiPageRedirects",
+                "link"
+            ],
+            [
+                "link",
+                "http://dbpedia.org/property/name",
+                "name"
+            ]
+        ],
+        "spos_label": [
+            [
+                "th President of the United States",
+                "wiki Page Redirects",
+                "link"
+            ],
+            [
+                "link",
+                "name",
+                "name"
+            ]
+        ]
+    },
+    {
+        "question": "how much is the total population of  european union?",
+        "spos": [
+            [
+                "http://dbpedia.org/resource/European_Union",
+                "http://dbpedia.org/ontology/populationTotal",
+                "europop"
+            ]
+        ],
+        "spos_label": [
+            [
+                "European Union",
+                "population Total",
+                "europop"
+            ]
+        ]
+    },
+    {
+        "question": "What is the birth name of Adele?",
+        "spos": [
+            [
+                "http://dbpedia.org/resource/Adele",
+                "http://dbpedia.org/ontology/birthName",
+                "bn"
+            ]
+        ],
+        "spos_label": [
+            [
+                "Adele",
+                "birth Name",
+                "bn"
+            ]
+        ]
+    },
+    {
+        "question": "What is the population of Cairo?",
+        "spos": [
+            [
+                "http://dbpedia.org/resource/Cairo",
+                "http://dbpedia.org/ontology/populationTotal",
+                "pop"
+            ]
+        ],
+        "spos_label": [
+            [
+                "Cairo",
+                "population Total",
+                "pop"
+            ]
+        ]
+    },
+    {
+        "question": "What is the last work of Dan Brown?",
+        "spos": [
+            [
+                "book",
+                "http://dbpedia.org/ontology/author",
+                "http://dbpedia.org/resource/Dan_Brown"
+            ],
+            [
+                "book",
+                "http://dbpedia.org/property/releaseDate",
+                "date"
+            ],
+            [
+                "book",
+                "http://dbpedia.org/ontology/author",
+                "http://dbpedia.org/resource/Dan_Brown"
+            ],
+            [
+                "book",
+                "http://dbpedia.org/ontology/publicationDate",
+                "date"
+            ]
+        ],
+        "spos_label": [
+            [
+                "book",
+                "author",
+                "Dan Brown"
+            ],
+            [
+                "book",
+                "release Date",
+                "date"
+            ],
+            [
+                "book",
+                "author",
+                "Dan Brown"
+            ],
+            [
+                "book",
+                "publication Date",
+                "date"
+            ]
+        ]
+    },
+    {
+        "question": "Where is Sungkyunkwan University?",
+        "spos": [
+            [
+                "http://dbpedia.org/resource/Sungkyunkwan_University",
+                "http://dbpedia.org/ontology/city",
+                "city"
+            ],
+            [
+                "http://dbpedia.org/resource/Sungkyunkwan_University",
+                "http://dbpedia.org/ontology/country",
+                "country"
+            ]
+        ],
+        "spos_label": [
+            [
+                "Sungkyunkwan University",
+                "city",
+                "city"
+            ],
+            [
+                "Sungkyunkwan University",
+                "country",
+                "country"
+            ]
+        ]
+    },
+    {
+        "question": "Who is the author of the interpretation of dreams?",
+        "spos": [
+            [
+                "http://dbpedia.org/resource/The_Interpretation_of_Dreams",
+                "http://dbpedia.org/ontology/author",
+                "Author"
+            ]
+        ],
+        "spos_label": [
+            [
+                "The Interpretation of Dreams",
+                "author",
+                "Author"
+            ]
+        ]
+    },
+    {
+        "question": "When was the death  of  Shakespeare?",
+        "spos": [
+            [
+                "http://dbpedia.org/resource/William_Shakespeare",
+                "http://dbpedia.org/ontology/deathDate",
+                "x"
+            ]
+        ],
+        "spos_label": [
+            [
+                "William Shakespeare",
+                "death Date",
+                "x"
+            ]
+        ]
+    },
+    {
+        "question": "Where is the origin of Carolina reaper?",
+        "spos": [
+            [
+                "http://dbpedia.org/resource/Carolina_Reaper",
+                "http://dbpedia.org/ontology/origin",
+                "uri"
+            ]
+        ],
+        "spos_label": [
+            [
+                "Carolina Reaper",
+                "origin",
+                "uri"
+            ]
+        ]
+    },
+    {
+        "question": "Which species does an elephant belong?",
+        "spos": [
+            [
+                "http://dbpedia.org/resource/Elephant",
+                "http://dbpedia.org/property/species",
+                "species"
+            ]
+        ],
+        "spos_label": [
+            [
+                "Elephant",
+                "species",
+                "species"
+            ]
+        ]
+    },
+    {
+        "question": "With how many countries Iran has borders?",
+        "spos": [
+            [
+                "http://dbpedia.org/resource/Geography_of_Iran",
+                "http://dbpedia.org/property/borders",
+                "border"
+            ]
+        ],
+        "spos_label": [
+            [
+                "Geography of Iran",
+                "borders",
+                "border"
+            ]
+        ]
+    },
+    {
+        "question": "how big is the total area of North Rhine- Westphalia?",
+        "spos": [
+            [
+                "http://dbpedia.org/resource/North_Rhine-Westphalia",
+                "http://dbpedia.org/ontology/areaTotal",
+                "tarea"
+            ]
+        ],
+        "spos_label": [
+            [
+                "North Rhine Westphalia",
+                "area Total",
+                "tarea"
+            ]
+        ]
+    },
+    {
+        "question": "What is Donald Trump's main business?",
+        "spos": [
+            [
+                "owner",
+                "http://dbpedia.org/ontology/owner",
+                "http://dbpedia.org/resource/Donald_Trump"
+            ]
+        ],
+        "spos_label": [
+            [
+                "owner",
+                "owner",
+                "Donald Trump"
+            ]
+        ]
+    },
+    {
+        "question": "When will start the final match of the football world cup 2018?",
+        "spos": [
+            [
+                "http://dbpedia.org/resource/2018_FIFA_World_Cup",
+                "http://dbpedia.org/property/date",
+                "Date"
+            ]
+        ],
+        "spos_label": [
+            [
+                "FIF World Cup",
+                "date",
+                "Date"
+            ]
+        ]
+    },
+    {
+        "question": "how much is the population  Iraq?",
+        "spos": [
+            [
+                "http://dbpedia.org/resource/Iraq",
+                "http://dbpedia.org/ontology/populationTotal",
+                "pIraq"
+            ]
+        ],
+        "spos_label": [
+            [
+                "Iraq",
+                "population Total",
+                "pIraq"
+            ]
+        ]
+    },
+    {
+        "question": "how much is the population densty rank of germany?",
+        "spos": [
+            [
+                "http://dbpedia.org/resource/Germany",
+                "http://dbpedia.org/property/populationDensityRank",
+                "rank"
+            ]
+        ],
+        "spos_label": [
+            [
+                "Germany",
+                "population Density Rank",
+                "rank"
+            ]
+        ]
+    },
+    {
+        "question": "Who are the writers of the Wall album of Pink Floyd?",
+        "spos": [
+            [
+                "http://dbpedia.org/resource/The_Wall",
+                "http://dbpedia.org/property/writer",
+                "writers"
+            ]
+        ],
+        "spos_label": [
+            [
+                "The Wall",
+                "writer",
+                "writers"
+            ]
+        ]
+    },
+    {
+        "question": "Which holidays are celebrated around the world? test2",
+        "spos": [
+            [
+                "uri",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/ontology/Holiday"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "type",
+                "Holiday"
+            ]
+        ]
+    },
+    {
+        "question": "\nWho is the governor of Wyoming?\n",
+        "spos": [
+            [
+                "http://dbpedia.org/resource/Wyoming",
+                "http://dbpedia.org/property/governor",
+                "uri"
+            ]
+        ],
+        "spos_label": [
+            [
+                "Wyoming",
+                "governor",
+                "uri"
+            ]
+        ]
+    },
+    {
+        "question": "\nDo Prince Harry and Prince William have the same mother?\n",
+        "spos": [
+            [
+                "http://dbpedia.org/resource/Prince_Harry_of_Wales",
+                "http://dbpedia.org/property/mother",
+                "y"
+            ],
+            [
+                "http://dbpedia.org/resource/Prince_William,_Duke_of_Cambridge",
+                "http://dbpedia.org/property/mother",
+                "x"
+            ]
+        ],
+        "spos_label": [
+            [
+                "Prince Harry of Wales",
+                "mother",
+                "y"
+            ],
+            [
+                "Prince William Duke of Cambridge",
+                "mother",
+                "x"
+            ]
+        ]
+    },
+    {
+        "question": "\nWho developed Minecraft?\n",
+        "spos": [
+            [
+                "http://dbpedia.org/resource/Minecraft",
+                "http://dbpedia.org/ontology/developer",
+                "uri"
+            ]
+        ],
+        "spos_label": [
+            [
+                "Minecraft",
+                "developer",
+                "uri"
+            ]
+        ]
+    },
+    {
+        "question": "\nHow many inhabitants does Maribor have?\n",
+        "spos": [
+            [
+                "http://dbpedia.org/resource/Maribor",
+                "http://dbpedia.org/ontology/populationTotal",
+                "num"
+            ]
+        ],
+        "spos_label": [
+            [
+                "Maribor",
+                "population Total",
+                "num"
+            ]
+        ]
+    },
+    {
+        "question": "\nList all games by GMT.\n",
+        "spos": [
+            [
+                "uri",
+                "http://dbpedia.org/ontology/publisher",
+                "http://dbpedia.org/resource/GMT_Games"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "publisher",
+                "GM Games"
+            ]
+        ]
+    },
+    {
+        "question": "\nIn which U.S. state is Fort Knox located?\n",
+        "spos": [
+            [
+                "uri",
+                "http://dbpedia.org/ontology/country",
+                "http://dbpedia.org/resource/United_States"
+            ],
+            [
+                "http://dbpedia.org/resource/Fort_Knox",
+                "http://dbpedia.org/property/location",
+                "uri"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "country",
+                "United States"
+            ],
+            [
+                "Fort Knox",
+                "location",
+                "uri"
+            ]
+        ]
+    },
+    {
+        "question": "\nWhich U.S. state has the abbreviation MN?\n",
+        "spos": [
+            [
+                "uri",
+                "http://dbpedia.org/property/postalabbreviation",
+                "MN"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/class/yago/StatesOfTheUnitedStates"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "postalabbreviation",
+                "MN"
+            ],
+            [
+                "uri",
+                "type",
+                "States Of The United States"
+            ]
+        ]
+    },
+    {
+        "question": "\nWhich movies did Kurosawa direct after Rashomon?\n",
+        "spos": [
+            [
+                "uri",
+                "http://dbpedia.org/ontology/director",
+                "http://dbpedia.org/resource/Akira_Kurosawa"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/ontology/Film"
+            ],
+            [
+                "uri",
+                "http://dbpedia.org/ontology/releaseDate",
+                "x"
+            ],
+            [
+                "uri",
+                "http://dbpedia.org/property/released",
+                "x"
+            ],
+            [
+                "http://dbpedia.org/resource/Rashomon_(film)",
+                "http://dbpedia.org/ontology/releaseDate",
+                "y"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "director",
+                "Akira Kurosawa"
+            ],
+            [
+                "uri",
+                "type",
+                "Film"
+            ],
+            [
+                "uri",
+                "release Date",
+                "x"
+            ],
+            [
+                "uri",
+                "released",
+                "x"
+            ],
+            [
+                "Rashomon film",
+                "release Date",
+                "y"
+            ]
+        ]
+    },
+    {
+        "question": "\nGive me all school types.\n",
+        "spos": [
+            [
+                "uri",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/class/yago/SchoolTypes"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/2000/01/rdf-schema#label",
+                "string"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "type",
+                "School Types"
+            ],
+            [
+                "uri",
+                "label",
+                "string"
+            ]
+        ]
+    },
+    {
+        "question": "\nWhich presidents were born in 1945?\n",
+        "spos": [
+            [
+                "uri",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/ontology/President"
+            ],
+            [
+                "uri",
+                "http://dbpedia.org/ontology/birthDate",
+                "date"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/2000/01/rdf-schema#label",
+                "string"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/class/yago/President"
+            ],
+            [
+                "uri",
+                "http://dbpedia.org/ontology/birthDate",
+                "date"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/2000/01/rdf-schema#label",
+                "string"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "type",
+                "President"
+            ],
+            [
+                "uri",
+                "birth Date",
+                "date"
+            ],
+            [
+                "uri",
+                "label",
+                "string"
+            ],
+            [
+                "uri",
+                "type",
+                "President"
+            ],
+            [
+                "uri",
+                "birth Date",
+                "date"
+            ],
+            [
+                "uri",
+                "label",
+                "string"
+            ]
+        ]
+    },
+    {
+        "question": "\nWho are the presidents of the United States?\n",
+        "spos": [
+            [
+                "uri",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/class/yago/PresidentsOfTheUnitedStates"
+            ],
+            [
+                "uri",
+                "http://dbpedia.org/property/title",
+                "http://dbpedia.org/resource/President_of_the_United_States"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/ontology/President"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/2000/01/rdf-schema#label",
+                "string"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "type",
+                "Presidents Of The United States"
+            ],
+            [
+                "uri",
+                "title",
+                "President of the United States"
+            ],
+            [
+                "uri",
+                "type",
+                "President"
+            ],
+            [
+                "uri",
+                "label",
+                "string"
+            ]
+        ]
+    },
+    {
+        "question": "\nWho was the wife of President Lincoln?\n",
+        "spos": [
+            [
+                "person",
+                "http://xmlns.com/foaf/0.1/surname",
+                "Lincoln"
+            ],
+            [
+                "person",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/ontology/President"
+            ],
+            [
+                "person",
+                "http://dbpedia.org/ontology/spouse",
+                "uri"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/2000/01/rdf-schema#label",
+                "string"
+            ]
+        ],
+        "spos_label": [
+            [
+                "person",
+                "surname",
+                "Lincoln"
+            ],
+            [
+                "person",
+                "type",
+                "President"
+            ],
+            [
+                "person",
+                "spouse",
+                "uri"
+            ],
+            [
+                "uri",
+                "label",
+                "string"
+            ]
+        ]
+    },
+    {
+        "question": "\nWho developed the video game World of Warcraft?\n",
+        "spos": [
+            [
+                "subject",
+                "http://www.w3.org/2000/01/rdf-schema#label",
+                "World of Warcraft"
+            ],
+            [
+                "subject",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/ontology/Software"
+            ],
+            [
+                "subject",
+                "http://dbpedia.org/ontology/developer",
+                "uri"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/2000/01/rdf-schema#label",
+                "string"
+            ]
+        ],
+        "spos_label": [
+            [
+                "subject",
+                "label",
+                "World of Warcraft"
+            ],
+            [
+                "subject",
+                "type",
+                "Software"
+            ],
+            [
+                "subject",
+                "developer",
+                "uri"
+            ],
+            [
+                "uri",
+                "label",
+                "string"
+            ]
+        ]
+    },
+    {
+        "question": "\nWhat is the official website of Tom Hanks?\n",
+        "spos": [
+            [
+                "subject",
+                "http://www.w3.org/2000/01/rdf-schema#label",
+                "Tom Hanks"
+            ],
+            [
+                "subject",
+                "http://xmlns.com/foaf/0.1/homepage",
+                "uri"
+            ]
+        ],
+        "spos_label": [
+            [
+                "subject",
+                "label",
+                "Tom Hanks"
+            ],
+            [
+                "subject",
+                "homepage",
+                "uri"
+            ]
+        ]
+    },
+    {
+        "question": "\nList all episodes of the first season of the HBO television series The Sopranos!\n",
+        "spos": [
+            [
+                "uri",
+                "http://dbpedia.org/ontology/seasonNumber",
+                "1"
+            ],
+            [
+                "uri",
+                "http://dbpedia.org/ontology/series",
+                "http://dbpedia.org/resource/The_Sopranos"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/2000/01/rdf-schema#label",
+                "string"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "season Number",
+                "1"
+            ],
+            [
+                "uri",
+                "series",
+                "The Sopranos"
+            ],
+            [
+                "uri",
+                "label",
+                "string"
+            ]
+        ]
+    },
+    {
+        "question": "\nWho produced the most films?\n",
+        "spos": [
+            [
+                "film",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/ontology/Film"
+            ],
+            [
+                "film",
+                "http://dbpedia.org/ontology/producer",
+                "uri"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/2000/01/rdf-schema#label",
+                "string"
+            ]
+        ],
+        "spos_label": [
+            [
+                "film",
+                "type",
+                "Film"
+            ],
+            [
+                "film",
+                "producer",
+                "uri"
+            ],
+            [
+                "uri",
+                "label",
+                "string"
+            ]
+        ]
+    },
+    {
+        "question": "\nWhich people have as their given name Jimmy?\n",
+        "spos": [
+            [
+                "uri",
+                "http://xmlns.com/foaf/0.1/givenName",
+                "Jimmy"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://xmlns.com/foaf/0.1/Person"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/2000/01/rdf-schema#label",
+                "string"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "given Name",
+                "Jimmy"
+            ],
+            [
+                "uri",
+                "type",
+                "Person"
+            ],
+            [
+                "uri",
+                "label",
+                "string"
+            ]
+        ]
+    },
+    {
+        "question": "\nIs there a video game called Battle Chess?\n",
+        "spos": [
+            [
+                "software",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/ontology/Software"
+            ],
+            [
+                "software",
+                "http://www.w3.org/2000/01/rdf-schema#label",
+                "name"
+            ]
+        ],
+        "spos_label": [
+            [
+                "software",
+                "type",
+                "Software"
+            ],
+            [
+                "software",
+                "label",
+                "name"
+            ]
+        ]
+    },
+    {
+        "question": "\nWhich mountains are higher than the Nanga Parbat?\n",
+        "spos": [
+            [
+                "acon",
+                "http://www.w3.org/2000/01/rdf-schema#label",
+                "Nanga Parbat"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/ontology/Mountain"
+            ],
+            [
+                "acon",
+                "http://dbpedia.org/property/elevationM",
+                "elevation"
+            ],
+            [
+                "uri",
+                "http://dbpedia.org/property/elevationM",
+                "allelevation"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/2000/01/rdf-schema#label",
+                "string"
+            ]
+        ],
+        "spos_label": [
+            [
+                "acon",
+                "label",
+                "Nanga Parbat"
+            ],
+            [
+                "uri",
+                "type",
+                "Mountain"
+            ],
+            [
+                "acon",
+                "elevation M",
+                "elevation"
+            ],
+            [
+                "uri",
+                "elevation M",
+                "allelevation"
+            ],
+            [
+                "uri",
+                "label",
+                "string"
+            ]
+        ]
+    },
+    {
+        "question": "\nWho created English Wikipedia?\n",
+        "spos": [
+            [
+                "website",
+                "http://www.w3.org/2000/01/rdf-schema#label",
+                "English Wikipedia"
+            ],
+            [
+                "website",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/ontology/Website"
+            ],
+            [
+                "website",
+                "http://dbpedia.org/ontology/author",
+                "uri"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/2000/01/rdf-schema#label",
+                "string"
+            ]
+        ],
+        "spos_label": [
+            [
+                "website",
+                "label",
+                "English Wikipedia"
+            ],
+            [
+                "website",
+                "type",
+                "Website"
+            ],
+            [
+                "website",
+                "author",
+                "uri"
+            ],
+            [
+                "uri",
+                "label",
+                "string"
+            ]
+        ]
+    },
+    {
+        "question": "\nGive me all actors starring in Batman Begins.\n",
+        "spos": [
+            [
+                "film",
+                "http://xmlns.com/foaf/0.1/name",
+                "Batman Begins"
+            ],
+            [
+                "film",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/ontology/Film"
+            ],
+            [
+                "film",
+                "http://dbpedia.org/ontology/starring",
+                "uri"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/2000/01/rdf-schema#label",
+                "string"
+            ]
+        ],
+        "spos_label": [
+            [
+                "film",
+                "name",
+                "Batman Begins"
+            ],
+            [
+                "film",
+                "type",
+                "Film"
+            ],
+            [
+                "film",
+                "starring",
+                "uri"
+            ],
+            [
+                "uri",
+                "label",
+                "string"
+            ]
+        ]
+    },
+    {
+        "question": "\nWhich software has been developed by organizations founded in California?\n",
+        "spos": [
+            [
+                "company",
+                "http://dbpedia.org/ontology/foundationPlace",
+                "http://dbpedia.org/resource/California"
+            ],
+            [
+                "uri",
+                "http://dbpedia.org/ontology/developer",
+                "company"
+            ],
+            [
+                "company",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/ontology/Organisation"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/ontology/Software"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/2000/01/rdf-schema#label",
+                "string"
+            ]
+        ],
+        "spos_label": [
+            [
+                "company",
+                "foundation Place",
+                "California"
+            ],
+            [
+                "uri",
+                "developer",
+                "company"
+            ],
+            [
+                "company",
+                "type",
+                "Organisation"
+            ],
+            [
+                "uri",
+                "type",
+                "Software"
+            ],
+            [
+                "uri",
+                "label",
+                "string"
+            ]
+        ]
+    },
+    {
+        "question": "\nWhich companies work in the aerospace industry as well as on nuclear reactor technology?\n",
+        "spos": [
+            [
+                "uri",
+                "http://dbpedia.org/property/industry",
+                "http://dbpedia.org/resource/Aerospace"
+            ],
+            [
+                "uri",
+                "http://dbpedia.org/property/industry",
+                "http://dbpedia.org/resource/Nuclear_reactor_technology"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/ontology/Company"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/2000/01/rdf-schema#label",
+                "string"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "industry",
+                "Aerospace"
+            ],
+            [
+                "uri",
+                "industry",
+                "Nuclear reactor technology"
+            ],
+            [
+                "uri",
+                "type",
+                "Company"
+            ],
+            [
+                "uri",
+                "label",
+                "string"
+            ]
+        ]
+    },
+    {
+        "question": "\nIs Christian Bale starring in Batman Begins?\n",
+        "spos": [
+            [
+                "film",
+                "http://xmlns.com/foaf/0.1/name",
+                "Batman Begins"
+            ],
+            [
+                "film",
+                "http://dbpedia.org/ontology/starring",
+                "actors"
+            ],
+            [
+                "film",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/ontology/Film"
+            ],
+            [
+                "actors",
+                "http://www.w3.org/2000/01/rdf-schema#label",
+                "Christian Bale"
+            ]
+        ],
+        "spos_label": [
+            [
+                "film",
+                "name",
+                "Batman Begins"
+            ],
+            [
+                "film",
+                "starring",
+                "actors"
+            ],
+            [
+                "film",
+                "type",
+                "Film"
+            ],
+            [
+                "actors",
+                "label",
+                "Christian Bale"
+            ]
+        ]
+    },
+    {
+        "question": "\nGive me the websites of companies with more than 500000 employees.\n",
+        "spos": [
+            [
+                "subject",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/ontology/Company"
+            ],
+            [
+                "subject",
+                "http://dbpedia.org/property/numEmployees",
+                "employees"
+            ],
+            [
+                "subject",
+                "http://xmlns.com/foaf/0.1/homepage",
+                "uri"
+            ]
+        ],
+        "spos_label": [
+            [
+                "subject",
+                "type",
+                "Company"
+            ],
+            [
+                "subject",
+                "num Employees",
+                "employees"
+            ],
+            [
+                "subject",
+                "homepage",
+                "uri"
+            ]
+        ]
+    },
+    {
+        "question": "\nWhich actors were born in Germany?\n",
+        "spos": [
+            [
+                "uri",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/ontology/Actor"
+            ],
+            [
+                "uri",
+                "http://dbpedia.org/ontology/birthPlace",
+                "http://dbpedia.org/resource/Germany"
+            ],
+            [
+                "city",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/class/yago/StatesOfGermany"
+            ],
+            [
+                "uri",
+                "http://dbpedia.org/ontology/birthPlace",
+                "city"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/2000/01/rdf-schema#label",
+                "string"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "type",
+                "Actor"
+            ],
+            [
+                "uri",
+                "birth Place",
+                "Germany"
+            ],
+            [
+                "city",
+                "type",
+                "States Of Germany"
+            ],
+            [
+                "uri",
+                "birth Place",
+                "city"
+            ],
+            [
+                "uri",
+                "label",
+                "string"
+            ]
+        ]
+    },
+    {
+        "question": "\nWhich country does the Airedale Terrier come from?\n",
+        "spos": [
+            [
+                "dog",
+                "http://www.w3.org/2000/01/rdf-schema#label",
+                "Airedale Terrier"
+            ],
+            [
+                "dog",
+                "http://dbpedia.org/property/country",
+                "string"
+            ]
+        ],
+        "spos_label": [
+            [
+                "dog",
+                "label",
+                "Airedale Terrier"
+            ],
+            [
+                "dog",
+                "country",
+                "string"
+            ]
+        ]
+    },
+    {
+        "question": "\nWhich birds are there in the United States?\n",
+        "spos": [
+            [
+                "uri",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/class/yago/BirdsOfTheUnitedStates"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/2000/01/rdf-schema#label",
+                "string"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "type",
+                "Birds Of The United States"
+            ],
+            [
+                "uri",
+                "label",
+                "string"
+            ]
+        ]
+    },
+    {
+        "question": "\nGive me all European Capitals!\n",
+        "spos": [
+            [
+                "uri",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/class/yago/CapitalsInEurope"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/2000/01/rdf-schema#label",
+                "string"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "type",
+                "Capitals In Europe"
+            ],
+            [
+                "uri",
+                "label",
+                "string"
+            ]
+        ]
+    },
+    {
+        "question": "\nWhich cities have more than 2 million inhabitants?\n",
+        "spos": [
+            [
+                "uri",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/ontology/City"
+            ],
+            [
+                "uri",
+                "http://dbpedia.org/property/population",
+                "population"
+            ],
+            [
+                "uri",
+                "http://dbpedia.org/property/populationUrban",
+                "population"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/2000/01/rdf-schema#label",
+                "string"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "type",
+                "City"
+            ],
+            [
+                "uri",
+                "population",
+                "population"
+            ],
+            [
+                "uri",
+                "population Urban",
+                "population"
+            ],
+            [
+                "uri",
+                "label",
+                "string"
+            ]
+        ]
+    },
+    {
+        "question": "\nWho was Tom Hanks married to?\n",
+        "spos": [
+            [
+                "person",
+                "http://www.w3.org/2000/01/rdf-schema#label",
+                "Tom Hanks"
+            ],
+            [
+                "person",
+                "http://dbpedia.org/property/spouse",
+                "string"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/2000/01/rdf-schema#label",
+                "string"
+            ]
+        ],
+        "spos_label": [
+            [
+                "person",
+                "label",
+                "Tom Hanks"
+            ],
+            [
+                "person",
+                "spouse",
+                "string"
+            ],
+            [
+                "uri",
+                "label",
+                "string"
+            ]
+        ]
+    },
+    {
+        "question": "\nWhen was DBpedia released?\n",
+        "spos": [
+            [
+                "website",
+                "http://www.w3.org/2000/01/rdf-schema#label",
+                "DBpedia"
+            ],
+            [
+                "website",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/ontology/Software"
+            ],
+            [
+                "website",
+                "http://dbpedia.org/ontology/releaseDate",
+                "date"
+            ]
+        ],
+        "spos_label": [
+            [
+                "website",
+                "label",
+                "DBpedia"
+            ],
+            [
+                "website",
+                "type",
+                "Software"
+            ],
+            [
+                "website",
+                "release Date",
+                "date"
+            ]
+        ]
+    },
+    {
+        "question": "\nWhich people were born in Heraklion?\n",
+        "spos": [
+            [
+                "city",
+                "http://www.w3.org/2000/01/rdf-schema#label",
+                "Heraklion"
+            ],
+            [
+                "uri",
+                "http://dbpedia.org/ontology/birthPlace",
+                "city"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/ontology/Person"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/2000/01/rdf-schema#label",
+                "string"
+            ]
+        ],
+        "spos_label": [
+            [
+                "city",
+                "label",
+                "Heraklion"
+            ],
+            [
+                "uri",
+                "birth Place",
+                "city"
+            ],
+            [
+                "uri",
+                "type",
+                "Person"
+            ],
+            [
+                "uri",
+                "label",
+                "string"
+            ]
+        ]
+    },
+    {
+        "question": "\nWhich caves have more than 3 entrances?\n",
+        "spos": [
+            [
+                "uri",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/ontology/Cave"
+            ],
+            [
+                "uri",
+                "http://dbpedia.org/ontology/numberOfEntrances",
+                "entrance"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/2000/01/rdf-schema#label",
+                "string"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "type",
+                "Cave"
+            ],
+            [
+                "uri",
+                "number Of Entrances",
+                "entrance"
+            ],
+            [
+                "uri",
+                "label",
+                "string"
+            ]
+        ]
+    },
+    {
+        "question": "\nGive me all films produced by Hal Roach.\n",
+        "spos": [
+            [
+                "producer",
+                "http://www.w3.org/2000/01/rdf-schema#label",
+                "Hal Roach"
+            ],
+            [
+                "uri",
+                "http://dbpedia.org/ontology/producer",
+                "producer"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/ontology/Film"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/2000/01/rdf-schema#label",
+                "string"
+            ]
+        ],
+        "spos_label": [
+            [
+                "producer",
+                "label",
+                "Hal Roach"
+            ],
+            [
+                "uri",
+                "producer",
+                "producer"
+            ],
+            [
+                "uri",
+                "type",
+                "Film"
+            ],
+            [
+                "uri",
+                "label",
+                "string"
+            ]
+        ]
+    },
+    {
+        "question": "\nWhich software has been published by Mean Hamster Software?\n",
+        "spos": [
+            [
+                "uri",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/ontology/Software"
+            ],
+            [
+                "uri",
+                "http://dbpedia.org/property/publisher",
+                "Mean Hamster Software"
+            ],
+            [
+                "uri",
+                "http://dbpedia.org/ontology/publisher",
+                "http://dbpedia.org/resource/Mean_Hamster_Software"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/2000/01/rdf-schema#label",
+                "string"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "type",
+                "Software"
+            ],
+            [
+                "uri",
+                "publisher",
+                "Mean Hamster Software"
+            ],
+            [
+                "uri",
+                "publisher",
+                "Mean Hamster Software"
+            ],
+            [
+                "uri",
+                "label",
+                "string"
+            ]
+        ]
+    },
+    {
+        "question": "\nWhat languages are spoken in Estonia?\n",
+        "spos": [
+            [
+                "country",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/ontology/Country"
+            ],
+            [
+                "country",
+                "http://dbpedia.org/ontology/language",
+                "uri"
+            ],
+            [
+                "uri",
+                "http://dbpedia.org/ontology/spokenIn",
+                "country"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/2000/01/rdf-schema#label",
+                "string"
+            ]
+        ],
+        "spos_label": [
+            [
+                "country",
+                "type",
+                "Country"
+            ],
+            [
+                "country",
+                "language",
+                "uri"
+            ],
+            [
+                "uri",
+                "spoken In",
+                "country"
+            ],
+            [
+                "uri",
+                "label",
+                "string"
+            ]
+        ]
+    },
+    {
+        "question": "\nWho owns Aldi?\n",
+        "spos": [
+            [
+                "orga",
+                "http://www.w3.org/2000/01/rdf-schema#label",
+                "Aldi"
+            ],
+            [
+                "orga",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/ontology/Organisation"
+            ],
+            [
+                "orga",
+                "http://dbpedia.org/ontology/keyPerson",
+                "uri"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/2000/01/rdf-schema#label",
+                "string"
+            ]
+        ],
+        "spos_label": [
+            [
+                "orga",
+                "label",
+                "Aldi"
+            ],
+            [
+                "orga",
+                "type",
+                "Organisation"
+            ],
+            [
+                "orga",
+                "key Person",
+                "uri"
+            ],
+            [
+                "uri",
+                "label",
+                "string"
+            ]
+        ]
+    },
+    {
+        "question": "\nWhich capitals in Europe were host cities of the summer olympic games?\n",
+        "spos": [
+            [
+                "uri",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/class/yago/CapitalsInEurope"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/class/yago/HostCitiesOfTheSummerOlympicGames"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/2000/01/rdf-schema#label",
+                "string"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "type",
+                "Capitals In Europe"
+            ],
+            [
+                "uri",
+                "type",
+                "Host Cities Of The Summer Olympic Games"
+            ],
+            [
+                "uri",
+                "label",
+                "string"
+            ]
+        ]
+    },
+    {
+        "question": "\nWho has been the 5th president of the United States of America?\n",
+        "spos": [
+            [
+                "uri",
+                "http://dbpedia.org/ontology/orderInOffice",
+                "5th President of the United States"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/ontology/President"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/2000/01/rdf-schema#label",
+                "string"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "order In Office",
+                "5th President of the United States"
+            ],
+            [
+                "uri",
+                "type",
+                "President"
+            ],
+            [
+                "uri",
+                "label",
+                "string"
+            ]
+        ]
+    },
+    {
+        "question": "\nWho is called Dana?\n",
+        "spos": [
+            [
+                "uri",
+                "http://xmlns.com/foaf/0.1/givenName",
+                "Dana"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://xmlns.com/foaf/0.1/Person"
+            ],
+            [
+                "uri",
+                "http://dbpedia.org/property/alias",
+                "alias"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/2000/01/rdf-schema#label",
+                "string"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "given Name",
+                "Dana"
+            ],
+            [
+                "uri",
+                "type",
+                "Person"
+            ],
+            [
+                "uri",
+                "alias",
+                "alias"
+            ],
+            [
+                "uri",
+                "label",
+                "string"
+            ]
+        ]
+    },
+    {
+        "question": "\nWhich music albums contain the song Last Christmas?\n",
+        "spos": [
+            [
+                "single",
+                "http://xmlns.com/foaf/0.1/name",
+                "Last Christmas"
+            ],
+            [
+                "single",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/ontology/Single"
+            ],
+            [
+                "single",
+                "http://dbpedia.org/ontology/album",
+                "uri"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/2000/01/rdf-schema#label",
+                "string"
+            ]
+        ],
+        "spos_label": [
+            [
+                "single",
+                "name",
+                "Last Christmas"
+            ],
+            [
+                "single",
+                "type",
+                "Single"
+            ],
+            [
+                "single",
+                "album",
+                "uri"
+            ],
+            [
+                "uri",
+                "label",
+                "string"
+            ]
+        ]
+    },
+    {
+        "question": "\nWhich books were written by Danielle Steel?\n",
+        "spos": [
+            [
+                "author",
+                "http://xmlns.com/foaf/0.1/name",
+                "Danielle Steel"
+            ],
+            [
+                "uri",
+                "http://dbpedia.org/ontology/author",
+                "author"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/ontology/Book"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/2000/01/rdf-schema#label",
+                "string"
+            ]
+        ],
+        "spos_label": [
+            [
+                "author",
+                "name",
+                "Danielle Steel"
+            ],
+            [
+                "uri",
+                "author",
+                "author"
+            ],
+            [
+                "uri",
+                "type",
+                "Book"
+            ],
+            [
+                "uri",
+                "label",
+                "string"
+            ]
+        ]
+    },
+    {
+        "question": "\nWhich companies are located in California, USA?\n",
+        "spos": [
+            [
+                "uri",
+                "http://dbpedia.org/ontology/location",
+                "http://dbpedia.org/resource/California"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "http://dbpedia.org/ontology/Organisation"
+            ],
+            [
+                "uri",
+                "http://www.w3.org/2000/01/rdf-schema#label",
+                "string"
+            ]
+        ],
+        "spos_label": [
+            [
+                "uri",
+                "location",
+                "California"
+            ],
+            [
+                "uri",
+                "type",
+                "Organisation"
+            ],
+            [
+                "uri",
+                "label",
+                "string"
+            ]
+        ]
+    }
+]
