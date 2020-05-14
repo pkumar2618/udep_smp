@@ -1,8 +1,26 @@
-import torch
 from pathlib import Path
-from configparser import ConfigParser
 import pickle
 import numpy as np
+import json
+import overrides
+import logging
+import numpy as np
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from allennlp.common.checks import ConfigurationError
+from allennlp.data.vocabulary import Vocabulary
+from typing import Iterator, Any, Callable, Dict, Iterable, List, Optional, Set, Union, TYPE_CHECKING
+from allennlp.data import Instance
+from allennlp.data.fields import TextField, Field, ListField, LabelField, ArrayField
+from allennlp.data.dataset_readers import DatasetReader
+from allennlp.data.token_indexers import TokenIndexer, SingleIdTokenIndexer
+from allennlp.data.tokenizers import Token, Tokenizer
+from allennlp.modules.seq2vec_encoders import Seq2VecEncoder, PytorchSeq2VecWrapper
+from allennlp.nn.util import get_text_field_mask
+from allennlp.models import Model
+from allennlp.modules.text_field_embedders import TextFieldEmbedder
+
 
 class Config(dict):
     def __init__(self, **kwargs):
@@ -17,41 +35,22 @@ class Config(dict):
 
 config = Config(
     testing=True,
-    testing_sample=100,
+    testing_sample=10,
     seed=1,
     batch_size=5,
     lr=3e-4,
-    epochs=2,
+    epochs=5,
     hidden_sz=64,
     max_seq_len=100,  # necessary to limit memory usage
     max_vocab_size=100000,
 )
-from allennlp.common.checks import ConfigurationError
-USE_GPU = torch.cuda.is_available()
-torch.manual_seed(config.seed)
-
-# ------
-from allennlp.data.vocabulary import Vocabulary
-from typing import Iterator, Any, Callable, Dict, Iterable, List, Optional, Set, Union, TYPE_CHECKING
-
-import torch
-import torch.optim as optim
-import numpy as np
-from allennlp.data import Instance
-from allennlp.data.fields import TextField, Field, ListField, LabelField, ArrayField
-from allennlp.data.dataset_readers import DatasetReader
-
-from allennlp.data.token_indexers import TokenIndexer, SingleIdTokenIndexer
-from allennlp.data.tokenizers import Token, Tokenizer
-
-import json
-import overrides
-import logging
-
-DEFAULT_NON_PADDED_NAMESPACES = ("*tags", "*labels")
 
 logging.basicConfig(filename='bertclf.log',level=logging.DEBUG)
 logger = logging.getLogger(__name__)
+
+USE_GPU = torch.cuda.is_available()
+torch.manual_seed(config.seed)
+
 
 class QuestionSPOReader(DatasetReader):
     def __init__(
@@ -152,26 +151,13 @@ vocab = Vocabulary()
 # Tokenizer is obtained from Bert using PretrainedBertIOndexr
 def bert_tokenizer(s: str):
     return bert_token_indexer.wordpiece_tokenizer(s)[:config.max_seq_len - 2]
-#------
 
 
 # creating the dataset reader
-# from dl_modules.data_loader import QuestionSPOReader, tokenizer, token_indexer
-# from dl_modules.data_loader import *
-# load the text to instance if already done
-# try:
-#     with open('train_ds.pkl', 'rb') as f_read:
-#         train_ds = pickle.load(f_read)
-#         print(len(train_ds))
-# except FileNotFoundError as err_file:
 reader = QuestionSPOReader(my_tokenizer=bert_tokenizer,
                        my_token_indexers={"sentence_spo": bert_token_indexer})
-# loading test_set data
 train_ds = reader.read("../dataset_qald/qald_input.json")
 val_ds = None
-
-# with open('train_ds.pkl', 'wb') as f_write:
-#     pickle.dump(train_ds, f_write)
 
 ### the iterator is used to batch the data and prepare it for input to the model
 from allennlp.data.iterators import BucketIterator
@@ -184,16 +170,10 @@ iterator.index_with(vocab)
 # batch = next(iter(iterator(train_ds)))
 # print(batch)
 # print(batch['sentence_spo']['sentence_spo'].shape)
-## running the trainier
 
+
+## running the trainier
 ## creating the Model now
-import torch
-import torch.nn as nn
-import torch.optim as optim
-from allennlp.modules.seq2vec_encoders import Seq2VecEncoder, PytorchSeq2VecWrapper
-from allennlp.nn.util import get_text_field_mask
-from allennlp.models import Model
-from allennlp.modules.text_field_embedders import TextFieldEmbedder
 
 
 class CrossEncoderModel(Model):
@@ -232,10 +212,10 @@ from allennlp.modules.text_field_embedders import BasicTextFieldEmbedder
 from allennlp.modules.token_embedders.bert_token_embedder import PretrainedBertEmbedder
 
 bert_embedder = PretrainedBertEmbedder(
-        # pretrained_model="bert-large-uncased",
-        # top_layer_only=True, # conserve memory
-        pretrained_model="bert-base-uncased",
+        pretrained_model="bert-large-uncased",
         top_layer_only=True, # conserve memory
+        # pretrained_model="bert-base-uncased",
+        # top_layer_only=True, # conserve memory
 )
 # The embedder gets us an embedding, here a werd embedding.
 word_embeddings: TextFieldEmbedder = BasicTextFieldEmbedder({"sentence_spo": bert_embedder},
@@ -281,7 +261,6 @@ else: model
 # training
 optimizer = optim.Adam(model.parameters(), lr=config.lr)
 from allennlp.training.trainer import Trainer
-
 trainer = Trainer(
     model=model,
     optimizer=optimizer,
