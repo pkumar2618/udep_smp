@@ -1,66 +1,138 @@
-# Loading config_settings
-from configparser import ConfigParser
-config = ConfigParser()
-config.read('bert_clf_config.ini')
-# print(config['DEFAULT']['testing'])
-
 from allennlp.data.vocabulary import Vocabulary
 from typing import *
 from allennlp.data.dataset_readers import DatasetReader
-from allennlp.data.fields import TextField, MetadataField, ArrayField
+from allennlp.data.fields import TextField, ListField, Field, ArrayField
 from allennlp.data import Instance, token_indexers
 from allennlp.data.token_indexers import TokenIndexer, SingleIdTokenIndexer
 from allennlp.data.tokenizers import Token
 import json
-import overrides
+import numpy as np
+import logging
+
+try:
+    with open('configuration.json', 'r') as f_read:
+        config = json.load(f_read)
+        test_for_dataset_key = config['dataset_settings']
+
+except KeyError as err_key:
+    with open('configuration.json', 'r') as f_read:
+        config = json.load(f_read)
+
+    config_data = {"dataset_settings": {}}
+    config_data["dataset_settings"]["testing"] = True
+    config_data["dataset_settings"]["testing_samples"] = 5
+    config_data["dataset_settings"]["max_seq_len"] = 100
+    config_data["dataset_settings"]["max_vocab_size"] = 100000,
+    config["dataset_settings"] = config_data["dataset_settings"]
+
+    with open('configuration.json', 'w') as f_write:
+        json.dump(config, f_write, indent=4)
+
+except FileNotFoundError as err_config_file:
+    config_data = {"dataset_settings": {}}
+    config_data["dataset_settings"]["testing"] = True
+    config_data["dataset_settings"]["testing_samples"] = 5
+    config_data["dataset_settings"]["max_seq_len"] = 100
+    config_data["dataset_settings"]["max_vocab_size"] = 100000,
+
+    with open('configuration.json', 'w') as f_write:
+        json.dump(config_data, f_write, indent=4)
+
+
+
+logger = logging.getLogger(__name__)
 
 
 class QuestionSPOReader(DatasetReader):
-    def __init__(self, tokenizer: Callable[[str], List[str]] = lambda x: x.split(),
-                 token_indexers: Dict[str, TokenIndexer] = None,
-                 max_seq_len: Optional[int] = config['default_settings']['max_seq_len']) -> None:
-        super().__init__(lazy=False)
-        self.tokenizer = tokenizer
-        self.token_indexers = token_indexers or {"tokens": SingleIdTokenIndexer()}
-        self.max_seq_len = max_seq_len
+    def __init__(
+            self,
+            my_tokenizer,
+            my_token_indexers: Dict[str, TokenIndexer] = None,
 
-    @overrides
-    def text_to_instance(self, sentence_tokens: List[Token]) -> Instance:
-        sentence_field = TextField(sentence_tokens, self.token_indexers)
-        # spo_field = TextField(spo_tokens, self.token_indexers)
-        fields = {"sentence_tokens": sentence_field} #, "spo_tokens": spo_field}
+    ) -> None:
+        super().__init__(lazy=False)
+        self.tokenizer = my_tokenizer
+        self.token_indexers = my_token_indexers or {"tokens": SingleIdTokenIndexer()}
+
+    def text_to_instance(self, sentence_spo_list: List[List[Token]],
+                         sentence_spo_label_list: np.ndarray=None):
+        fields: Dict[str, Field] = {}
+        sentence_spo = ListField([TextField(sentence_spo_tokens, self.token_indexers) for sentence_spo_tokens in sentence_spo_list])
+        fields['sentence_spo']= sentence_spo
+        if sentence_spo_label_list is None:
+            labels = np.zeros(len(sentence_spo_list)[0])
+        else:
+            labels = sentence_spo_label_list
+        label_field = ArrayField(array=labels)
+        fields["labels"] = label_field
+
+        # if sentence_spo_label_list is None:
+        #     labels = np.zeros(len(sentence_spo))
+        #     fields['labels'] = ListField([LabelField(label) for label in sentence_spo_label_list])
         return Instance(fields)
 
-    @overrides
+    # @overrides
     def _read(self, file_path: str) -> Iterator[Instance]:
+        logger.info("Reading file at %s", file_path)
         with open(file_path, 'r') as f_read:
             json_dict = json.load(f_read)
-            if config['default_settings']['testing']:
-                json_dict = json_dict[:config['default_settings']['testing_load']]
+            if config["dataset_settings"]["testing"]: # when testing only load a few examples
+                json_dict = json_dict[:config["dataset_settings"]["testing_samples"]]
 
-            for question_spos in json_dict:
+            # consider taking spo-triples from next 4 queries in the training set to form negative samples
+            # of the current question's spo-triples
+            len_dataset = len(json_dict)
+            for i, question_spos in enumerate(json_dict):
                 question = question_spos['question']
-                question_tokens = [Token(x) for x in self.tokenizer(question)]
+                question_tokens = self.tokenizer(question)
+                question_tokens = [Token(x) for x in question_tokens]
+                question_spo_list = list()
+                question_spo_label_list = list()
                 for spo_list in question_spos['spos_label']:
+                    # correct spo: positive sample
                     spo_label_joined = ' '.join(spo_list)
-                    spo_tokens = [Token(x) for x in self.tokenizer(spo_label_joined)]
-                    yield self.text_to_instance(question_tokens, spo_tokens)
+                    spo_tokens = self.tokenizer(spo_label_joined)
+                    spo_tokens = [Token(x) for x in spo_tokens]
+                    question_spo_tokens = [Token("[CLS]")] + question_tokens + [Token("[SEP]")] + spo_tokens
+                    question_spo_list.append(question_spo_tokens)
+                    question_spo_label_list.append(1) # label is 1 for positive sample
+                    # incorrect spo: the negative sample, not that this is not really
+                    # a batch negative sample, where we pick up spo from the instances
+                    # in the batch. Which kind of help in speed up, the least we can say.
 
-# The sentence need to be converted into tensor, the indexer is used to do that.
-# For BERT pre-trained we will use indexer from BERT, which will get us the BERT Vocabulary as well as
-# the BERT's wordpiece tokenizer.
+                    for neg_sample in range(4):
+                        if i < len_dataset - 4: # take next 4 queries
+                            neg_question_spos = json_dict[i+neg_sample+1]
+                        else: # take previous examples
+                            neg_question_spos = json_dict[i -1- neg_sample]
+                #         note that we will only take up spo-triples to form the negative examples for training.
+                        for neg_spo_list in neg_question_spos['spos_label']:
+                            neg_spo_label_joined = ' '.join(neg_spo_list)
+                            neg_spo_tokens = self.tokenizer(neg_spo_label_joined)
+                            neg_spo_tokens = [Token(x) for x in neg_spo_tokens]
+                            # the question will stay from the positive sample,
+                            # only the spo-triple will be taken up for negative example
+                            question_neg_spo_tokens = [Token("[CLS]")] + question_tokens + [Token("[SEP]")] + neg_spo_tokens
+                            question_spo_list.append(question_neg_spo_tokens)
+                            question_spo_label_list.append("0") # zero label for negative sample
+
+                    yield self.text_to_instance(question_spo_list, np.array(question_spo_label_list))
+
+
+# The sentence need to be converted into a tensor(embedding space),
+# but before that the tokens are mapped to an integer using the token_indexer.
+# For BERT pre-trained we will use indexer, vocab and embedder all from the BERT pre-trained.
+# Note that the BERT's wordpiece tokenizer need to be used
 
 from allennlp.data.token_indexers import PretrainedBertIndexer
-token_indexer = PretrainedBertIndexer(
+bert_token_indexer = PretrainedBertIndexer(
     pretrained_model="bert-large-uncased",
-    max_pieces=config['default_settings']['max_seq_len'],
+    max_pieces=100,
     do_lowercase=True,
  )
+# The vocabulary reuiqred for indexing is taken from the BERT pre-trained.
+vocab = Vocabulary()
+
 # Tokenizer is obtained from Bert using PretrainedBertIOndexr
-def tokenizer(s: str):
-    return token_indexer.wordpiece_tokenizer(s)[:config['default_settings']['max_seq_len'] - 2]
-
-
-
-if __main__ == __name__:
-    """Testing"""
+def bert_tokenizer(s: str):
+    return bert_token_indexer.wordpiece_tokenizer(s)[:config["dataset_settings"]["max_seq_len"] - 2]
