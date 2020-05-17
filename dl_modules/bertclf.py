@@ -22,43 +22,20 @@ from allennlp.models import Model
 from allennlp.modules.text_field_embedders import TextFieldEmbedder
 from allennlp.training.trainer import Trainer
 from dl_modules.data_loader import QuestionSPOReader, bert_token_indexer, bert_tokenizer
+from dl_modules.dl_utilities import ConfigJSON
 
-try:
-    with open('configuration.json', 'r') as f_read:
-        config = json.load(f_read)
-        test_for_train_key = config['training_settings']
-except KeyError:
-    config_train = {"training_settings": {}}
-    config_train["training_settings"]["seed"] = 1
-    config_train["training_settings"]["batch_size"] = 2
-    config_train["training_settings"]["learning_rate"] = 3e-4
-    config_train["training_settings"]["epochs"] = 3
-    config_train["training_settings"]["USE_GPU"] = torch.cuda.is_available()
-    with open('configuration.json', 'r') as f_read:
-        config = json.load(f_read)
-        config["training_settings"] = config_train["training_settings"]
-
-    # config["model_settings"]["hidden_sz"] = 64
-    with open('configuration.json', 'w') as f_write:
-        json.dump(config, f_write, indent=4)
-
-except FileNotFoundError as err_config_file:
-    config_train = {"training_settings": {}}
-    config_train["training_settings"]["seed"] = 1
-    config_train["training_settings"]["batch_size"] = 2
-    config_train["training_settings"]["learning_rate"] = 3e-4
-    config_train["training_settings"]["epochs"] = 3
-    config["training_settings"]["USE_GPU"] = torch.cuda.is_available()
-
-    with open('configuration.json', 'w') as f_write:
-        json.dump(config_train, f_write, indent=4)
-
+# we are goint to use a single configuration file for the entire deep learning module.
+config = ConfigJSON('configuration.json')
+config.update(section_name = "training_settings",
+                       data={"seed": 1, "batch_size":2, "learning_rate":3e-4,
+                             "epochs": 3, "USE_GPU": torch.cuda.is_available()}
+                       )
 
 logging.basicConfig(filename='bertclf.log',level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 
-torch.manual_seed(config["training_settings"]["seed"])
+torch.manual_seed(config.config["training_settings"]["seed"])
 
 # The sentence need to be converted into a tensor(embedding space),
 # but before that the tokens are mapped to an integer using the token_indexer.

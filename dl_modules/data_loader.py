@@ -8,37 +8,13 @@ from allennlp.data.tokenizers import Token
 import json
 import numpy as np
 import logging
+from dl_modules.dl_utilities import ConfigJSON
 
-try:
-    with open('configuration.json', 'r') as f_read:
-        config = json.load(f_read)
-        test_for_dataset_key = config['dataset_settings']
-
-except KeyError as err_key:
-    with open('configuration.json', 'r') as f_read:
-        config = json.load(f_read)
-
-    config_data = {"dataset_settings": {}}
-    config_data["dataset_settings"]["testing"] = True
-    config_data["dataset_settings"]["testing_samples"] = 5
-    config_data["dataset_settings"]["max_seq_len"] = 100
-    config_data["dataset_settings"]["max_vocab_size"] = 100000,
-    config["dataset_settings"] = config_data["dataset_settings"]
-
-    with open('configuration.json', 'w') as f_write:
-        json.dump(config, f_write, indent=4)
-
-except FileNotFoundError as err_config_file:
-    config_data = {"dataset_settings": {}}
-    config_data["dataset_settings"]["testing"] = True
-    config_data["dataset_settings"]["testing_samples"] = 5
-    config_data["dataset_settings"]["max_seq_len"] = 100
-    config_data["dataset_settings"]["max_vocab_size"] = 100000,
-
-    with open('configuration.json', 'w') as f_write:
-        json.dump(config_data, f_write, indent=4)
-
-
+config = ConfigJSON('configuration.json')
+config.update(section_name = "dataset_settings",
+                       data={"testing": True, "testing_samples":4, "max_seq_len":100,
+                             "max_vocab_size": 100000}
+                       )
 
 logger = logging.getLogger(__name__)
 
@@ -76,8 +52,8 @@ class QuestionSPOReader(DatasetReader):
         logger.info("Reading file at %s", file_path)
         with open(file_path, 'r') as f_read:
             json_dict = json.load(f_read)
-            if config["dataset_settings"]["testing"]: # when testing only load a few examples
-                json_dict = json_dict[:config["dataset_settings"]["testing_samples"]]
+            if config.config["dataset_settings"]["testing"]: # when testing only load a few examples
+                json_dict = json_dict[:config.config["dataset_settings"]["testing_samples"]]
 
             # consider taking spo-triples from next 4 queries in the training set to form negative samples
             # of the current question's spo-triples
@@ -135,4 +111,4 @@ vocab = Vocabulary()
 
 # Tokenizer is obtained from Bert using PretrainedBertIOndexr
 def bert_tokenizer(s: str):
-    return bert_token_indexer.wordpiece_tokenizer(s)[:config["dataset_settings"]["max_seq_len"] - 2]
+    return bert_token_indexer.wordpiece_tokenizer(s)[:config.config["dataset_settings"]["max_seq_len"] - 2]
