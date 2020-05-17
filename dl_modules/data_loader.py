@@ -8,11 +8,11 @@ from allennlp.data.tokenizers import Token
 import json
 import numpy as np
 import logging
-from dl_modules.dl_utilities import ConfigJSON
+from dl_utilities import ConfigJSON
 
 config = ConfigJSON('configuration.json')
 config.update(section_name="dataset_settings",
-                       data={"testing": True, "testing_samples":4, "max_seq_len":100,
+                       data={"testing": False, "testing_samples":4, "max_seq_len":100,
                              "max_vocab_size": 100000}
                        )
 

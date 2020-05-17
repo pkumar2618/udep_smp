@@ -2,18 +2,16 @@ import logging
 import torch
 import torch.optim as optim
 from allennlp.data.vocabulary import Vocabulary
-
-
 from allennlp.training.trainer import Trainer
-from dl_modules.data_loader import QuestionSPOReader, bert_token_indexer, bert_tokenizer
-from dl_modules.dl_utilities import ConfigJSON
+import sys
+#sys.path.insert(0, '/home/pawan/projects/aihn_qa/udep_smp/dl_modules/')
 
-from udeplib.parser import Parser
-# from pre_processor import PreProcessor
+
+from data_loader import QuestionSPOReader, bert_token_indexer, bert_tokenizer
+from dl_utilities import ConfigJSON
+
 import pickle
 import argparse
-import sys
-
 
 arguments_parser = argparse.ArgumentParser(
     prog='Entity Disambiguation',
@@ -69,7 +67,7 @@ if args.training:
 
 
     # instantiating the model
-    from dl_modules.model_architectures import CrossEncoderModel, word_embeddings, Encoder
+    from model_architectures import CrossEncoderModel, word_embeddings, Encoder
     cls_token_encoder = Encoder(vocab)
     model = CrossEncoderModel(word_embeddings, cls_token_encoder, vocab)
     if config.config["training_settings"]["USE_GPU"]:
@@ -97,7 +95,7 @@ if args.training:
         train_dataset=train_ds,
         validation_dataset=val_ds,
         cuda_device=0 if config.config["training_settings"]["USE_GPU"] else -1,
-        num_epochs=config.config["training.settings"]["epochs"],
+        num_epochs=config.config["training_settings"]["epochs"],
     )
 
     metrics = trainer.train()
