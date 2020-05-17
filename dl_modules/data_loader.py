@@ -11,7 +11,7 @@ import logging
 from dl_modules.dl_utilities import ConfigJSON
 
 config = ConfigJSON('configuration.json')
-config.update(section_name = "dataset_settings",
+config.update(section_name="dataset_settings",
                        data={"testing": True, "testing_samples":4, "max_seq_len":100,
                              "max_vocab_size": 100000}
                        )
@@ -107,7 +107,7 @@ bert_token_indexer = PretrainedBertIndexer(
     do_lowercase=True,
  )
 # The vocabulary reuiqred for indexing is taken from the BERT pre-trained.
-vocab = Vocabulary()
+# vocab = Vocabulary()
 
 # Tokenizer is obtained from Bert using PretrainedBertIOndexr
 def bert_tokenizer(s: str):

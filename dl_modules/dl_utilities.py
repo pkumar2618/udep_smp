@@ -5,12 +5,12 @@ class ConfigJSON:
         self.config = {}
         self.file_str = file_str
         try: # try reading the file if it exists already.
-            with open(file_str, 'r') as f_read:
+            with open(self.file_str, 'r') as f_read:
                 self.config = json.load(f_read)
 
         except FileNotFoundError:
-            with open(file_str, 'w') as f_write:
-                json.dump(config, f_write, indent=4)
+            with open(self.file_str, 'w') as f_write:
+                json.dump(self.config, f_write, indent=4)
 
     def load(self):
         with open(self.file_str, 'r') as f_read:
@@ -27,15 +27,18 @@ class ConfigJSON:
         """
         try:
             with open(self.file_str, 'r') as f_read:
-                config = json.load(f_read)
+                self.config = json.load(f_read)
+                for key, value in data.items():
+                    self.config[section_name][key] = value
 
         except KeyError as err_key:
             print(err_key)
-            print("KeyError: the section doesn't exist or is with different name.\n"
-                  "creating a new section with name: %s", section_name)
+            print(f"KeyError: the section {section_name} doesn't exist or is with different name.\n"
+                  "creating a new section with the same name")
             with open(self.file_str, 'r') as f_read:
                 self.config = json.load(f_read)
-                for key, value in data:
+                self.config[section_name] = {}
+                for key, value in data.items():
                     self.config[section_name][key] = value
 
             with open(self.file_str, 'w') as f_write:
