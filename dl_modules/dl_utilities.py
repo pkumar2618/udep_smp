@@ -80,6 +80,57 @@ class ConfigJSON:
         self.update(section_name = "training_settings", 
                     data={"iteration_info": iteration_info})
 
+
+def combine_input_output(input_file_path, output_file_path):
+    f_input = open(input_file_path, 'r')
+    json_input = json.load(f_input)
+
+    f_output = open(output_file_path, 'r')
+    json_output = json.load(f_output)
+
+
+    # Note this the following are taken from data_loader read methods. please confirm to that block of code for
+    # a meaningful combination of output_data with input_data
+    # consider taking spo-triples from next 4 queries in the training set to form negative samples
+    # of the current question's spo-triples
+    len_input = len(json_input)
+    len_output = len(json_output)
+    json_temp = []
+
+    for i, question_spos in enumerate(json_input):
+        question = question_spos['question']
+        for spo_list in question_spos['spos_label']:
+            # correct spo: positive sample
+            spo_label_joined = ' '.join(spo_list)
+            label = 1 # label is 1 for positive sample
+            json_temp.appen({'question': question, 'spo_triple': spo_label_joined, 'target_score': label})
+            # incorrect spo: the negative sample, not that this is not really
+            # a batch negative sample, where we pick up spo from the instances
+            # in the batch. Which kind of help in speed up, the least we can say.
+            for neg_sample in range(4):
+                if i < len_input - 4:  # take next 4 queries
+                    neg_question_spos = json_input[i + neg_sample + 1]
+                else:  # take previous examples
+                    neg_question_spos = json_input[i - 1 - neg_sample]
+                #         note that we will only take up spo-triples to form the negative examples for training.
+                for neg_spo_list in neg_question_spos['spos_label']:
+                    neg_spo_label_joined = ' '.join(neg_spo_list)
+                    # the question will stay from the positive sample,
+                    # only the spo-triple will be taken up for negative example
+                    label = 0  # zero label for negative sample
+                    json_temp.appen({'question': question, 'spo_triple': neg_spo_label_joined, 'target_score': label})
+
+    json_combined = []
+    with open("output_input_analysis.json", 'w') as f_write:
+        for dict1, dict2 in zip(json_temp, json_output):
+            json_combined.append(merge_dict(dict1, dict2))
+        json.dump(json_combined, f_write)
+
+
+def merge_dict(dict1, dict2):
+    res = {**dict1, **dict2}
+    return res
+
 class Config(dict):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -91,15 +142,6 @@ class Config(dict):
         setattr(self, key, val)
 
 
+
 if __name__ == "__main__":
-   config = Config(
-        testing=True,
-        testing_sample=10,
-        seed=1,
-        batch_size=2,
-        lr=3e-4,
-        epochs=3,
-        hidden_sz=64,
-        max_seq_len=100,  # necessary to limit memory usage
-        max_vocab_size=100000,
-    )
+    combine_input_output('../dataset_qald/qald_input.json', 'output_prediction.json')
