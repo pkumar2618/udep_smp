@@ -9,7 +9,7 @@ import numpy as np
 from allennlp.nn import util as nn_util
 import json
 def tonp(tsr): return tsr.detach().cpu().numpy()
-
+#USE_GPU = torch.cuda.is_available()
 class Predictor:
     def __init__(self, model: Model, iterator: DataIterator,
                  cuda_device: int = -1) -> None:
