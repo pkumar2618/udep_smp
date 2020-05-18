@@ -18,7 +18,11 @@ config.update(section_name="dataset_settings",
 
 logger = logging.getLogger(__name__)
 
-
+"""
+The basic unit here is a block of sentence_positive-spos and sentence_negative-spos. This block is batched by the 
+BucketIterator. Note that the block size is not finite, it may vary.
+So is the number of tokens in the sentence_spo_tokens. 
+"""
 class QuestionSPOReader(DatasetReader):
     def __init__(
             self,

@@ -3,12 +3,12 @@ import torch
 import torch.optim as optim
 from allennlp.data.vocabulary import Vocabulary
 from allennlp.training.trainer import Trainer
-import sys
-#sys.path.insert(0, '/home/pawan/projects/aihn_qa/udep_smp/dl_modules/')
-
+from allennlp.data.iterators import BasicIterator
 
 from data_loader import QuestionSPOReader, bert_token_indexer, bert_tokenizer
 from dl_utilities import ConfigJSON
+from model_architectures import CrossEncoderModel, word_embeddings, Encoder
+from predictor import Predictor
 
 import pickle
 import argparse
@@ -21,14 +21,38 @@ arguments_parser = argparse.ArgumentParser(
 
 arguments_parser.add_argument("--training", help="Train the Model, the training-settings are at configuration.json"
                                                  " file", action="store_true")
-arguments_parser.add_argument("--prediction", help="pass the list of candidate <S,P,O> to find out their score.")
+arguments_parser.add_argument("--prediction", help="pass the block of candidate <S,P,O> to find out their score.",
+                              action="store_true")
 arguments_parser.add_argument("--new_experiment_starts", help="Start a new training experiment.") 
 arguments_parser.add_argument("--iteration_info", help="Provide info on what is new about this iteration." )
 arguments_parser.add_argument("--iteration_data", type=json.loads, help="Provide the data as string, which will be loaded with json.load")
 
 args = arguments_parser.parse_args()
 
-if args.training:
+if args.prediction:
+    USE_GPU = torch.cuda.is_available()
+    # vocab = Vocabulary.from_files("./vocabulary")
+    reader = QuestionSPOReader(my_tokenizer=bert_tokenizer,
+                               my_token_indexers={"sentence_spo": bert_token_indexer})
+
+    test_ds = reader.read("../dataset_qald/qald_test.json")
+    test_ds = test_ds[:3]
+    vocab = Vocabulary()
+    seq_iterator = BasicIterator(batch_size=1)
+    seq_iterator.index_with(vocab)
+    # instantiating the model
+    cls_token_encoder = Encoder(vocab)
+    model = CrossEncoderModel(word_embeddings, cls_token_encoder, vocab)
+    # loading model_state from the saved model
+    with open("./model.th", 'rb') as f_model:
+        model.load_state_dict(torch.load(f_model))
+
+    predictor = Predictor(model, seq_iterator, cuda_device=0 if USE_GPU else -1)
+    test_preds = predictor.predict(test_ds)
+    print("prediction done, see the output_prediction.json")
+    # iterate over the dataset without changing its order
+
+elif args.training:
     config = ConfigJSON('configuration.json')
     if args.new_experiment_starts:
         # we are goint to use a single configuration file for the entire deep learning module.
@@ -124,7 +148,3 @@ if args.training:
         torch.save(model.state_dict(), f)
     # save the vocabulary
     vocab.save_to_files("./vocabulary")
-
-
-if args.prediction:
-    pass
