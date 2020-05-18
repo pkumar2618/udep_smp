@@ -4,7 +4,7 @@ import numpy as np
 from allennlp.modules.text_field_embedders import TextFieldEmbedder
 from allennlp.modules.seq2vec_encoders import Seq2VecEncoder
 from allennlp.models import Model
-from typing import Dict, List
+from typing import Dict, List, Any
 from allennlp.modules.text_field_embedders import BasicTextFieldEmbedder
 # We need to use BERT pre-trained model to create the embedding for the input tokens
 from allennlp.modules.token_embedders.bert_token_embedder import PretrainedBertEmbedder
@@ -23,6 +23,7 @@ class CrossEncoderModel(Model):
         self.loss = nn.BCEWithLogitsLoss()
 
     def forward(self, sentence_spo: Dict[str, torch.Tensor],
+                sentence_spo_raw: Any,
                 labels: List[torch.Tensor] = None) -> torch.Tensor:
         all_sample_logits = list()
         # all_sample_labels = list()

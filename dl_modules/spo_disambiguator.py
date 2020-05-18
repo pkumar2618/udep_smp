@@ -23,7 +23,8 @@ arguments_parser.add_argument("--training", help="Train the Model, the training-
                                                  " file", action="store_true")
 arguments_parser.add_argument("--prediction", help="pass the block of candidate <S,P,O> to find out their score.",
                               action="store_true")
-arguments_parser.add_argument("--new_experiment_starts", help="Start a new training experiment.") 
+arguments_parser.add_argument("--new_experiment_starts", help="Start a new training experiment.",
+                              action="store_true")
 arguments_parser.add_argument("--iteration_info", help="Provide info on what is new about this iteration." )
 arguments_parser.add_argument("--iteration_data", type=json.loads, help="Provide the data as string, which will be loaded with json.load")
 arguments_parser.add_argument("--model_file", type = str, help="name of the saved model_file to be used for prediction")
@@ -68,9 +69,9 @@ elif args.training:
                                     "iteration_number": 0
                                     }
                             )
-        config.run_cycle_reset() #when called it will reset the experiment run cycle, 
+        # config.run_cycle_reset() #when called it will reset the experiment run cycle,
         # the training_run in the configuration file will be set to zero. and further iteration will update the value. 
-        config.iteration_info(args.iteration_info)
+        # config.iteration_info(args.iteration_info)
     elif args.iteration_info:
         # if continuing with the same experimens and only running its further iterations.
         config.iteration_info(args.iteration_info)

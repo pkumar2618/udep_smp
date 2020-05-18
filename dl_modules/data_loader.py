@@ -1,7 +1,7 @@
 from allennlp.data.vocabulary import Vocabulary
 from typing import *
 from allennlp.data.dataset_readers import DatasetReader
-from allennlp.data.fields import TextField, ListField, Field, ArrayField
+from allennlp.data.fields import TextField, ListField, Field, ArrayField, MetadataField
 from allennlp.data import Instance, token_indexers
 from allennlp.data.token_indexers import TokenIndexer, SingleIdTokenIndexer
 from allennlp.data.tokenizers import Token
@@ -35,7 +35,9 @@ class QuestionSPOReader(DatasetReader):
         self.token_indexers = my_token_indexers or {"tokens": SingleIdTokenIndexer()}
 
     def text_to_instance(self, sentence_spo_list: List[List[Token]],
-                         sentence_spo_label_list: np.ndarray=None):
+                         sentence_spo_list_raw: List[Dict],
+                         sentence_spo_label_list: np.ndarray=None,
+                         ):
         fields: Dict[str, Field] = {}
         sentence_spo = ListField([TextField(sentence_spo_tokens, self.token_indexers) for sentence_spo_tokens in sentence_spo_list])
         fields['sentence_spo']= sentence_spo
@@ -46,6 +48,7 @@ class QuestionSPOReader(DatasetReader):
         label_field = ArrayField(array=labels)
         fields["labels"] = label_field
 
+        fields["sentence_spo_raw"] = ListField([MetadataField(sentence_spo_raw) for sentence_spo_raw in sentence_spo_list_raw])
         # if sentence_spo_label_list is None:
         #     labels = np.zeros(len(sentence_spo))
         #     fields['labels'] = ListField([LabelField(label) for label in sentence_spo_label_list])
@@ -67,6 +70,7 @@ class QuestionSPOReader(DatasetReader):
                 question_tokens = self.tokenizer(question)
                 question_tokens = [Token(x) for x in question_tokens]
                 question_spo_list = list()
+                question_spo_list_raw = list()
                 question_spo_label_list = list()
                 for spo_list in question_spos['spos_label']:
                     # correct spo: positive sample
@@ -79,7 +83,7 @@ class QuestionSPOReader(DatasetReader):
                     # incorrect spo: the negative sample, not that this is not really
                     # a batch negative sample, where we pick up spo from the instances
                     # in the batch. Which kind of help in speed up, the least we can say.
-
+                    question_spo_list_raw.append({'question': question, 'spo_triple': spo_label_joined, 'target_score': 1})
                     for neg_sample in range(4):
                         if i < len_dataset - 4: # take next 4 queries
                             neg_question_spos = json_dict[i+neg_sample+1]
@@ -95,8 +99,9 @@ class QuestionSPOReader(DatasetReader):
                             question_neg_spo_tokens = [Token("[CLS]")] + question_tokens + [Token("[SEP]")] + neg_spo_tokens
                             question_spo_list.append(question_neg_spo_tokens)
                             question_spo_label_list.append("0") # zero label for negative sample
+                            question_spo_list_raw.append({'question': question, 'spo_triple': neg_spo_label_joined, 'target_score': 0})
 
-                    yield self.text_to_instance(question_spo_list, np.array(question_spo_label_list))
+                    yield self.text_to_instance(question_spo_list, question_spo_list_raw, np.array(question_spo_label_list))
 
 
 # The sentence need to be converted into a tensor(embedding space),
