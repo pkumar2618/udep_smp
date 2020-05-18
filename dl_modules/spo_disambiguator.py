@@ -26,7 +26,7 @@ arguments_parser.add_argument("--prediction", help="pass the block of candidate 
 arguments_parser.add_argument("--new_experiment_starts", help="Start a new training experiment.") 
 arguments_parser.add_argument("--iteration_info", help="Provide info on what is new about this iteration." )
 arguments_parser.add_argument("--iteration_data", type=json.loads, help="Provide the data as string, which will be loaded with json.load")
-
+arguments_parser.add_argument("--model_file", type = str, help="name of the saved model_file to be used for prediction")
 args = arguments_parser.parse_args()
 
 if args.prediction:
@@ -36,15 +36,19 @@ if args.prediction:
                                my_token_indexers={"sentence_spo": bert_token_indexer})
 
     test_ds = reader.read("../dataset_qald/qald_test.json")
-    test_ds = test_ds[:3]
+    # test_ds = test_ds[:3]
     vocab = Vocabulary()
     seq_iterator = BasicIterator(batch_size=1)
     seq_iterator.index_with(vocab)
     # instantiating the model
     cls_token_encoder = Encoder(vocab)
     model = CrossEncoderModel(word_embeddings, cls_token_encoder, vocab)
+    if USE_GPU:
+        model.cuda()
+    else:
+        model
     # loading model_state from the saved model
-    with open("./model.th", 'rb') as f_model:
+    with open(args.model_file, 'rb') as f_model:
         model.load_state_dict(torch.load(f_model))
 
     predictor = Predictor(model, seq_iterator, cuda_device=0 if USE_GPU else -1)
