@@ -23,8 +23,7 @@ arguments_parser.add_argument("--training", help="Train the Model, the training-
                                                  " file", action="store_true")
 arguments_parser.add_argument("--prediction", help="pass the block of candidate <S,P,O> to find out their score.",
                               action="store_true")
-arguments_parser.add_argument("--new_experiment_starts", help="Start a new training experiment.",
-                              action="store_true")
+arguments_parser.add_argument("--new_experiment", help="Start a new training experiment.")
 arguments_parser.add_argument("--iteration_info", help="Provide info on what is new about this iteration." )
 arguments_parser.add_argument("--iteration_data", type=json.loads, help="Provide the data as string, which will be loaded with json.load")
 arguments_parser.add_argument("--model_file", type = str, help="name of the saved model_file to be used for prediction")
@@ -59,11 +58,11 @@ if args.prediction:
 
 elif args.training:
     config = ConfigJSON('configuration.json')
-    if args.new_experiment_starts:
+    if args.new_experiment:
         # we are goint to use a single configuration file for the entire deep learning module.
         config.update(section_name = "training_settings",
-                               data={"seed": 1, "batch_size":2, "learning_rate":3e-4,
-                                     "epochs": 3, "USE_GPU": torch.cuda.is_available(),
+                               data={"seed": 1, "batch_size":8, "learning_rate":3e-4,
+                                     "epochs": 5, "USE_GPU": torch.cuda.is_available(),
                                      "training_dataset": "../dataset_qald/qald_train.json",
                                     "validation_dataset": "../dataset_qald/qald_val.json",
                                     "iteration_number": 0
@@ -74,9 +73,9 @@ elif args.training:
                             "max_vocab_size": 100000}
                       )
 
+        config.experiment_info(args.new_experiment)
         # config.run_cycle_reset() #when called it will reset the experiment run cycle,
         # the training_run in the configuration file will be set to zero. and further iteration will update the value. 
-        # config.iteration_info(args.iteration_info)
     elif args.iteration_info:
         # if continuing with the same experimens and only running its further iterations.
         config.iteration_info(args.iteration_info)

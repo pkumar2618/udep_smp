@@ -46,7 +46,7 @@ class CrossEncoderModel(Model):
 
 bert_embedder = PretrainedBertEmbedder(
     pretrained_model="bert-large-cased",
-    top_layer_only=True,  # conserve memory
+    top_layer_only=False,  # conserve memory
     # pretrained_model="bert-base-uncased",
     # top_layer_only=True, # conserve memory
 )

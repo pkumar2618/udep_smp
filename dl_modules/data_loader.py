@@ -109,11 +109,12 @@ from allennlp.data.token_indexers import PretrainedBertIndexer
 bert_token_indexer = PretrainedBertIndexer(
     pretrained_model="bert-large-cased",
     max_pieces=config.config["dataset_settings"]["max_seq_len"],
-    do_lowercase=True,
+    do_lowercase=False,
  )
 # The vocabulary reuiqred for indexing is taken from the BERT pre-trained.
 # vocab = Vocabulary()
 
 # Tokenizer is obtained from Bert using PretrainedBertIOndexr
 def bert_tokenizer(s: str):
-    return bert_token_indexer.wordpiece_tokenizer(s)[:config.config["dataset_settings"]["max_seq_len"] - 2]
+    #return bert_token_indexer.wordpiece_tokenizer(s)[:config.config["dataset_settings"]["max_seq_len"] - 2]
+    return bert_token_indexer.wordpiece_tokenizer(s)

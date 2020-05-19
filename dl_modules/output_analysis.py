@@ -67,7 +67,10 @@ with open("output_prediction.json", 'r') as f_read:
     print(f"Accuracy: {accurate}/{total_block} which is {perc_accu}%" )
     print(f"MRR: {mrr}")
     for k, v in hit_at.items():
-        # try:
-            # hit_rate = v[0]/v[1]
-        print(f'hit@{k} : {v[0]}/{v[1]}\n')
+        try:
+            hit_rate = v[0]/v[1]
+        except ZeroDivisionError:
+            hit_rate ="__"
+            print(f'hit@{k} : {v[0]}/{v[1]}, {hit_rate}')
+
 

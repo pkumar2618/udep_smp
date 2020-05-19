@@ -79,6 +79,10 @@ class ConfigJSON:
     def iteration_info(self, iteration_info = None): 
         self.update(section_name = "training_settings", 
                     data={"iteration_info": iteration_info})
+    
+    def experiment_info(self, experiment_info = None):
+        self.update(section_name = "training_settings", 
+                    data={"experiment_info": experiment_info})
 
 
 def combine_input_output(input_file_path, output_file_path):
