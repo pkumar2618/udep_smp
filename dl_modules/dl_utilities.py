@@ -103,7 +103,7 @@ def combine_input_output(input_file_path, output_file_path):
             # correct spo: positive sample
             spo_label_joined = ' '.join(spo_list)
             label = 1 # label is 1 for positive sample
-            json_temp.appen({'question': question, 'spo_triple': spo_label_joined, 'target_score': label})
+            json_temp.append({'question': question, 'spo_triple': spo_label_joined, 'target_score': label})
             # incorrect spo: the negative sample, not that this is not really
             # a batch negative sample, where we pick up spo from the instances
             # in the batch. Which kind of help in speed up, the least we can say.
@@ -118,13 +118,13 @@ def combine_input_output(input_file_path, output_file_path):
                     # the question will stay from the positive sample,
                     # only the spo-triple will be taken up for negative example
                     label = 0  # zero label for negative sample
-                    json_temp.appen({'question': question, 'spo_triple': neg_spo_label_joined, 'target_score': label})
+                    json_temp.append({'question': question, 'spo_triple': neg_spo_label_joined, 'target_score': label})
 
     json_combined = []
     with open("output_input_analysis.json", 'w') as f_write:
         for dict1, dict2 in zip(json_temp, json_output):
             json_combined.append(merge_dict(dict1, dict2))
-        json.dump(json_combined, f_write)
+        json.dump(json_combined, f_write, indent=4)
 
 
 def merge_dict(dict1, dict2):
