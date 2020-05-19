@@ -11,10 +11,6 @@ import logging
 from dl_utilities import ConfigJSON
 
 config = ConfigJSON('configuration.json')
-config.update(section_name="dataset_settings",
-                       data={"testing": False, "testing_samples":4, "max_seq_len":100,
-                             "max_vocab_size": 100000}
-                       )
 
 logger = logging.getLogger(__name__)
 
@@ -111,8 +107,8 @@ class QuestionSPOReader(DatasetReader):
 
 from allennlp.data.token_indexers import PretrainedBertIndexer
 bert_token_indexer = PretrainedBertIndexer(
-    pretrained_model="bert-large-uncased",
-    max_pieces=100,
+    pretrained_model="bert-large-cased",
+    max_pieces=config.config["dataset_settings"]["max_seq_len"],
     do_lowercase=True,
  )
 # The vocabulary reuiqred for indexing is taken from the BERT pre-trained.

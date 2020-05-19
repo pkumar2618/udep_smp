@@ -69,6 +69,11 @@ elif args.training:
                                     "iteration_number": 0
                                     }
                             )
+        config.update(section_name="dataset_settings",
+                      data={"testing": False, "testing_samples": 4, "max_seq_len": 100,
+                            "max_vocab_size": 100000}
+                      )
+
         # config.run_cycle_reset() #when called it will reset the experiment run cycle,
         # the training_run in the configuration file will be set to zero. and further iteration will update the value. 
         # config.iteration_info(args.iteration_info)
