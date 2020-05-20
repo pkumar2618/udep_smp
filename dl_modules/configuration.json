@@ -1,0 +1,20 @@
+{
+    "dataset_settings": {
+        "testing": false,
+        "testing_samples": 4,
+        "max_seq_len": 100,
+        "max_vocab_size": 100000
+    },
+    "training_settings": {
+        "seed": 1,
+        "batch_size": 8,
+        "learning_rate": 0.0003,
+        "epochs": 5,
+        "USE_GPU": true,
+        "training_dataset": "../dataset_qald/qald_train.json",
+        "validation_dataset": "../dataset_qald/qald_val.json",
+        "iteration_info": "using bert-large-case",
+        "iteration_number": 0,
+        "experiment_info": "running with all layers of BERT to give embedding, Note that this doesn't causes backpro on these layers"
+    }
+}

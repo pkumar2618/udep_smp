@@ -71,6 +71,6 @@ with open("output_prediction.json", 'r') as f_read:
             hit_rate = v[0]/v[1]
         except ZeroDivisionError:
             hit_rate ="__"
-            print(f'hit@{k} : {v[0]}/{v[1]}, {hit_rate}')
+        print(f'hit@{k} : {v[0]}/{v[1]}, {hit_rate}')
 
 
