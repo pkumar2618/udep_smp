@@ -1,4 +1,4 @@
-from SPARQLWrapper import SPARQLWrapper, JSON
+# from SPARQLWrapper import SPARQLWrapper, JSON
 # from surf.query import a, select
 # from surf.rdf import BNode, Graph, ConjunctiveGraph, Literal, Namespace
 # from surf.rdf import RDF, URIRef
@@ -145,7 +145,7 @@ class Query(object):
         if logical_form == 'sparql':
             query_type = f"{self._type} {self._modifier} {' '.join(self._vars)} "
 
-            bgp_string = '\n'.join([f"{self._angular_braces(s)} {self._angular_braces(p)} {self._angular_braces(o)}" for s, p, o in self._data])
+            bgp_string = ' . '.join([f"{self._angular_braces(s)} {self._angular_braces(p)} {self._angular_braces(o)}" for s, p, o in self._data])
 
             self.sparql= f"{query_type}\n{self._where} {{{bgp_string}}}"
 

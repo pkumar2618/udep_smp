@@ -19,12 +19,12 @@ class Predictor:
         self.iterator = iterator
         self.cuda_device = cuda_device
 
-    def _extract_data(self, batch) -> np.ndarray:
+    def _extract_data(self, batch):
         out_dict = self.model(**batch)
         # return expit(tonp(out_dict["sentence_spo_logits"]))
         return out_dict["sentence_spo_logits"]
 
-    def predict(self, ds: Iterable[Instance]) -> np.ndarray:
+    def predict(self, ds: Iterable[Instance], write_pred = False):
         pred_generator = self.iterator(ds, num_epochs=1, shuffle=False)
         self.model.eval()
         pred_generator_tqdm = tqdm(pred_generator,
@@ -43,7 +43,10 @@ class Predictor:
 
                 instance_count += 1
 
-        with open('output_prediction.json', 'w') as f_write:
-            json.dump(json_list, f_write, indent=4)
+        if write_pred:
+            with open('output_prediction.json', 'w') as f_write:
+                json.dump(json_list, f_write, indent=4)
+        else:
+            return json_list
 
         # return np.concatenate(json_list, axis=0)

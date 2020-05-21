@@ -1,6 +1,4 @@
-from typing import List, Any
-
-from udeplib.nl_utils import *
+from udeplib.nlquestion import NLQuestion
 
 
 class Parser(object):
@@ -8,7 +6,7 @@ class Parser(object):
     Takes as input a list NLQuestion(one or more)
     and parse it.
     """
-    ug_sparql_graph_list: List[Any]
+    # ug_sparql_graph_list: List[Any]
 
     def __init__(self, nlqs):
         """
@@ -23,7 +21,7 @@ class Parser(object):
         self.g_sparql_graph_list = []
         self.results_list = []
 
-    def tokenize(self, dependency_parsing):
+    def tokenize(self, dependency_parsing, bypass=True):
         """
         tokenize the natural language question question
         :return:
@@ -34,7 +32,12 @@ class Parser(object):
         self.nlq_canonical_list = [nlq_tokens.canonicalize(dependency_parsing, canonical_form) for nlq_tokens in self.nlq_tokens_list]
 
     def ungrounded_logical_form(self):
-        self.ug_logical_form_list = [nlq_canonical.formalize_into_udeplambda() for nlq_canonical in self.nlq_canonical_list]
+        # self.ug_logical_form_list = [nlq_canonical.formalize_into_udeplambda()
+        #                              for nlq_canonical in self.nlq_canonical_list]
+        # for nlq_canon, sentence in zip(self.nlq_canonical_list, self.nlq_questions_list):
+        #     self.ug_logical_form_list.append(nlq_canon.direct_to_udeplambda(sentence))
+        self.ug_logical_form_list = [nlq_canonical.direct_to_udeplambda()
+                                     for nlq_canonical in self.nlq_canonical_list]
 
     def ungrounded_sparql_graph(self, kg='dbpedia'):
         """

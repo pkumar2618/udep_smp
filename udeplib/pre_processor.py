@@ -1,4 +1,4 @@
-from udeplib.nl_utils import *
+from udeplib.nlqtokens import *
 from ug_utils import *
 from nltk.tokenize import word_tokenize
 import string

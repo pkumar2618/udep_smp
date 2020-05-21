@@ -26,6 +26,7 @@ with open("output_prediction.json", 'r') as f_read:
                 idx_cemb = np.argmax(label_score_block)
                 # calculating mrr
                 mrr_list.append(1 / (1 + idx_cemb))
+
                 #### Calculating Hit Rate
                 hit_dict = {}
                 for i, value in enumerate(label_score_block):

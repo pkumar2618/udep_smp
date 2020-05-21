@@ -1,12 +1,12 @@
 import pandas as pd
 import numpy as np
 import json
-from SPARQLWrapper import SPARQLWrapper, JSON
+# from SPARQLWrapper import SPARQLWrapper, JSON
 import re
 from urllib.parse import urlparse, urlunparse
 import sys
 from ast import literal_eval
-from gensim.models import KeyedVectors
+# from gensim.models import KeyedVectors
 import pickle
 from sklearn.metrics.pairwise import cosine_similarity
 

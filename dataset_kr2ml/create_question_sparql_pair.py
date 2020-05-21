@@ -1,5 +1,7 @@
-from udeplib.nl_utils import *
 import pandas as pd
+
+from udeplib.nlqcanonical import NLQCanonical
+
 file_input= 'kr2ml_select.tsv'
 file_output= '../question_sparql_pairs.tsv'
 question_sparql_pair= pd.DataFrame(columns=['question_id', 'gold_sparql',
