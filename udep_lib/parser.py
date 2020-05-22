@@ -1,4 +1,4 @@
-from udeplib.nlquestion import NLQuestion
+from udep_lib.nlquestion import NLQuestion
 
 
 class Parser(object):

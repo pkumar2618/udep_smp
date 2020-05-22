@@ -2,8 +2,8 @@ import re
 
 from rdflib import URIRef, BNode
 
-from udeplib.ug_sparql_graph import UGSPARQLGraph
-from udeplib.sparql_builder import Query
+from udep_lib.ug_sparql_graph import UGSPARQLGraph
+from udep_lib.sparql_builder import Query
 
 
 class UGLogicalForm():

@@ -1,7 +1,7 @@
 import json
 import subprocess
 
-from udeplib.ug_logicalform import UGLogicalForm
+from udep_lib.ug_logicalform import UGLogicalForm
 
 
 class NLQCanonical(object):

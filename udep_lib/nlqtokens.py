@@ -1,7 +1,7 @@
 # from ug_utils import *
 # import spotlight
-from udeplib.nlqcanonical import NLQCanonical
-from udeplib.nlquestion import NLQuestion
+from udep_lib.nlqcanonical import NLQCanonical
+from udep_lib.nlquestion import NLQuestion
 # from gensim.models import KeyedVectors
 import pickle
 

@@ -3,7 +3,7 @@ import string
 import stanfordnlp
 from nltk import word_tokenize
 
-from udeplib.nlqtokens import NLQTokens, NLQTokensDepParsed
+from udep_lib.nlqtokens import NLQTokens, NLQTokensDepParsed
 
 # Philosopy 1: Object may be created empty and later on modified using a bunch of operations on them.
 # Philosopy 2: An object is modified by performing some operation on it from its own class and takes a completely
