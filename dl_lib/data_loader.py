@@ -9,8 +9,9 @@ import json
 import numpy as np
 import logging
 from .dl_utilities import ConfigJSON
-
-config = ConfigJSON('configuration.json')
+import os 
+dir_path = os.path.dirname(os.path.realpath(__file__))
+config = ConfigJSON(os.path.join(dir_path,'configuration.json'))
 
 logger = logging.getLogger(__name__)
 

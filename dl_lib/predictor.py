@@ -7,7 +7,7 @@ from allennlp.data import Instance
 import torch
 import numpy as np
 from allennlp.nn import util as nn_util
-from dl_utilities import merge_dict
+from dl_lib.dl_utilities import merge_dict
 import json
 
 def tonp(tsr): return tsr.detach().cpu().numpy()

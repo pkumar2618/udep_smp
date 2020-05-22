@@ -4,10 +4,10 @@ import os
 from rdflib import BNode, URIRef
 
 from candidate_generation.searchIndex import entitySearch, propertySearch
-from dbpedialib.db_utils import get_property_using_cosine_similarity
-from dl_modules.spo_disambiguator import cross_emb_predictor
-from udeplib.nlqtokens import question
-from udeplib.g_sparql_graph import GroundedSPARQLGraph
+from dbpedia_lib.db_utils import get_property_using_cosine_similarity
+from dl_lib.spo_disambiguator import cross_emb_predictor 
+#from udep_lib.nlqtokens import question
+from udep_lib.g_sparql_graph import GroundedSPARQLGraph
 
 
 class UGSPARQLGraph:

@@ -1,7 +1,6 @@
 # from ug_utils import *
 # import spotlight
 from udep_lib.nlqcanonical import NLQCanonical
-from udep_lib.nlquestion import NLQuestion
 # from gensim.models import KeyedVectors
 import pickle
 
@@ -85,6 +84,7 @@ if __name__ == "__main__":
             nlq_tokens = pickle.load(f)
 
     except FileNotFoundError as e:
+        from udep_lib.nlquestion import NLQuestion
         nlq = NLQuestion(question)
         nlq_tokens = nlq.tokenize(dependency_parsing=True)
         with open(f'{dump_name}.pkl', 'wb') as f:

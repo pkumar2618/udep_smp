@@ -5,30 +5,30 @@ from allennlp.data.vocabulary import Vocabulary
 from allennlp.training.trainer import Trainer
 from allennlp.data.iterators import BasicIterator
 
-from data_loader import QuestionSPOReader, bert_token_indexer, bert_tokenizer
-from dl_utilities import ConfigJSON
-from model_architectures import CrossEncoderModel, word_embeddings, Encoder
-from predictor import Predictor
-
+from dl_lib.data_loader import QuestionSPOReader, bert_token_indexer, bert_tokenizer
+from dl_lib.dl_utilities import ConfigJSON
+from dl_lib.model_architectures import CrossEncoderModel, word_embeddings, Encoder
+from dl_lib.predictor import Predictor
+import os
 import pickle
-import argparse
 import json
 
 
-arguments_parser = argparse.ArgumentParser(
-    prog='Entity Disambiguation',
-    description="Will take candidates entity(relation) and re-rank them to get the top candidate for final use in the"
-                "query.")
-
-arguments_parser.add_argument("--training", help="Train the Model, the training-settings are at configuration.json"
-                                                 " file", action="store_true")
-arguments_parser.add_argument("--prediction", help="pass the block of candidate <S,P,O> to find out their score.",
-                              action="store_true")
-arguments_parser.add_argument("--new_experiment", help="Start a new training experiment.")
-arguments_parser.add_argument("--iteration_info", help="Provide info on what is new about this iteration." )
-arguments_parser.add_argument("--iteration_data", type=json.loads, help="Provide the data as string, which will be loaded with json.load")
-arguments_parser.add_argument("--model_file", type = str, help="name of the saved model_file to be used for prediction")
-args = arguments_parser.parse_args()
+#import argparse
+#arguments_parser = argparse.ArgumentParser(
+#   prog='Entity Disambiguation',
+#   description="Will take candidates entity(relation) and re-rank them to get the top candidate for final use in the"
+#               "query.")
+#a
+#arguments_parser.add_argument("--training", help="Train the Model, the training-settings are at configuration.json"
+#                                                " file", action="store_true")
+#arguments_parser.add_argument("--prediction", help="pass the block of candidate <S,P,O> to find out their score.",
+#                             action="store_true")
+#arguments_parser.add_argument("--new_experiment", help="Start a new training experiment.")
+#arguments_parser.add_argument("--iteration_info", help="Provide info on what is new about this iteration." )
+#arguments_parser.add_argument("--iteration_data", type=json.loads, help="Provide the data as string, which will be loaded with json.load")
+#arguments_parser.add_argument("--model_file", type = str, help="name of the saved model_file to be used for prediction")
+#args = arguments_parser.parse_args()
 
 # if args.prediction:
 def cross_emb_predictor(input_file_str=None, input_dict=None, write_pred=False, model_file=None):
@@ -61,7 +61,10 @@ def cross_emb_predictor(input_file_str=None, input_dict=None, write_pred=False, 
     else:
         model
     # loading model_state from the saved model
-    with open(model_file, 'rb') as f_model:
+
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    model_file_abs = os.path.join(dir_path, f'model_file')
+    with open(model_file_abs, 'rb') as f_model:
         model.load_state_dict(torch.load(f_model))
 
     predictor = Predictor(model, seq_iterator, cuda_device=0 if USE_GPU else -1)
@@ -173,6 +176,7 @@ def cross_emb_trainer(log_new_experiment=True, experiment_iter=False, iteration_
     # vocab.save_to_files("./vocabulary")
 
 if __name__ =="__main__":
+    """
     input_dict = {
         "question": "Give me all types of eating disorders.",
         "spos": [
@@ -200,11 +204,11 @@ if __name__ =="__main__":
                 "uri"
             ]
         ]
-    }
+    }"""
 
-    if args.prediction:
+    #if args.prediction:
         # predictor(input_file_str="../dataset_qald/qald_test.json", write_pred=True, model_file=args.model_file)
-        cross_emb_predictor(input_dict=input_dict, write_pred=True, model_file=args.model_file)
-    if args.training:
-        cross_emb_trainer(log_new_experiment=args.new_experiment, experiment_iter=args.iteration_info,
-                          iteration_info=args.iteration_info, iteration_data=args.iteration_data )
+    #    cross_emb_predictor(input_dict=input_dict, write_pred=True, model_file=args.model_file)
+    #if args.training:
+       # cross_emb_trainer(log_new_experiment=args.new_experiment, experiment_iter=args.iteration_info,
+       #                   iteration_info=args.iteration_info, iteration_data=args.iteration_data )
