@@ -4,7 +4,9 @@ import pickle
 import argparse
 import sys
 
-sys.path.insert(0, './dl_modules')
+sys.path.insert(0, './dl_lib')
+sys.path.insert(0, './udep_lib')
+sys.path.insert(0, './candidate_generation')
 
 arguments_parser = argparse.ArgumentParser(
     prog='NLQA',
