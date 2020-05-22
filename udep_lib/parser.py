@@ -48,8 +48,8 @@ class Parser(object):
             self.ug_sparql_graph_list.append(ug_logical_form.translate_to_sparql(kg))
 
     def grounded_sparql_graph(self, linker=None, kg=None):
-        for ug_sparql_graph in self.ug_sparql_graph_list:
-            ug_sparql_graph.ground_spo(linker=linker, kg=kg)
+        for ug_sparql_graph, nlquestion in zip(self.ug_sparql_graph_list, self.nlq_questions_list):
+            ug_sparql_graph.ground_spo(question=nlquestion.question, linker=linker, kg=kg)
             self.g_sparql_graph_list.append(ug_sparql_graph.get_g_sparql_graph())
 
     def query_executor(self, kg='dbpedia'):

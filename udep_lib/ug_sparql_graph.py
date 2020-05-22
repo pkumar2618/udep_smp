@@ -48,7 +48,7 @@ class UGSPARQLGraph:
     def get_ug_sparql_query_string(self):
         return self.query_graph.get_query_string()
 
-    def ground_spo(self, linker=None, kg=None): # this will generate a set of candidate spo,
+    def ground_spo(self, question=None, linker=None, kg=None): # this will generate a set of candidate spo,
         # which are lated passed throug a disambiguation stage to obtain a final spo-triple
         """
         entity linking using dbpedia Spotlight
@@ -76,10 +76,11 @@ class UGSPARQLGraph:
 
                 elif linker == 'elasticsearch':
                     # ground subject
-                    subject_entities_list = UGSPARQLGraph.ground_so_elasticsearch(self.query_graph, sub)
+                    rdf_type_s, subject_entities_list = UGSPARQLGraph.ground_so_elasticsearch(self.query_graph, sub)
                     # ground object, before passing them over strip off any white space.
-                    object_entities_list = UGSPARQLGraph.ground_so_elasticsearch(self.query_graph, obj)
-                    # ground predicate
+                    rdf_type_o, object_entities_list = UGSPARQLGraph.ground_so_elasticsearch(self.query_graph, obj)
+                    # ground predicate, predicate is assumed given, never a blank node. 
+                    # therefore not returning any type information.
                     predicate_property_list = UGSPARQLGraph.ground_predicate_elasticsearch(pred, onto_hint=obj)
 
                     # we can create a combination of s, p, o such that, the high scoring element in the
@@ -87,7 +88,24 @@ class UGSPARQLGraph:
                     disambiguated_spo = UGSPARQLGraph.disambiguate_using_cotext(question, subject_entities_list,
                                                                           predicate_property_list, object_entities_list)
                     #The set of candidate-spos we will get above would create for a given spo-triple
-                    self.g_query.add_triple(disambiguated_spo)
+                    disambiguated_spo_with_rdfterm = (s, o, p)
+                    if rdf_type_s == 'URIRef':
+                        disambiguated_spo_with_rdfterm[0] = URIRef(disambiguated_spo[0])
+                    elif rdf_type_s == 'BNode':
+                        disambiguated_spo_with_rdfterm[0] = BNode(disambiguated_spo[0])
+                    else: # in case Exception occurs, we will receive None 
+                        disambiguated_spo_with_rdfterm[0] = BNode()
+                        
+                    if rdf_type_o == 'URIRef':
+                        disambiguated_spo_with_rdfterm[2] = URIRef(disambiguated_spo[2])
+                    elif rdf_type_s == 'BNode':
+                        disambiguated_spo_with_rdfterm[2] = BNode(disambiguated_spo[2])
+                    else: # in case Exception occurs, we will receive None 
+                        disambiguated_spo_with_rdfterm[2] = BNode()
+
+                    #predicate will carry URIRef
+                    disambiguated_spo_with_rdfterm[1] = URIRef(disambiguated_spo[1])
+                    self.g_query.add_triple(disambiguated_spo_with_rdfterm)
 
     def get_g_sparql_graph(self):
         #todo from the list of candidates spo we need to disambiguate to obtain only one spo-triple
@@ -103,9 +121,10 @@ class UGSPARQLGraph:
 
         try:
             if query_graph.has_variable(so.strip()):
-                so_entities = so
+                so_entities = [[f'{so}', ' ', 0, 0]] # return as a list of list confirming to the output of the
+                # elasticsearch which has label, uri, score and another elemen 0
             else:
-                so_entities = entitySearch(so)
+                so_entities = entitySearch(f'{so}')
                 # so_entities = so
 
             return rdf_type, so_entities
@@ -114,7 +133,7 @@ class UGSPARQLGraph:
             # however to stop the bert based cross embedder from failing we
             # will need to pass empty space.
             # so_entities = ' ',
-            return ' ', ' '
+            return None, [[' ', ' ', 0, 0]]
 
 
 
@@ -130,15 +149,15 @@ class UGSPARQLGraph:
         predicates = []
         db_properties = []
         try:
-            if predicate == 'a':
-                if onto_hint in onto_wh.keys():
+            if f'{predicate}' == 'a':
+                if f'{onto_hint}' in onto_wh.keys():
                     #todo Require ontology, may be expansion or contraction of the query_graph
-                    predicates = onto_wh[onto_hint]
+                    predicates = onto_wh[f'{onto_hint}']
             else:
-                predicates.append(predicate)
+                predicates.append(f'{predicate}')
 
             for pred in predicates:
-                db_properties.append(propertySearch(pred))
+                [db_properties.append(es_item) for es_item in propertySearch(pred)]
 
             return db_properties
 
@@ -198,18 +217,18 @@ class UGSPARQLGraph:
         # todo we can do some innovative mixing to create spo triple from the separate list of s, o, p.
         # sort the list by thrid value of the sublist which is the score as returned by the elastic
         # search.
-        subject_entities_list_sorted = sorted(subject_entities_list, key=lambda x: x[2])
-        predicate_property_list_sorted = sorted(predicate_property_list, key=lambda x: x[2])
-        object_entities_list_sorted = sorted(object_entities_list, key=lambda  x: x[2])
+        subject_entities_list_sorted = sorted(subject_entities_list, key=lambda x: x[2], reverse=True)
+        predicate_property_list_sorted = sorted(predicate_property_list, key=lambda x: x[2], reverse=True)
+        object_entities_list_sorted = sorted(object_entities_list, key=lambda  x: x[2], reverse=True)
         for si in subject_entities_list_sorted:
             for pi in predicate_property_list_sorted:
                 for oi in object_entities_list_sorted:
-                    input_dict['spos'].append([subject_entities_list_sorted[si][1], predicate_property_list_sorted[pi][1],
-                                              object_entities_list_sorted[oi][1]])
+                    input_dict['spos'].append([si[1], pi[1], oi[1]])
+                    input_dict['spos_label'].append([si[0], pi[0], oi[0]])
 
-                    input_dict['spos_label'].append([subject_entities_list_sorted[si][0], predicate_property_list_sorted[pi][0],
-                                              object_entities_list_sorted[oi][0]])
-        model_file_path = os.path.join(os.getcwd(),"dl_modules", "model.th")
-        reranked_spos = cross_emb_predictor(input_dict=input_dict, model_file=model_file_path, write_pred=False)
+        #model_file_path = os.path.join(os.getcwd(),"dl_lib", "model.th")
+        #dir_path = os.path.dirname(os.path.realpath(__file__))
+        #model_file_abs = os.path.join(dir_path, f'model_file')
+        reranked_spos = cross_emb_predictor(input_dict=input_dict, write_pred=False)
         reranked_spos_sorted = sorted(reranked_spos, key=lambda x: x['cross_emb_score'], reverse=True)
         return reranked_spos_sorted[0]['spo_triple_uri']
