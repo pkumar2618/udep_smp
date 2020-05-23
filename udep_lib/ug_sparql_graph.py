@@ -88,7 +88,7 @@ class UGSPARQLGraph:
                     disambiguated_spo = UGSPARQLGraph.disambiguate_using_cotext(question, subject_entities_list,
                                                                           predicate_property_list, object_entities_list)
                     #The set of candidate-spos we will get above would create for a given spo-triple
-                    disambiguated_spo_with_rdfterm = (s, o, p)
+                    disambiguated_spo_with_rdfterm = ['s', 'o', 'p']
                     if rdf_type_s == 'URIRef':
                         disambiguated_spo_with_rdfterm[0] = URIRef(disambiguated_spo[0])
                     elif rdf_type_s == 'BNode':
@@ -105,12 +105,15 @@ class UGSPARQLGraph:
 
                     #predicate will carry URIRef
                     disambiguated_spo_with_rdfterm[1] = URIRef(disambiguated_spo[1])
-                    self.g_query.add_triple(disambiguated_spo_with_rdfterm)
+                    self.g_query.add_triple(tuple(disambiguated_spo_with_rdfterm))
 
     def get_g_sparql_graph(self):
         #todo from the list of candidates spo we need to disambiguate to obtain only one spo-triple
-
         return GroundedSPARQLGraph(self.g_query)
+
+    def get_g_sparql_query(self):
+        return self.g_query.get_query_string()
+        
 
     @staticmethod
     def ground_so_elasticsearch(query_graph, so):
@@ -230,5 +233,5 @@ class UGSPARQLGraph:
         #dir_path = os.path.dirname(os.path.realpath(__file__))
         #model_file_abs = os.path.join(dir_path, f'model_file')
         reranked_spos = cross_emb_predictor(input_dict=input_dict, write_pred=False)
-        reranked_spos_sorted = sorted(reranked_spos, key=lambda x: x['cross_emb_score'], reverse=True)
+        reranked_spos_sorted = sorted(reranked_spos[0], key=lambda x: x['cross_emb_score'], reverse=True)
         return reranked_spos_sorted[0]['spo_triple_uri']

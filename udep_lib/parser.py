@@ -50,7 +50,8 @@ class Parser(object):
     def grounded_sparql_graph(self, linker=None, kg=None):
         for ug_sparql_graph, nlquestion in zip(self.ug_sparql_graph_list, self.nlq_questions_list):
             ug_sparql_graph.ground_spo(question=nlquestion.question, linker=linker, kg=kg)
-            self.g_sparql_graph_list.append(ug_sparql_graph.get_g_sparql_graph())
+            graph_query = {'sparql_graph': ug_sparql_graph.get_g_sparql_graph(), 'sparql_query': ug_sparql_graph.get_g_sparql_query()}
+            self.g_sparql_graph_list.append(graph_query)
 
     def query_executor(self, kg='dbpedia'):
         # self.results_list = [query.run(kg) for query in self.query_list]

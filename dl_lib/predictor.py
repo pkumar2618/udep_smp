@@ -7,7 +7,7 @@ from allennlp.data import Instance
 import torch
 import numpy as np
 from allennlp.nn import util as nn_util
-from dl_lib.dl_utilities import merge_dict
+from dl_lib.dl_utilities import merge_list_of_dict
 import json
 
 def tonp(tsr): return tsr.detach().cpu().numpy()
@@ -32,16 +32,17 @@ class Predictor:
         json_list = []
         # json_items_dict = {"sentence_candidate": None, "score": None}
         with torch.no_grad():
-            instance_count = 0
+            # assuming the batch size of 1 for now. we can use ds to get to sentence_candidate tokens. 
             for batch_sentence_candidates in pred_generator_tqdm:
                 batch_input = nn_util.move_to_device(batch_sentence_candidates, self.cuda_device)
                 batch_scores = self._extract_data(batch_input)
-                for sentence_candidate, sentence_spo_dict, score in zip(ds[instance_count]["sentence_spo"], ds[instance_count]["sentence_spo_raw"], batch_scores):
-                    input_dict = sentence_spo_dict
-                    output_dict = {"sentence_candidate": " ".join([x.text for x in sentence_candidate]), "cross_emb_score": score.item()}
-                    json_list.append(merge_dict(input_dict, output_dict))
-
-                instance_count += 1
+                # each batch is formed by a set of block, where batch size id determined internally by allennlp. 
+                # one block is formed by a sentence and a set of positive and negative spo-triples
+                # because during prediction we are only using batch size 1. we will have block_score=batch_scores
+                for block_sentence_spo_raw in batch_sentence_candidates["sentence_spo_raw"]:
+                    input_list_of_dict = block_sentence_spo_raw
+                    output_list_dict2= [{"cross_emb_score": score.item()} for score in batch_scores]
+                    json_list.append(merge_list_of_dict(input_list_of_dict, output_list_dict2))
 
         if write_pred:
             with open('output_prediction.json', 'w') as f_write:

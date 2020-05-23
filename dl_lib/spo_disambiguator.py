@@ -77,8 +77,9 @@ def cross_emb_predictor(input_file_str=None, input_dict=None, write_pred=False, 
 
     predictor = Predictor(model, seq_iterator, cuda_device=0 if USE_GPU else -1)
     test_preds = predictor.predict(test_ds, write_pred=write_pred)
-    print(test_preds)
-    print("prediction done, see the output_prediction.json")
+    return test_preds
+    #print(test_preds)
+    #print("prediction done, see the output_prediction.json")
     # iterate over the dataset without changing its order
 
 

@@ -136,6 +136,10 @@ def merge_dict(dict1, dict2):
     res = {**dict1, **dict2}
     return res
 
+def merge_list_of_dict(list_dict1, list_dict2):
+    res_list_dict = [merge_dict(dict1, dict2) for dict1, dict2 in zip(list_dict1, list_dict2)]
+    return res_list_dict 
+
 class Config(dict):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
