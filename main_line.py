@@ -25,7 +25,7 @@ arguments_parser.add_argument("--dependency_parsing", help="Dependency parsing w
                               action="store_true")
 
 arguments_parser.add_argument("--disambiguator", help="select linker for disambiguation among spotlight and "
-                                                      "custom", choices=['spotlight', 'custom'])
+                                                      "custom", choices=['spotlight', 'custom', 'elasticsearch'])
 
 arguments_parser.add_argument("--knowledge_graph", help="select the KG to be used for querying",
                               choices=['dbpedia', 'wikidata', 'freebase'])

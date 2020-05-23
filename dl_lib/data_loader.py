@@ -10,6 +10,7 @@ import numpy as np
 import logging
 from .dl_utilities import ConfigJSON
 import os 
+import overrides 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 config = ConfigJSON(os.path.join(dir_path,'configuration.json'))
 
@@ -51,8 +52,8 @@ class QuestionSPOReader(DatasetReader):
         #     fields['labels'] = ListField([LabelField(label) for label in sentence_spo_label_list])
         return Instance(fields)
 
-    # @overrides
-    def _read(self, file_path: str=None, input_dict: Dict = None) -> Iterator[Instance]:
+#    @overrides
+    def read(self, file_path: str=None, input_dict: Dict = None) -> Iterator[Instance]:
         # logger.info("Reading file at %s", file_path)
         if file_path:
             with open(file_path, 'r') as f_read:

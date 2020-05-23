@@ -49,7 +49,7 @@ def cross_emb_predictor(input_file_str=None, input_dict=None, write_pred=False, 
 
     # test_ds = reader.read("../dataset_qald/qald_test.json")
     # test_ds = test_ds[:3]
-    test_ds = reader.read(input_file_str=input_file_str, input_dict=input_dict) #one of them must be None
+    test_ds = reader.read(file_path=input_file_str, input_dict=input_dict) #one of them must be None
     vocab = Vocabulary()
     seq_iterator = BasicIterator(batch_size=1)
     seq_iterator.index_with(vocab)
@@ -62,10 +62,18 @@ def cross_emb_predictor(input_file_str=None, input_dict=None, write_pred=False, 
         model
     # loading model_state from the saved model
 
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-    model_file_abs = os.path.join(dir_path, f'model_file')
-    with open(model_file_abs, 'rb') as f_model:
-        model.load_state_dict(torch.load(f_model))
+    if not model_file:
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        model_file_abs = os.path.join(dir_path, 'model.th')
+        with open(model_file_abs, 'rb') as f_model:
+            model.load_state_dict(torch.load(f_model))
+
+    elif model_file:
+        try:
+            with open(model_file, 'rb') as f_model:
+                model.load_state_dict(torch.load(f_model))
+        except: 
+            raise
 
     predictor = Predictor(model, seq_iterator, cuda_device=0 if USE_GPU else -1)
     test_preds = predictor.predict(test_ds, write_pred=write_pred)
