@@ -12,8 +12,6 @@ from dl_lib.predictor import Predictor
 import os
 import pickle
 import json
-logging.basicConfig(filename='spo_disambiguator.log',level=logging.DEBUG)
-logger = logging.getLogger(__name__)
 
 
 #import argparse
@@ -44,6 +42,7 @@ def cross_emb_predictor(input_file_str=None, input_dict=None, write_pred=False, 
     :param input_file_str:
     :return:
     """
+    logger = logging.getLogger(__name__)
     USE_GPU = torch.cuda.is_available()
     # vocab = Vocabulary.from_files("./vocabulary")
     reader = QuestionSPOReader(my_tokenizer=bert_tokenizer,
@@ -87,6 +86,8 @@ def cross_emb_predictor(input_file_str=None, input_dict=None, write_pred=False, 
 
 def cross_emb_trainer(log_new_experiment=True, experiment_iter=False, iteration_info=None, iteration_data=None):
     config = ConfigJSON('configuration.json')
+    logging.basicConfig(filename='spo_disambiguator.log',level=logging.DEBUG)
+    logger = logging.getLogger(__name__)
     if log_new_experiment:
         # we are goint to use a single configuration file for the entire deep learning module.
         config.update(section_name = "training_settings",

@@ -35,14 +35,16 @@ arguments_parser.add_argument("--one_hot", help="Take the questions and create a
 
 arguments_parser.add_argument("--input_embedding", help="Enter type of word_embedding to be used.",
                               choices=['Word2Vec', 'GloVe'])
-arguments_parser.add_argument("--log", help="Provide logging lever eg. debug, info")
+arguments_parser.add_argument("--log", help="Provide logging level eg. debug, info")
+arguments_parser.add_argument("--logname", help="Provide log file name")
 
 args = arguments_parser.parse_args()
 
 numeric_level = getattr(logging, args.log.upper(), None)
 if not isinstance(numeric_level, int):
         raise ValueError('Invalid log level: %s' % args.log)
-logging.basicConfig(filename='semantic_parser.log', level=numeric_level, filemode='a')
+
+logging.basicConfig(filename=f'{args.logname}.log', level=numeric_level, filemode='a')
 
 while True:
     """
@@ -58,10 +60,10 @@ while True:
             # # # # nl_question -> tokenization -> canonicalization(default bypassed)->disambiguation->formalization
             # # # # Tokenize the list of questions.
             # save the name of the question_sets under consideration.
-            qset = "select_2spo"
+            #qset = "select_2spo"
             logging.info('Semantic Parser Started')
             try:
-                with open(f'{qset}_log0_parser.pkl', 'rb') as f:
+                with open(f'{args.logname}_log0_parser.pkl', 'rb') as f:
                     parser = pickle.load(f)
             except FileNotFoundError as e:
                 # # # provide the file name containing the questions
@@ -73,39 +75,39 @@ while True:
                 #     print(nlq_tokens)
 
                 # # # saving the parser state using pickle
-                with open(f'{qset}_log0_parser.pkl', 'wb') as f:
+                with open(f'{args.logname}_log0_parser.pkl', 'wb') as f:
                     pickle.dump(parser, f)
 
 
             # # canonicalize based on canonical_form flag and dependency_parsing flag. when canonical_form flag is
             # # disabled the parser sets it's attribute self.canonical_list as copy of self.nlq_token_list
             try:
-                with open(f'{qset}_log1_parser.pkl', 'rb') as f:
+                with open(f'{args.logname}_log1_parser.pkl', 'rb') as f:
                     parser = pickle.load(f)
             except FileNotFoundError as e:
                 parser.canonicalize(args.dependency_parsing, args.canonical_form)
-                with open(f'{qset}_log1_parser.pkl', 'wb') as f:
+                with open(f'{args.logname}_log1_parser.pkl', 'wb') as f:
                     pickle.dump(parser, f)
 
 
             # # convert the question into a Query, the reference to knowledge graph is rquired to provide list of namespace
             # # prefixes used during creating a query-string
             try:
-                with open(f'{qset}_log2_parser.pkl', 'rb') as f:
+                with open(f'{args.logname}_log2_parser.pkl', 'rb') as f:
                     parser = pickle.load(f)
             except FileNotFoundError as e:
                 parser.ungrounded_logical_form()
-                with open(f'{qset}_log2_parser.pkl', 'wb') as f:
+                with open(f'{args.logname}_log2_parser.pkl', 'wb') as f:
                     pickle.dump(parser, f)
 
 
             # translate logical form into graphical representation using SPARQL basic graph pattern (BGP)
             try:
-                with open(f'{qset}_log3_parser.pkl', 'rb') as f:
+                with open(f'{args.logname}_log3_parser.pkl', 'rb') as f:
                     parser = pickle.load(f)
             except FileNotFoundError as e:
                 parser.ungrounded_sparql_graph(kg=args.knowledge_graph)
-                with open(f'{qset}_log3_parser.pkl', 'wb') as f:
+                with open(f'{args.logname}_log3_parser.pkl', 'wb') as f:
                     pickle.dump(parser, f)
 
 
@@ -113,11 +115,11 @@ while True:
             # provides denotation (entity or resources) for each token,
             # the parser stores a dictionary of token-denotation pairs
             try:
-                with open(f'{qset}_log4_parser.pkl', 'rb') as f:
+                with open(f'{args.logname}_log4_parser.pkl', 'rb') as f:
                     parser = pickle.load(f)
             except FileNotFoundError as e:
                 parser.grounded_sparql_graph(linker=args.disambiguator, kg=args.knowledge_graph)
-                with open(f'{qset}_log4_parser.pkl', 'wb') as f:
+                with open(f'{args.logname}_log4_parser.pkl', 'wb') as f:
                     pickle.dump(parser, f)
 
             # parser.query_executor(args.knowledge_graph)
