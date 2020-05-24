@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 class GroundedSPARQLGraph: #todo
     def __init__(self, g_query):
         self.g_query = g_query

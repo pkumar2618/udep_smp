@@ -12,6 +12,8 @@ from dl_lib.predictor import Predictor
 import os
 import pickle
 import json
+logging.basicConfig(filename='spo_disambiguator.log',level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 
 #import argparse
@@ -111,8 +113,6 @@ def cross_emb_trainer(log_new_experiment=True, experiment_iter=False, iteration_
 
         config.iter_cycle_update()
 
-    logging.basicConfig(filename='spo_disambiguator.log',level=logging.DEBUG)
-    logger = logging.getLogger(__name__)
     torch.manual_seed(config.config["training_settings"]["seed"])
 
     # The sentence need to be converted into a tensor(embedding space),

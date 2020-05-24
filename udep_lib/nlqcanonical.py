@@ -1,8 +1,9 @@
 import json
 import subprocess
+import logging
 
 from udep_lib.ug_logicalform import UGLogicalForm
-
+logger = logging.getLogger(__name__)
 
 class NLQCanonical(object):
     """
@@ -11,7 +12,7 @@ class NLQCanonical(object):
 
     def __init__(self, canonical_form):
         self.nlq_canonical = canonical_form
-
+        logger.info(f'canonical-form: {canonical_form}')
     def formalize_into_udeplambda(self):
         # This is shortcut, note the we take help from UDepLambda to create lambda logical form
         # from the natural question itself. So all this pipeline from natural language uptil tokenization is

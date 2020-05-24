@@ -1,6 +1,6 @@
 import copy
 import os
-
+import logging
 from rdflib import BNode, URIRef
 
 from candidate_generation.searchIndex import entitySearch, propertySearch
@@ -9,6 +9,7 @@ from dl_lib.spo_disambiguator import cross_emb_predictor
 #from udep_lib.nlqtokens import question
 from udep_lib.g_sparql_graph import GroundedSPARQLGraph
 
+logger = logging.getLogger(__name__)
 
 class UGSPARQLGraph:
     # UGSPARQLGraph will take in a sparql query object, which can also be treated as a graph object.
@@ -26,6 +27,8 @@ class UGSPARQLGraph:
         self.g_query = copy.deepcopy(ug_query) # this is just to get the various attribute copied.
         # and remove the basic graph pattern
         self.g_query.empty_bgp()
+        logger.info(f'ug_sparql: {self.query_graph.get_query_string()}')
+
         # self.nlq_phrase_kbentity_dict = {}
         # self.nlq_word_kb_predicate_dict = {}
         # if not UGSPARQLGraph.glove_loaded:
@@ -75,6 +78,7 @@ class UGSPARQLGraph:
                     self.g_query.add_triple((subject_entities, predicate_property, object_entities))
 
                 elif linker == 'elasticsearch':
+                    logger.info(f'ug spo: {sub}, {pred}, {obj}')
                     # ground subject
                     rdf_type_s, subject_entities_list = UGSPARQLGraph.ground_so_elasticsearch(self.query_graph, sub)
                     # ground object, before passing them over strip off any white space.
@@ -83,10 +87,14 @@ class UGSPARQLGraph:
                     # therefore not returning any type information.
                     predicate_property_list = UGSPARQLGraph.ground_predicate_elasticsearch(pred, onto_hint=obj)
 
+                    subject_entities_list_sorted = sorted(subject_entities_list, key=lambda x: x[2], reverse=True)
+                    predicate_property_list_sorted = sorted(predicate_property_list, key=lambda x: x[2], reverse=True)
+                    object_entities_list_sorted = sorted(object_entities_list, key=lambda  x: x[2], reverse=True)
+                    logger.info(f'top-es spo: {subject_entities_list_sorted[:0], predicate_property_list_sorted[:0], object_entities_list_sorted[:0]}')
                     # we can create a combination of s, p, o such that, the high scoring element in the
                     # set of S, P, O are together.
-                    disambiguated_spo = UGSPARQLGraph.disambiguate_using_cotext(question, subject_entities_list,
-                                                                          predicate_property_list, object_entities_list)
+                    disambiguated_spo = UGSPARQLGraph.disambiguate_using_cotext(question, subject_entities_list_sorted[:5],
+                                                                                predicate_property_list_sorted[:5], object_entities_list_sorted[:5])
                     #The set of candidate-spos we will get above would create for a given spo-triple
                     disambiguated_spo_with_rdfterm = ['s', 'o', 'p']
                     if rdf_type_s == 'URIRef':
@@ -112,8 +120,9 @@ class UGSPARQLGraph:
         return GroundedSPARQLGraph(self.g_query)
 
     def get_g_sparql_query(self):
-        return self.g_query.get_query_string()
-        
+        sparql_query = self.g_query.get_query_string()
+        logger.info(f'g-SPARQL: {sparql_query}') 
+        return sparql_query
 
     @staticmethod
     def ground_so_elasticsearch(query_graph, so):
@@ -215,23 +224,20 @@ class UGSPARQLGraph:
         return predicate_property
 
     @staticmethod
-    def disambiguate_using_cotext(question, subject_entities_list, predicate_property_list, object_entities_list):
+    def disambiguate_using_cotext(question, subject_entities_list_sorted, predicate_property_list_sorted, object_entities_list_sorted):
         input_dict = {'question':question, 'spos':[], 'spos_label':[]}
         # todo we can do some innovative mixing to create spo triple from the separate list of s, o, p.
         # sort the list by thrid value of the sublist which is the score as returned by the elastic
         # search.
-        subject_entities_list_sorted = sorted(subject_entities_list, key=lambda x: x[2], reverse=True)
-        predicate_property_list_sorted = sorted(predicate_property_list, key=lambda x: x[2], reverse=True)
-        object_entities_list_sorted = sorted(object_entities_list, key=lambda  x: x[2], reverse=True)
+
         for si in subject_entities_list_sorted:
             for pi in predicate_property_list_sorted:
                 for oi in object_entities_list_sorted:
                     input_dict['spos'].append([si[1], pi[1], oi[1]])
                     input_dict['spos_label'].append([si[0], pi[0], oi[0]])
 
-        #model_file_path = os.path.join(os.getcwd(),"dl_lib", "model.th")
-        #dir_path = os.path.dirname(os.path.realpath(__file__))
-        #model_file_abs = os.path.join(dir_path, f'model_file')
         reranked_spos = cross_emb_predictor(input_dict=input_dict, write_pred=False)
         reranked_spos_sorted = sorted(reranked_spos[0], key=lambda x: x['cross_emb_score'], reverse=True)
+        logger.info(f"cross-emb spo: {reranked_spos_sorted[0]['spo_triple_uri']}")
+        logger.debug(f"cross-emb spo: {reranked_spos_sorted}")
         return reranked_spos_sorted[0]['spo_triple_uri']

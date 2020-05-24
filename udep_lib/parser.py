@@ -1,5 +1,6 @@
 from udep_lib.nlquestion import NLQuestion
-
+import logging
+logger = logging.getLogger(__name__)
 
 class Parser(object):
     """
@@ -7,7 +8,6 @@ class Parser(object):
     and parse it.
     """
     # ug_sparql_graph_list: List[Any]
-
     def __init__(self, nlqs):
         """
         Take a list of questions (one or more)

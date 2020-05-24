@@ -37,6 +37,7 @@ class QuestionSPOReader(DatasetReader):
                          sentence_spo_label_list: np.ndarray=None,
                          ):
         fields: Dict[str, Field] = {}
+        logger.debug(f'sentence-spo-block: {sentence_spo_list}')
         sentence_spo = ListField([TextField(sentence_spo_tokens, self.token_indexers) for sentence_spo_tokens in sentence_spo_list])
         fields['sentence_spo']= sentence_spo
         if sentence_spo_label_list is None:
@@ -121,6 +122,7 @@ class QuestionSPOReader(DatasetReader):
                 spo_tokens = self.tokenizer(spo_label_joined)
                 spo_tokens = [Token(x) for x in spo_tokens]
                 question_spo_tokens = [Token("[CLS]")] + question_tokens + [Token("[SEP]")] + spo_tokens
+                logger.debug(f'cros-emb-ctxt-spo: {question_spo_tokens}')
                 question_spo_list.append(question_spo_tokens)
                 question_spo_label_list.append(1)  # not really required during production.
                 #however assume each one of these is a true striple

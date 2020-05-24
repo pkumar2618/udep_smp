@@ -1,14 +1,15 @@
 import re
-
+import logging
 from rdflib import URIRef, BNode
-
 from udep_lib.ug_sparql_graph import UGSPARQLGraph
 from udep_lib.sparql_builder import Query
 
+logger = logging.getLogger(__name__)
 
 class UGLogicalForm():
     def __init__(self, udep_lambda):
         self.udep_lambda = udep_lambda
+        logger.info(f"dependency_lambda: {udep_lambda['dependency_lambda'][0]}")
 
     def translate_to_sparql(self, kg='dbpedia'):
         """

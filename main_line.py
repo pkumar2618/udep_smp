@@ -1,5 +1,5 @@
 from udep_lib.parser import Parser
-# from pre_processor import PreProcessor
+import logging
 import pickle
 import argparse
 import sys
@@ -35,8 +35,14 @@ arguments_parser.add_argument("--one_hot", help="Take the questions and create a
 
 arguments_parser.add_argument("--input_embedding", help="Enter type of word_embedding to be used.",
                               choices=['Word2Vec', 'GloVe'])
+arguments_parser.add_argument("--log", help="Provide logging lever eg. debug, info")
 
 args = arguments_parser.parse_args()
+
+numeric_level = getattr(logging, args.log.upper(), None)
+if not isinstance(numeric_level, int):
+        raise ValueError('Invalid log level: %s' % args.log)
+logging.basicConfig(filename='semantic_parser.log', level=numeric_level, filemode='a')
 
 while True:
     """
@@ -53,6 +59,7 @@ while True:
             # # # # Tokenize the list of questions.
             # save the name of the question_sets under consideration.
             qset = "select_2spo"
+            logging.info('Semantic Parser Started')
             try:
                 with open(f'{qset}_log0_parser.pkl', 'rb') as f:
                     parser = pickle.load(f)
@@ -117,12 +124,6 @@ while True:
 
             # Result of Querying the Knowledge Graph
             print("done")
-
-        elif args.questions_list:
-            pass
-
-        elif args.question:
-            pass
 
         break
 

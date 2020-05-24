@@ -3,8 +3,9 @@
 from udep_lib.nlqcanonical import NLQCanonical
 # from gensim.models import KeyedVectors
 import pickle
+import logging
 
-
+logger = logging.getLogger(__name__)
 # Philosopy 1: Object may be created empty and later on modified using a bunch of operations on them.
 # Philosopy 2: An object is modified by performing some operation on it from its own class and takes a completely
 # different character that it has to be named a class of its own.
@@ -15,9 +16,9 @@ class NLQTokens(object):
     A wrapper class to wrap the output of PreProcessor into NLQTokens.
     """
     # pass
-    def __init__(self, questions_tokens):
-        self.nlq_tokens = questions_tokens
-        self.nlq_token_entity_dict = {}
+    def __init__(self, question_tokens):
+        self.nlq_tokens = question_tokens
+        logger.info(f'tokens: {question_tokens}')
 
     def canonicalize(self, dependency_parsing=False, canonical_form=False):
         """

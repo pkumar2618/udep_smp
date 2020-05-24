@@ -1,5 +1,5 @@
 import string
-
+import logging
 import stanfordnlp
 from nltk import word_tokenize
 
@@ -9,6 +9,7 @@ from udep_lib.nlqtokens import NLQTokens, NLQTokensDepParsed
 # Philosopy 2: An object is modified by performing some operation on it from its own class and takes a completely
 # different character that it has to be named a class of its own.
 
+logger = logging.getLogger(__name__)
 
 class NLQuestion(object):
     """
@@ -18,12 +19,13 @@ class NLQuestion(object):
     sd_nlp_loaded=False
     nlp = None
 
-
     def __init__(self, question, bypass_pre_processing=True):
         if bypass_pre_processing:
             self.question = question
+            logger.info(f'question: {question}')
         else:
             self.question = question
+            logger.info(f'question: {question}')
             if not NLQuestion.sd_nlp_loaded:
                 NLQuestion.nlp = stanfordnlp.Pipeline(processors='tokenize,lemma,pos,depparse', use_gpu=True)
                 NLQuestion.sd_nlp_loaded = True

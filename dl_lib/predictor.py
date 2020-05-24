@@ -9,6 +9,8 @@ import numpy as np
 from allennlp.nn import util as nn_util
 from dl_lib.dl_utilities import merge_list_of_dict
 import json
+import logging
+logger = logging.getLogger(__name__)
 
 def tonp(tsr): return tsr.detach().cpu().numpy()
 #USE_GPU = torch.cuda.is_available()
