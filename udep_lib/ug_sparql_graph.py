@@ -86,11 +86,13 @@ class UGSPARQLGraph:
                     # ground predicate, predicate is assumed given, never a blank node. 
                     # therefore not returning any type information.
                     predicate_property_list = UGSPARQLGraph.ground_predicate_elasticsearch(pred, onto_hint=obj)
-
+                    
+                    # the returned items from elasticsearch are in the form of list of list-elements.
+                    
                     subject_entities_list_sorted = sorted(subject_entities_list, key=lambda x: x[2], reverse=True)
                     predicate_property_list_sorted = sorted(predicate_property_list, key=lambda x: x[2], reverse=True)
                     object_entities_list_sorted = sorted(object_entities_list, key=lambda  x: x[2], reverse=True)
-                    logger.info(f'top-es spo: {subject_entities_list_sorted[:0], predicate_property_list_sorted[:0], object_entities_list_sorted[:0]}')
+                    logger.info(f'top-es spo: ({subject_entities_list_sorted[0]}, {predicate_property_list_sorted[0]}, {object_entities_list_sorted[0]})')
                     # we can create a combination of s, p, o such that, the high scoring element in the
                     # set of S, P, O are together.
                     disambiguated_spo = UGSPARQLGraph.disambiguate_using_cotext(question, subject_entities_list_sorted[:5],
@@ -165,11 +167,14 @@ class UGSPARQLGraph:
                 if f'{onto_hint}' in onto_wh.keys():
                     #todo Require ontology, may be expansion or contraction of the query_graph
                     predicates = onto_wh[f'{onto_hint}']
+                else:
+                    predicates.append(f'{onto_hint}')
             else:
                 predicates.append(f'{predicate}')
 
             for pred in predicates:
-                [db_properties.append(es_item) for es_item in propertySearch(pred)]
+                #[db_properties.append(es_item) for es_item in propertySearch(pred)]
+                db_properties = db_properties + propertySearch(pred)
 
             return db_properties
 
@@ -241,3 +246,17 @@ class UGSPARQLGraph:
         logger.info(f"cross-emb spo: {reranked_spos_sorted[0]['spo_triple_uri']}")
         logger.debug(f"cross-emb spo: {reranked_spos_sorted}")
         return reranked_spos_sorted[0]['spo_triple_uri']
+
+    @staticmethod
+    def flatten_search_result(nested_list):
+        result = []
+        if not nested_list:
+            return
+        for element in nested_list:
+            if isinstance(element, list):
+                result.append(element)
+            elif not element:  # element is NoneType
+                continue
+            else:
+                result = result + flatten_search_result(element)
+        return result
