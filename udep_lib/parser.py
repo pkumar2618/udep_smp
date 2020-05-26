@@ -93,13 +93,14 @@ class Parser(object):
         return cls(file_obj.readlines())
 
 
-    # @classmethod
-    # def from_list(cls, question_list):
-    #     """
-    #     Should parse question in batch
-    #     :param question_list:
-    #     :return:
-    #     """
+    @classmethod
+    def from_list(cls, question_list):
+        """
+        Should parse question in batch
+        :param question_list:
+        :return:
+        """
+        return cls(question_list)
 
 if __name__ == "__main__":
     parser = Parser("When did Michael Jackson die?")
