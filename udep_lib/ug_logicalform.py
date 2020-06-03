@@ -25,13 +25,19 @@ class UGLogicalForm():
         # # we will create a dictionary of event_id, which is dictionary of dictionary {key:predicate, value:{s_list, o_list}}
         event_triples_dict = {}
         for neod_lambda_term in self.udep_lambda['dependency_lambda'][0]:
-            # neod_lambda term in the atomic form takes a function name predicate or predicate.dependency
-            # or predicate.args
+            # neod_lambda term in the simplified represetation takes for a function name either a predicate or 
+            # predicate.dependency or predicate.args
+            # the arguments of the simplified formula are type-entity pair, where the type is either event type ':e'
+            # or individual type ':m'. Note that in neod-grammar only 2 types are allowed. 
+            # The type ':s' is used to represent that a word is a type, 
+            # thus it may represent an ontology class. 
+            # ontology type s, noun-phrase type m, 
             try:
                 pred_dependency, type_entity = UGLogicalForm.get_atomic_name_atomic_args(neod_lambda_term)
             except TypeError as e_type:
                 continue # when the name of the neod_lambda_term could n't be split into atomic_name and
                 # atomic_arguments, better skip that term.
+                # todo: there are many instances when the proper sparql-graph could not be found due to this 
 
             type_entity = type_entity.split(",")
             pred_dependency = pred_dependency.split(".")
@@ -54,7 +60,7 @@ class UGLogicalForm():
                     predicate = pred_dependency[0]
                     dependency_relations = pred_dependency[1]
                     try:
-                        entity = type_entity[1].split('.')[1]
+                        entity = type_entity[1].split('.')[1] # take the last word e.g. 3:m.Lovesick
                         rdf_type = 'URIRef'
                     except IndexError as e_index:  # index error
                         # the term is a varaible
