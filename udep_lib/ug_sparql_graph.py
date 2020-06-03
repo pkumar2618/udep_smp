@@ -3,7 +3,7 @@ import os
 import logging
 from rdflib import BNode, URIRef
 
-from candidate_generation.searchIndex import entitySearch, propertySearch
+from candidate_generation.searchIndex import entitySearch, propertySearch, ontologySearch
 from dbpedia_lib.db_utils import get_property_using_cosine_similarity
 from dl_lib.spo_disambiguator import cross_emb_predictor 
 #from udep_lib.nlqtokens import question
@@ -52,7 +52,7 @@ class UGSPARQLGraph:
         return self.query_graph.get_query_string()
 
     def ground_spo(self, question=None, linker=None, kg=None): # this will generate a set of candidate spo,
-        # which are lated passed throug a disambiguation stage to obtain a final spo-triple
+        # which are later passed throug a disambiguation stage to obtain a final spo-triple
         """
         entity linking using dbpedia Spotlight
         Entity linker by definition must have reference to Knowledge Graph, whence it bring list of denotation for
@@ -82,9 +82,12 @@ class UGSPARQLGraph:
                     # ground subject
                     rdf_type_s, subject_entities_list = UGSPARQLGraph.ground_so_elasticsearch(self.query_graph, sub)
                     # ground object, before passing them over strip off any white space.
-                    rdf_type_o, object_entities_list = UGSPARQLGraph.ground_so_elasticsearch(self.query_graph, obj)
+                    # the object may belong to ontology whenever predicate is letter 'a'
+                    rdf_type_o, object_entities_list = UGSPARQLGraph.ground_so_elasticsearch(self.query_graph, obj, onto_hint=pred)
                     # ground predicate, predicate is assumed given, never a blank node. 
                     # therefore not returning any type information.
+                    # when predicate is letter 'a' specifying an ontology, this function will return 'a' withought going into searching 
+                    # property-index in elasticsearch.
                     predicate_property_list = UGSPARQLGraph.ground_predicate_elasticsearch(pred, onto_hint=obj)
                     
                     # the returned items from elasticsearch are in the form of list of list-elements.
@@ -96,7 +99,7 @@ class UGSPARQLGraph:
                     # we can create a combination of s, p, o such that, the high scoring element in the
                     # set of S, P, O are together.
                     disambiguated_spo = UGSPARQLGraph.disambiguate_using_cotext(question, subject_entities_list_sorted[:5],
-                                                                                predicate_property_list_sorted[:5], object_entities_list_sorted[:5])
+                                                                                predicate_property_list_sorted[:5], object_entities_list_sorted[:5], rdf_type_s, rdf_type_o)
                     #The set of candidate-spos we will get above would create for a given spo-triple
                     disambiguated_spo_with_rdfterm = ['s', 'o', 'p']
                     if rdf_type_s == 'URIRef':
@@ -127,7 +130,7 @@ class UGSPARQLGraph:
         return sparql_query
 
     @staticmethod
-    def ground_so_elasticsearch(query_graph, so):
+    def ground_so_elasticsearch(query_graph, so, onto_hint=None):
         if isinstance(so, BNode):
             rdf_type = 'BNode'
         elif isinstance(so, URIRef):
@@ -137,6 +140,9 @@ class UGSPARQLGraph:
             if query_graph.has_variable(so.strip()):
                 so_entities = [[f'{so}', ' ', 0, 0]] # return as a list of list confirming to the output of the
                 # elasticsearch which has label, uri, score and another elemen 0
+            elif onto_hint == 'a':
+                # do a search in ontology
+                so_entities = ontologySearch(f'{so}')
             else:
                 so_entities = entitySearch(f'{so}')
                 # so_entities = so
@@ -160,23 +166,14 @@ class UGSPARQLGraph:
                    'which': ['thing', 'type'],
                    'how': ['quantity', 'weight', 'distance']}
 
-        predicates = []
-        db_properties = []
         try:
             if f'{predicate}' == 'a':
-                if f'{onto_hint}' in onto_wh.keys():
-                    #todo Require ontology, may be expansion or contraction of the query_graph
-                    predicates = onto_wh[f'{onto_hint}']
-                else:
-                    predicates.append(f'{onto_hint}')
+                # when predicate is 'a' we return it as is. 
+                # also make the uri as 'a'
+                return [[f'a', 'a', 0, 0]]
             else:
-                predicates.append(f'{predicate}')
-
-            for pred in predicates:
-                #[db_properties.append(es_item) for es_item in propertySearch(pred)]
-                db_properties = db_properties + propertySearch(pred)
-
-            return db_properties
+                db_properties = propertySearch(f'{predicate}')
+                return db_properties
 
         except:
             empty_list = []
@@ -229,7 +226,7 @@ class UGSPARQLGraph:
         return predicate_property
 
     @staticmethod
-    def disambiguate_using_cotext(question, subject_entities_list_sorted, predicate_property_list_sorted, object_entities_list_sorted):
+    def disambiguate_using_cotext(question, subject_entities_list_sorted, predicate_property_list_sorted, object_entities_list_sorted, rdf_type_s=None, rdf_type_o=None):
         input_dict = {'question':question, 'spos':[], 'spos_label':[]}
         # todo we can do some innovative mixing to create spo triple from the separate list of s, o, p.
         # sort the list by thrid value of the sublist which is the score as returned by the elastic
@@ -238,8 +235,30 @@ class UGSPARQLGraph:
         for si in subject_entities_list_sorted:
             for pi in predicate_property_list_sorted:
                 for oi in object_entities_list_sorted:
-                    input_dict['spos'].append([si[1], pi[1], oi[1]])
-                    input_dict['spos_label'].append([si[0], pi[0], oi[0]])
+                    tmp_list_spos = ['','','']
+                    tmp_list_spos_label = ['','','']
+                    # don't want blank-node interfere with the cross-embedding score therefore passing it as empty-string
+                    if rdf_type_s == 'BNode':
+                        # would like to pass on the label of the blank node as uri,
+                        # so that it could be passed through the uri, but we keep the label an empty-string 
+                        tmp_list_spos[0] = si[0] # uri is name of the variable 
+                        tmp_list_spos_label[0] = '' # label is empty list
+                    else:
+                        tmp_list_spos[0] = si[1]
+                        tmp_list_spos_label[0] = si[0]
+
+                    if rdf_type_o == 'BNode':
+                        tmp_list_spos[2] = oi[0] # uri is name of the variable 
+                        tmp_list_spos_label[2] = '' # label is empty list
+                    else:
+                        tmp_list_spos[2] = oi[1]
+                        tmp_list_spos_label[2] = oi[0]
+
+                    tmp_list_spos[1] = pi[1]
+                    tmp_list_spos_label[1] = pi[0]
+                    
+                    input_dict['spos'].append(tmp_list_spos)
+                    input_dict['spos_label'].append(tmp_list_spos_label)
 
         reranked_spos = cross_emb_predictor(input_dict=input_dict, write_pred=False)
         reranked_spos_sorted = sorted(reranked_spos[0], key=lambda x: x['cross_emb_score'], reverse=True)

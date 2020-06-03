@@ -77,4 +77,5 @@ def classesIndexAdd():
 
 if __name__ == '__main__':
     #entitiesIndexAdd()
-    propertyIndexAdd()
+    #propertyIndexAdd()
+    OntologyIndexAdd()
