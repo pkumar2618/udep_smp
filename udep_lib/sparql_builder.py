@@ -49,7 +49,7 @@ class Query(object):
                 raise ValueError(f"Not a Variable:{var} should start with ?")
 
     def has_variable(self, variable):
-        variable = f'?{variable}'
+        #variable = f'?{variable}'
         if variable in self._vars:
             return True
         else:
@@ -135,7 +135,10 @@ class Query(object):
 
     def _angular_braces(self, term):
         if isinstance(term, URIRef):
-            return f'<{term}>'
+            if f'{term}'=='a':
+                return f'{term}'
+            else:
+                return f'<{term}>'
         elif isinstance(term, BNode):
             return term
         else:

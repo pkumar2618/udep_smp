@@ -47,6 +47,7 @@ class UGLogicalForm():
                 # Take the arguments inside it and change them into SPARQL Variable, prepend with '?'
                 variables_list.append(f'?{type_entity[0]}')
 
+
             # # identify the event_id and the predicate
             elif re.match(r'[\d]+:e', type_entity[0]):  # when identified for the first time, the event will
                 # create new dictionary entry into the event_triples_dict.
@@ -126,6 +127,12 @@ class UGLogicalForm():
                 type_label = pred_dependency[0]
 
                 if len(pred_dependency) == 1: # only the type name is given, and the atomic_args contain variable
+                    #if predicate is which/what/who/where and the variable inside is one of the variables that exist as arg
+                    # in the QUESTION, we will skip counting that neod-term
+                    if type_label in ['which', 'who', 'where', 'what']:
+                        if f'?{variable_name.strip()}' in variables_list: #variables are store with prefix ?
+                            continue # continue with the next neod-term and leave out the current word.
+
                     UGLogicalForm.update_plist(event_triples_dict, type_id, 'a', rdf_type='URIRef') # dbpedia uses a for type
                     UGLogicalForm.update_olist(event_triples_dict, type_id, 'a', type_label, rdf_type='URIRef')
                     UGLogicalForm.update_slist(event_triples_dict, type_id, 'a', variable_name, rdf_type='BNode')
@@ -204,13 +211,14 @@ class UGLogicalForm():
                 if rdf_type is 'URIRef':
                     event_triples_dict[event_id][predicate]['s_list'].append(URIRef(subject))
                 elif rdf_type is 'BNode':
-                    event_triples_dict[event_id][predicate]['s_list'].append(BNode(subject))
+                    # when subject is a blank-node it comes with ? prefixed to it. 
+                    event_triples_dict[event_id][predicate]['s_list'].append(BNode(f'?{subject.strip()}'))
         except KeyError as ek:
             # create s_list
             if rdf_type is 'URIRef':
                 event_triples_dict[event_id][predicate]['s_list'] = [URIRef(subject)]  # assign the subject
             elif rdf_type is 'BNode':
-                event_triples_dict[event_id][predicate]['s_list'] = [BNode(subject)]  # assign the subject
+                event_triples_dict[event_id][predicate]['s_list'] = [BNode(f'?{subject.strip()}')]  # assign the subject
 
     @staticmethod
     def exists_in_slist(event_triples_dict, event_id, predicate, entity):
@@ -229,13 +237,13 @@ class UGLogicalForm():
                 if rdf_type is 'URIRef':
                     event_triples_dict[event_id][predicate]['s_list'].append(URIRef(object))
                 elif rdf_type is 'BNode':
-                    event_triples_dict[event_id][predicate]['s_list'].append(BNode(object))
+                    event_triples_dict[event_id][predicate]['s_list'].append(BNode(f'?{object.strip()}'))
         except KeyError as ek:
             # create the object_list with entity_id/type_id
             if rdf_type  is 'URIRef':
                 event_triples_dict[event_id][predicate]['o_list'] = [URIRef(object)] # assign the object
             elif rdf_type is 'BNode':
-                event_triples_dict[event_id][predicate]['o_list'] = [BNode(object)]  # assign the object
+                event_triples_dict[event_id][predicate]['o_list'] = [BNode(f'?{object.strip()}')]  # assign the object
 
     @staticmethod
     def exists_in_olist(event_triples_dict, event_id, predicate, entity):

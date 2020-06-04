@@ -140,6 +140,8 @@ class UGSPARQLGraph:
             if query_graph.has_variable(so.strip()):
                 so_entities = [[f'{so}', ' ', 0, 0]] # return as a list of list confirming to the output of the
                 # elasticsearch which has label, uri, score and another elemen 0
+            elif rdf_type == 'BNode':
+                so_entities = [[f'{so}', ' ', 0, 0]]
             elif onto_hint == 'a':
                 # do a search in ontology
                 so_entities = ontologySearch(f'{so}')
