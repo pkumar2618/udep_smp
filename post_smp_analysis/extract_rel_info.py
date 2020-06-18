@@ -1,6 +1,7 @@
 extract_info_about = ['udep_lib.nlquestion', 'udep_lib.ug_logicalform', 'udep_lib.ug_sparql_graph']
 # the last ug_sparql_graph corresponds to the ug-sparql-query, three appearances of spo-tripe and the g-sparql-query. 
-with open('../select_pp_batch.log', 'r') as f_read:
+
+with open('../kr2ml.log', 'r') as f_read:
     f_write = open('pp_graph_structures.txt', 'w')
     lines = f_read.readlines() 
     next_line_write_flag = True

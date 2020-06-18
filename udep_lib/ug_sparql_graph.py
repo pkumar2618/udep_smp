@@ -22,11 +22,13 @@ class UGSPARQLGraph:
     # glove_loaded = False  # flag to load the keyedvector from file once
     # glove = None  # the keyedvector stored using memory map for fast access
 
-    def __init__(self, ug_query):
+    def __init__(self, ug_query, grounded_topk=10):
         self.query_graph = ug_query
-        self.g_query = copy.deepcopy(ug_query) # this is just to get the various attribute copied.
+        self.g_query_tmp = copy.deepcopy(ug_query) # this is just to get the various attribute copied.
         # and remove the basic graph pattern
-        self.g_query.empty_bgp()
+        self.g_query_tmp.empty_bgp() 
+        self.g_query_topk = [self.g_query_tmp for i in range(grounded_topk)]
+        
         logger.info(f'ug_sparql: {self.query_graph.get_query_string()}')
 
         # self.nlq_phrase_kbentity_dict = {}
@@ -98,34 +100,35 @@ class UGSPARQLGraph:
                     logger.info(f'top-es spo: ({subject_entities_list_sorted[0]}, {predicate_property_list_sorted[0]}, {object_entities_list_sorted[0]})')
                     # we can create a combination of s, p, o such that, the high scoring element in the
                     # set of S, P, O are together.
-                    disambiguated_spo = UGSPARQLGraph.disambiguate_using_cotext(question, subject_entities_list_sorted[:5],
-                                                                                predicate_property_list_sorted[:5], object_entities_list_sorted[:5], rdf_type_s, rdf_type_o)
+                    disambiguated_spo_topk = UGSPARQLGraph.disambiguate_using_cotext(question, subject_entities_list_sorted[:50],
+                                                                                predicate_property_list_sorted[:50], object_entities_list_sorted[:50], rdf_type_s, rdf_type_o)
                     #The set of candidate-spos we will get above would create for a given spo-triple
-                    disambiguated_spo_with_rdfterm = ['s', 'o', 'p']
-                    if rdf_type_s == 'URIRef':
-                        disambiguated_spo_with_rdfterm[0] = URIRef(disambiguated_spo[0])
-                    elif rdf_type_s == 'BNode':
-                        disambiguated_spo_with_rdfterm[0] = BNode(disambiguated_spo[0])
-                    else: # in case Exception occurs, we will receive None 
-                        disambiguated_spo_with_rdfterm[0] = BNode()
+                    for i, disambiguated_spo in enumerate(disambiguated_spo_topk):
+                        disambiguated_spo_with_rdfterm = ['s', 'o', 'p']
+                        if rdf_type_s == 'URIRef':
+                            disambiguated_spo_with_rdfterm[0] = URIRef(disambiguated_spo[0])
+                        elif rdf_type_s == 'BNode':
+                            disambiguated_spo_with_rdfterm[0] = BNode(disambiguated_spo[0])
+                        else: # in case Exception occurs, we will receive None 
+                            disambiguated_spo_with_rdfterm[0] = BNode()
                         
-                    if rdf_type_o == 'URIRef':
-                        disambiguated_spo_with_rdfterm[2] = URIRef(disambiguated_spo[2])
-                    elif rdf_type_s == 'BNode':
-                        disambiguated_spo_with_rdfterm[2] = BNode(disambiguated_spo[2])
-                    else: # in case Exception occurs, we will receive None 
-                        disambiguated_spo_with_rdfterm[2] = BNode()
+                        if rdf_type_o == 'URIRef':
+                            disambiguated_spo_with_rdfterm[2] = URIRef(disambiguated_spo[2])
+                        elif rdf_type_o == 'BNode':
+                            disambiguated_spo_with_rdfterm[2] = BNode(disambiguated_spo[2])
+                        else: # in case Exception occurs, we will receive None 
+                            disambiguated_spo_with_rdfterm[2] = BNode()
 
-                    #predicate will carry URIRef
-                    disambiguated_spo_with_rdfterm[1] = URIRef(disambiguated_spo[1])
-                    self.g_query.add_triple(tuple(disambiguated_spo_with_rdfterm))
+                        #predicate will carry URIRef
+                        disambiguated_spo_with_rdfterm[1] = URIRef(disambiguated_spo[1])
+                        self.g_query_topk[i].add_triple(tuple(disambiguated_spo_with_rdfterm))
 
     def get_g_sparql_graph(self):
         #todo from the list of candidates spo we need to disambiguate to obtain only one spo-triple
-        return GroundedSPARQLGraph(self.g_query)
+        return GroundedSPARQLGraph(self.g_query_topk)
 
     def get_g_sparql_query(self):
-        sparql_query = self.g_query.get_query_string()
+        sparql_query = [g_query.get_query_string() for g_query in self.g_query_topk]
         logger.info(f'g-SPARQL: {sparql_query}') 
         return sparql_query
 
@@ -264,9 +267,10 @@ class UGSPARQLGraph:
 
         reranked_spos = cross_emb_predictor(input_dict=input_dict, write_pred=False)
         reranked_spos_sorted = sorted(reranked_spos[0], key=lambda x: x['cross_emb_score'], reverse=True)
-        logger.info(f"cross-emb spo: {reranked_spos_sorted[0]['spo_triple_uri']}")
+        only_uri_list_topk = [only_uri['spo_triple_uri'] for only_uri in reranked_spos_sorted[:10]]
+        logger.info(f"cross-emb spo: {only_uri_list_topk}")
         logger.debug(f"cross-emb spo: {reranked_spos_sorted}")
-        return reranked_spos_sorted[0]['spo_triple_uri']
+        return only_uri_list_topk
 
     @staticmethod
     def flatten_search_result(nested_list):
