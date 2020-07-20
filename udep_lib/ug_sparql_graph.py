@@ -24,10 +24,10 @@ class UGSPARQLGraph:
 
     def __init__(self, ug_query, grounded_topk=10):
         self.query_graph = ug_query
-        self.g_query_tmp = copy.deepcopy(ug_query) # this is just to get the various attribute copied.
+        g_query_tmp = copy.deepcopy(ug_query) # this is just to get the various attribute copied.
         # and remove the basic graph pattern
-        self.g_query_tmp.empty_bgp() 
-        self.g_query_topk = [self.g_query_tmp for i in range(grounded_topk)]
+        g_query_tmp.empty_bgp() 
+        self.g_query_topk = [copy.deepcopy(g_query_tmp) for i in range(grounded_topk)]
         
         logger.info(f'ug_sparql: {self.query_graph.get_query_string()}')
 

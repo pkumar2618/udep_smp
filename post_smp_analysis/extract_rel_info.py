@@ -18,10 +18,14 @@ with open('../kr2ml.log', 'r') as f_read:
 
                 #check if the next line is also part of the query
                 if line_split[2] in ["ug_sparql", "g-SPARQL"]:
-                    next_line = lines[i+1].split(':')
-                    if next_line[0] not  in ['INFO', 'DEBUG']:
-                        next_line_write_flag = True
-                    else:
-                        next_line_write_flag = False
+                    try:
+                        next_line = lines[i+1].split(':')
+                        if next_line[0] not  in ['INFO', 'DEBUG']:
+                            next_line_write_flag = True
+                        else:
+                            next_line_write_flag = False
+                    except:
+                        continue
+
     f_write.close()
 
