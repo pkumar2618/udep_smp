@@ -158,6 +158,10 @@ class UGLogicalForm():
             elif re.match(r'\s*[\d]+:s[\s]*', neod_type):
                 spo_triples = spo_triples + UGLogicalForm.create_spo_triples(kp_vso)
 
+        # put spo_tiples through connect, merge and fold operations. The expand is not required right now
+
+
+
         query.where(spo_triples)
         return UGSPARQLGraph(query) # query.get_query_string()
 
@@ -273,3 +277,34 @@ class UGLogicalForm():
                 pass
 
         return spo_triples
+
+    @staticmethod
+    def graph_node_connect_merge_fold_expand(query_var, spo_triples):
+        # merge_rule-1: merge triple having sub and obj connected by wh-phrase
+        variables_list = set()
+        replace_variable_dict = {}
+        replace_triple_idx =[]
+        for idx, spo in enumerate(spo_triples):
+            if spo[0].startswith('?') and spo[2].startswith('?'): #if the variable node
+                variables_list.add([spo[0], spo[2]])
+                if re.match(r'[Ww]h[a-z]+]', spo[1]):
+                    if spo[0] in query_var:
+                        replace_variable_dict[spo[2]] = spo[0] #note dict has key-value reversed
+                    elif spo[2] in query_var:
+                        replace_variable_dict[spo[0]] = spo[2]
+                    replace_triple_idx.append(idx)
+
+        # remove the triple
+        popped_count = 0
+        for idx in replace_triple_idx:
+            spo_triples.pop(idx-popped_count)
+            popped_count += 1
+
+        # correct the variables binding/name
+        for idx, spo in enumerate(spo_triples):
+            if spo[0] in replace_variable_dict.keys():
+                spo_triples[idx][0] = replace_variable_dict[spo[0]]
+            if spo[2] in replace_variable_dict.keys():
+                spo_triples[idx][2] = replace_variable_dict[spo[2]]
+
+        # rule-2:
