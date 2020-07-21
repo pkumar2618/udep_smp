@@ -217,13 +217,13 @@ class UGLogicalForm():
                     event_triples_dict[event_id][predicate]['s_list'].append(URIRef(subject))
                 elif rdf_type is 'BNode':
                     # when subject is a blank-node it comes with ? prefixed to it. 
-                    event_triples_dict[event_id][predicate]['s_list'].append(BNode(f'?{subject.strip()}'))
+                    event_triples_dict[event_id][predicate]['s_list'].append(BNode(f'?{subject.strip()}'.replace(':', '')))
         except KeyError as ek:
             # create s_list
             if rdf_type is 'URIRef':
                 event_triples_dict[event_id][predicate]['s_list'] = [URIRef(subject)]  # assign the subject
             elif rdf_type is 'BNode':
-                event_triples_dict[event_id][predicate]['s_list'] = [BNode(f'?{subject.strip()}')]  # assign the subject
+                event_triples_dict[event_id][predicate]['s_list'] = [BNode(f'?{subject.strip()}'.replace(':', ''))]  # assign the subject
 
     @staticmethod
     def exists_in_slist(event_triples_dict, event_id, predicate, entity):
@@ -242,13 +242,13 @@ class UGLogicalForm():
                 if rdf_type is 'URIRef':
                     event_triples_dict[event_id][predicate]['s_list'].append(URIRef(object))
                 elif rdf_type is 'BNode':
-                    event_triples_dict[event_id][predicate]['s_list'].append(BNode(f'?{object.strip()}'))
+                    event_triples_dict[event_id][predicate]['s_list'].append(BNode(f'?{object.strip()}'.replace(':', '')))
         except KeyError as ek:
             # create the object_list with entity_id/type_id
             if rdf_type  is 'URIRef':
                 event_triples_dict[event_id][predicate]['o_list'] = [URIRef(object)] # assign the object
             elif rdf_type is 'BNode':
-                event_triples_dict[event_id][predicate]['o_list'] = [BNode(f'?{object.strip()}')]  # assign the object
+                event_triples_dict[event_id][predicate]['o_list'] = [BNode(f'?{object.strip()}'.replace(':', ''))]  # assign the object
 
     @staticmethod
     def exists_in_olist(event_triples_dict, event_id, predicate, entity):
