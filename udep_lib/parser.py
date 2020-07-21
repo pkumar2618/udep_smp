@@ -47,6 +47,7 @@ class Parser(object):
         for ug_logical_form in self.ug_logical_form_list:
             self.ug_sparql_graph_list.append(ug_logical_form.translate_to_sparql(kg))
 
+    # this is where all the magic happens, linking using elasticsearch, as well as reranking using BERT
     def grounded_sparql_graph(self, linker=None, kg=None):
         for ug_sparql_graph, nlquestion in zip(self.ug_sparql_graph_list, self.nlq_questions_list):
             ug_sparql_graph.ground_spo(question=nlquestion.question, linker=linker, kg=kg)

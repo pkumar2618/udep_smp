@@ -45,7 +45,7 @@ class UGLogicalForm():
             # if neod_term is Question then use the variable in it as select variables of the query object
             if re.match(r'^QUESTION', pred_dependency[0]):
                 # Take the arguments inside it and change them into SPARQL Variable, prepend with '?'
-                variables_list.append(f'?{type_entity[0]}')
+                variables_list.append(f'?{type_entity[0]}'.replace(':', ''))
 
 
             # # identify the event_id and the predicate
@@ -54,7 +54,7 @@ class UGLogicalForm():
                 event_id = type_entity[0]
                 if len(pred_dependency) == 1: # the atomic name only contains predicate
                     predicate = pred_dependency[0]
-                    UGLogicalForm.update_plist(event_triples_dict, event_id, predicate , rdf_type='URIRef')
+                    UGLogicalForm.update_plist(event_triples_dict, event_id, predicate, rdf_type='URIRef')
 
                 elif len(pred_dependency) == 2: # the atomic name coontains predicate and the dependency-relations
                     # or it contains predicate and arg0-1
@@ -65,7 +65,7 @@ class UGLogicalForm():
                         rdf_type = 'URIRef'
                     except IndexError as e_index:  # index error
                         # the term is a varaible
-                        entity = type_entity[1]
+                        entity = type_entity[1].replace(':', '')
                         rdf_type = 'BNode'
 
                     if not re.match(r'arg[\d]+', dependency_relations): # the term is dependency-relation
@@ -95,7 +95,7 @@ class UGLogicalForm():
                         rdf_type = 'URIRef'
                     except IndexError as e_index:  # index error
                         # the term is a varaible
-                        entity = type_entity[1]
+                        entity = type_entity[1].replace(':', '')
                         rdf_type = 'BNode'
 
                     if not re.match(r'arg[\d]+', dependency_relations):  # the term is dependency-relation
@@ -140,6 +140,11 @@ class UGLogicalForm():
                 elif len(pred_dependency) == 2: # atomic expression for type ':s' don't have arg[\d]
                     pass
 
+
+        # change variables in variables_list into ?0x type i.e. remove the colon, it is problem for sparql query
+        # variables_list_original = variables_list.copy()
+        # v_list_no_colon = [v_with_col.replace(':', '') for v_with_col in variables_list]
+        # v_list_dict = dict(zip(variables_list_original, v_list_no_colon))
         query.select(variables_list)
         query.distinct()
         spo_triples = []
