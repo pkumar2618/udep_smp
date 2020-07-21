@@ -160,8 +160,7 @@ class UGLogicalForm():
 
         # put spo_tiples through connect, merge and fold operations. The expand is not required right now
 
-
-
+        UGLogicalForm.graph_node_connect_merge_fold_expand(variables_list, spo_triples)
         query.where(spo_triples)
         return UGSPARQLGraph(query) # query.get_query_string()
 
