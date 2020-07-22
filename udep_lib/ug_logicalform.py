@@ -160,7 +160,7 @@ class UGLogicalForm():
 
         # put spo_tiples through connect, merge and fold operations. The expand is not required right now
 
-        UGLogicalForm.graph_node_connect_merge_fold_expand(variables_list, spo_triples)
+        spo_triples = UGLogicalForm.graph_node_connect_merge_fold_expand(variables_list, spo_triples)
         query.where(spo_triples)
         return UGSPARQLGraph(query) # query.get_query_string()
 
@@ -271,7 +271,7 @@ class UGLogicalForm():
             try:
                 assert len(slist_olist_dict['s_list']) == len(slist_olist_dict['o_list']), "hanging edge: missing subject or object node"
                 predicate = URIRef(predicate)
-                spo_triples = spo_triples + [(s, predicate, o) for s,o in zip(slist_olist_dict['s_list'], slist_olist_dict['o_list'])]
+                spo_triples = spo_triples + [[s, predicate, o] for s,o in zip(slist_olist_dict['s_list'], slist_olist_dict['o_list'])]
             except (AssertionError, KeyError) as e:
                 pass
 
@@ -285,12 +285,14 @@ class UGLogicalForm():
         replace_triple_idx =[]
         for idx, spo in enumerate(spo_triples):
             if spo[0].startswith('?') and spo[2].startswith('?'): #if the variable node
-                variables_list.add([spo[0], spo[2]])
-                if re.match(r'[Ww]h[a-z]+]', spo[1]):
-                    if spo[0] in query_var:
-                        replace_variable_dict[spo[2]] = spo[0] #note dict has key-value reversed
-                    elif spo[2] in query_var:
-                        replace_variable_dict[spo[0]] = spo[2]
+                variables_list.add(f'{spo[0]}')
+                variables_list.add(f'{spo[2]}')
+                
+                if re.match(r'[wW]h[a-zA-Z]+', spo[1]):
+                    if f'{spo[0]}' in query_var:
+                        replace_variable_dict[f'{spo[2]}'] = f'{spo[0]}' #note dict has key-value reversed
+                    elif f'{spo[2]}' in query_var:
+                        replace_variable_dict[f'{spo[0]}'] = f'{spo[2]}'
                     replace_triple_idx.append(idx)
 
         # remove the triple
@@ -301,9 +303,10 @@ class UGLogicalForm():
 
         # correct the variables binding/name
         for idx, spo in enumerate(spo_triples):
-            if spo[0] in replace_variable_dict.keys():
-                spo_triples[idx][0] = replace_variable_dict[spo[0]]
-            if spo[2] in replace_variable_dict.keys():
-                spo_triples[idx][2] = replace_variable_dict[spo[2]]
+            if f'{spo[0]}' in replace_variable_dict.keys():
+                spo_triples[idx][0] = BNode(replace_variable_dict[f'{spo[0]}'])
+            elif f'{spo[2]}' in replace_variable_dict.keys():
+                spo_triples[idx][2] = BNode(replace_variable_dict[f'{spo[2]}'])
 
+        return [tuple(spo) for spo in spo_triples]
         # rule-2:
