@@ -124,7 +124,7 @@ while True:
                     with open(f'{args.logname}_log4_parser.pkl', 'wb') as f:
                         pickle.dump(parser, f)
 
-                # parser.query_executor(args.knowledge_graph)
+                parser.query_executor(args.knowledge_graph)
 
                 # Result of Querying the Knowledge Graph
                 print("done")
