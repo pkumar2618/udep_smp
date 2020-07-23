@@ -1,5 +1,6 @@
 from udep_lib.nlquestion import NLQuestion
 import logging
+import json
 logger = logging.getLogger(__name__)
 
 class Parser(object):
@@ -65,13 +66,23 @@ class Parser(object):
         # WHERE
         # { <http://dbpedia.org/resource/Michael_Jackson> < http://dbpedia.org/ontology/deathDate> ?date}"""
         # query = Query(query_string)
-        for query in self.g_sparql_graph_list:
-            query.run(kg)
-            result_list_dict  = query.results["results"]["bindings"]
-
-            # print(result["label"]["value"])
-            for result_dict in result_list_dict:
-                print("\t".join(["label: { } \t value: { }".format(key, result_dict[key]) for key in result_dict.keys()]))
+        json_item = {}
+        json_list = []
+        with open('execution_results.json', 'w') as f_handle:
+           for graph_query, question in zip(self.g_sparql_graph_list, self.nlq_questions_list):
+               json_item = {}
+               json_item['question'] = question
+               query_object = graph_query['sparql_graph']
+               query_object.run(kg)
+               result_list_dict  = query_object.results["results"]["bindings"]
+               json_item['query_output'] = result_list_dict
+               json_list.append(json_item)
+               # print(result["label"]["value"])
+               # for result_dict in result_list_dict:
+               #     output_values = "\n".join([f"label: {key} \t value: { result_dict[key]}") for key in result_dict.keys()])
+               #     f_handle.writeline(output_values)
+               # print("\n".join([f"label: {key} \t value: { result_dict[key]}") for key in result_dict.keys()]))
+           json.dump(json_list, f_handle, indent=4)
 
 
     @staticmethod

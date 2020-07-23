@@ -178,7 +178,8 @@ class Query(object):
         print(all_ns)
 
     def run(self, kg='dbpedia'):
-        sparql_endpoint = SPARQLWrapper("http://dbpedia.org/sparql")
+        #sparql_endpoint = SPARQLWrapper("http://dbpedia.org/sparql")
+        sparql_endpoint = SPARQLWrapper("http://10.208.20.61:8890/sparql/")
         sparql_endpoint.setReturnFormat(JSON)
         try:
             sparql_endpoint.setQuery(self.sparql)
