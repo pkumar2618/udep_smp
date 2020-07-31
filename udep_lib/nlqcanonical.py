@@ -14,7 +14,7 @@ class NLQCanonical(object):
         self.nlq_canonical = canonical_form
         logger.info(f'canonical-form: {canonical_form}')
     def formalize_into_udeplambda(self):
-        # This is shortcut, note the we take help from UDepLambda to create lambda logical form
+        # This is shortcut, note that we take help from UDepLambda to create lambda logical form
         # from the natural question itself. So all this pipeline from natural language uptil tokenization is
         # now taken care off by the UDepLambda.
         # the lambda form is stored in the self.udep_lambda object variable.
@@ -41,7 +41,31 @@ class NLQCanonical(object):
                 f.write(f'{{"sentence":"{sentence}"}}')
 
         res = subprocess.check_output("./run_udep_lambda.sh")
+        self.udep_lambda = json.loads(res.decode('utf-8'))
+        # the output json_object will be stored in a file dep_parse.txt, that will be used by 
+        # another script from UDepLambda to get to the ungrounded graph, implemented in ug_logical_form.translate_to_sparql.
+        with open("./dep_parse.txt", 'w') as f:
+            json.dump(self.udep_lambda, f)
+
+        # the elements in entities will be provided key label entity instead of phrase.  
+        semantic_parse = {} 
+        with open("./dep_parse.txt", 'r') as f:
+            semantic_parse = json.load(f)
+            if 'entities' in semantic_parse.keys():
+                temp_entities = [] # a list of dictionary items.
+                semantic_parse_entity_list_dict = semantic_parse['entities'].copy()
+                del semantic_parse['entities']
+                for entity_dict in semantic_parse_entity_list_dict:
+                   temp_entity = entity_dict.copy() 
+                   del entity_dict['phrase']
+                   entity_dict['entity'] = temp_entity['phrase']
+                   temp_entities.append(entity_dict)
+
+                semantic_parse['entities']= temp_entities
+                self.udep_lambda = semantic_parse
+
+        with open("./dep_parse.txt", 'w') as f:
+            json.dump(semantic_parse, f)
 
         # convert the bytecode into dictionary.
-        self.udep_lambda = json.loads(res.decode('utf-8'))
         return UGLogicalForm(self.udep_lambda)

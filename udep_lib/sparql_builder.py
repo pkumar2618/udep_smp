@@ -32,7 +32,7 @@ class Query(object):
         """
         self.sparql = None
         self._where = None
-        # self.results = None
+        self.results = None
         self._type = None
         self._data = Graph()
         self._modifier = None
