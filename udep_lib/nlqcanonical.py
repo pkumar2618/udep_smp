@@ -1,8 +1,9 @@
 import json
 import subprocess
 import logging
+import os
 
-# from udep_lib.ug_logicalform import UGLogicalForm
+from udep_lib.ug_logicalform import UGLogicalForm
 logger = logging.getLogger(__name__)
 
 class NLQCanonical(object):
@@ -12,7 +13,8 @@ class NLQCanonical(object):
 
     def __init__(self, canonical_form):
         self.nlq_canonical = canonical_form
-        self.ug_graph = None
+        self.udep_lambda = None
+        #self.ug_graph = None
         logger.info(f'canonical-form: {canonical_form}')
     def formalize_into_udeplambda(self):
         # This is shortcut, note that we take help from UDepLambda to create lambda logical form
@@ -74,10 +76,73 @@ class NLQCanonical(object):
 
     def lambda_to_sqg(self):
         res = subprocess.check_output("./run_lambda_ug_graph.sh")
-        self.ug_graph = json.loads(res.decode('utf-8'))
+        #self.ug_graph = json.loads(res.decode('utf-8'))
+        #the graph from gp is written in a file ug_graph.txt
+        # it is for the next_module in the pipeline ug_logicalform to read the file and convert the gp-graph into a
+        # sparql graph.
+    
+    def direct_to_gpgraph(self):
+        self.direct_to_udeplambda()
+        self.lambda_to_sqg()
+        #this function will return the gp-graph as dictionary of keys: {Semantic Parse, Words, Edgesi, Types, Properties, EventTypes, EventEventModifiers} 
+        #curr_path = os.getcwd()
+        with open('./ug_graph.txt') as f_read:
+           lines = f_read.readlines()
+           line_iter = iter(lines)
+           graphs_count = 0
+           line = next(line_iter) 
+           line_split = line.split(":", 1)
+           json_gp_graphs = []
+           if line_split[0] == "UG Graphs":
+               graphs_count = int(line_split[1].strip())
+           for g in range(graphs_count):
+               json_graph = {}
+               while True:
+                   line = next(line_iter)
+                   line_split = line.split(":", 1)
+                   if line_split[0] == "Semantic Parse":
+                       json_graph["Semantic Parse"]=line_split[1]
+                   elif line_split[0] == "Words":
+                       line = next(line_iter)
+                       json_graph["nodes"] = []
+                       while(line.split(":", 1)[0] != "Edges"):
+                           json_graph['nodes'].append(line.replace("LexicalItem", ""))
+                           line = next(line_iter)
+                       json_graph["Edges"] = []
+                       line = next(line_iter)
+                       while(line.split(":", 1)[0] != "Types"):
+                           json_graph['Edges'].append(line.split("\t", 1))
+                           line = next(line_iter)
+                       json_graph["Types"] = []
+                       line = next(line_iter)
+                       while(line.split(":", 1)[0] != "Properties"):
+                           json_graph['Types'].append(line.split("\t", 1))
+                           line = next(line_iter)
+                       json_graph["Properties"] = []
+                       line = next(line_iter)
+                       while(line.split(":", 1)[0] != "EventTypes"):
+                           json_graph["Properties"].append(line.split("\t", 1))
+                           line = next(line_iter)
+                       json_graph["EventTypes"] = []
+                       line = next(line_iter)
+                       while(line.split(":", 1)[0] != "EventEventModifiers"):
+                           json_graph["EventTypes"].append(line.split("\t", 1))
+                           line = next(line_iter)
+                       json_graph["EventEventModifiers"] = []
+                       try:
+                           line = next(line_iter, None)
+                           while(line.split(":", 1)[0] != "Semantic Parse"):
+                               json_graph["EventEventModifiers"].append(line.split("\t", 1))
+                               line = next(line_iter)
+                           json_gp_graphs.append(json_graph)
+                           break
+                       except AttributeError as e:
+                           break
 
+        return json.dumps(json_gp_graphs)
 
 if __name__=='__main__':
     parser = NLQCanonical('Who was the doctoral supervisor of Albert Einstein?')
     parser.direct_to_udeplambda()
     parser.lambda_to_sqg()
+
