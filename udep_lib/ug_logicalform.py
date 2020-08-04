@@ -11,6 +11,9 @@ class UGLogicalForm():
         self.udep_lambda = udep_lambda
         logger.info(f"dependency_lambda: {udep_lambda['dependency_lambda'][0]}")
 
+    def graphparser_sparql(self):
+        pass
+
     def translate_to_sparql(self, kg='dbpedia'):
         """
         The logical form in udep_lambda is translated into SPARQL.

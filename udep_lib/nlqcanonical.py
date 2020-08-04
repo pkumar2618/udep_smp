@@ -2,7 +2,7 @@ import json
 import subprocess
 import logging
 
-from udep_lib.ug_logicalform import UGLogicalForm
+# from udep_lib.ug_logicalform import UGLogicalForm
 logger = logging.getLogger(__name__)
 
 class NLQCanonical(object):
@@ -12,6 +12,7 @@ class NLQCanonical(object):
 
     def __init__(self, canonical_form):
         self.nlq_canonical = canonical_form
+        self.ug_graph = None
         logger.info(f'canonical-form: {canonical_form}')
     def formalize_into_udeplambda(self):
         # This is shortcut, note that we take help from UDepLambda to create lambda logical form
@@ -68,4 +69,15 @@ class NLQCanonical(object):
             json.dump(semantic_parse, f)
 
         # convert the bytecode into dictionary.
-        return UGLogicalForm(self.udep_lambda)
+        # return UGLogicalForm(self.udep_lambda)
+        return self.udep_lambda
+
+    def lambda_to_sqg(self):
+        res = subprocess.check_output("./run_lambda_ug_graph.sh")
+        self.ug_graph = json.loads(res.decode('utf-8'))
+
+
+if __name__=='__main__':
+    parser = NLQCanonical('Who was the doctoral supervisor of Albert Einstein?')
+    parser.direct_to_udeplambda()
+    parser.lambda_to_sqg()
