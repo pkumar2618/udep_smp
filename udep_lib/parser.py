@@ -37,7 +37,9 @@ class Parser(object):
         #                              for nlq_canonical in self.nlq_canonical_list]
         # for nlq_canon, sentence in zip(self.nlq_canonical_list, self.nlq_questions_list):
         #     self.ug_logical_form_list.append(nlq_canon.direct_to_udeplambda(sentence))
-        self.ug_logical_form_list = [nlq_canonical.direct_to_udeplambda()
+        # self.ug_logical_form_list = [nlq_canonical.direct_to_udeplambda()
+                                     # for nlq_canonical in self.nlq_canonical_list]
+        self.ug_gpgraph = [nlq_canonical.direct_to_gpgraph()
                                      for nlq_canonical in self.nlq_canonical_list]
 
     def ungrounded_sparql_graph(self, kg='dbpedia'):
