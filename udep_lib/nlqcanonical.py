@@ -14,8 +14,9 @@ class NLQCanonical(object):
     def __init__(self, canonical_form):
         self.nlq_canonical = canonical_form
         self.udep_lambda = None
-        #self.ug_graph = None
+        self.ug_gp_graphs = None
         logger.info(f'canonical-form: {canonical_form}')
+
     def formalize_into_udeplambda(self):
         # This is shortcut, note that we take help from UDepLambda to create lambda logical form
         # from the natural question itself. So all this pipeline from natural language uptil tokenization is
@@ -71,8 +72,7 @@ class NLQCanonical(object):
             json.dump(semantic_parse, f)
 
         # convert the bytecode into dictionary.
-        # return UGLogicalForm(self.udep_lambda)
-        return self.udep_lambda
+        return UGLogicalForm(self.udep_lambda)
 
     def lambda_to_sqg(self):
         res = subprocess.check_output("./run_lambda_ug_graph.sh")
@@ -137,9 +137,11 @@ class NLQCanonical(object):
                            json_gp_graphs.append(json_graph)
                            break
                        except AttributeError as e:
+                           json_gp_graphs.append(json_graph)
                            break
 
-        return json.dumps(json_gp_graphs)
+        self.ug_gp_graphs = json_gp_graphs
+        return UGLogicalForm(None, self.ug_gp_graphs)
 
 if __name__=='__main__':
     parser = NLQCanonical('Who was the doctoral supervisor of Albert Einstein?')

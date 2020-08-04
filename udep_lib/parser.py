@@ -18,7 +18,8 @@ class Parser(object):
         self.nlq_tokens_list = []
         self.nlq_canonical_list = []
         self.ug_logical_form_list = []
-        self.ug_sparql_graph_list = []
+        self.ug_gpgraphs_list = []
+        self.ug_sparql_graphs_list = []
         self.g_sparql_graph_list = []
         self.results_list = []
 
@@ -39,7 +40,7 @@ class Parser(object):
         #     self.ug_logical_form_list.append(nlq_canon.direct_to_udeplambda(sentence))
         # self.ug_logical_form_list = [nlq_canonical.direct_to_udeplambda()
                                      # for nlq_canonical in self.nlq_canonical_list]
-        self.ug_gpgraph = [nlq_canonical.direct_to_gpgraph()
+        self.ug_gpgraphs_list = [nlq_canonical.direct_to_gpgraph()
                                      for nlq_canonical in self.nlq_canonical_list]
 
     def ungrounded_sparql_graph(self, kg='dbpedia'):
@@ -47,8 +48,10 @@ class Parser(object):
         takes the the sparql query object obtained from the ug_logical_form.
         :return:
         """
-        for ug_logical_form in self.ug_logical_form_list:
-            self.ug_sparql_graph_list.append(ug_logical_form.translate_to_sparql(kg))
+        #for ug_logical_form in self.ug_logical_form_list:
+        #    self.ug_sparql_graphs_list.append(ug_logical_form.translate_to_sparql(kg))
+        for ug_graphs in self.ug_gpgraphs_list:
+            self.ug_sparql_graphs_list.append(ug_graphs.gpgraph_to_sparql(kg))
 
     # this is where all the magic happens, linking using elasticsearch, as well as reranking using BERT
     def grounded_sparql_graph(self, linker=None, kg=None):

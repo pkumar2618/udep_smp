@@ -7,12 +7,29 @@ from udep_lib.sparql_builder import Query
 logger = logging.getLogger(__name__)
 
 class UGLogicalForm():
-    def __init__(self, udep_lambda):
+    def __init__(self, udep_lambda=None, ug_gpgraphs=None):
         self.udep_lambda = udep_lambda
-        logger.info(f"dependency_lambda: {udep_lambda['dependency_lambda'][0]}")
+        self.ug_gpgraphs = ug_gpgraphs
+        try:
+            logger.info(f"dependency_lambda: {udep_lambda['dependency_lambda'][0]}")
+        except TypeError as e:
+            logger.info(f"ug_gp_graphs: {ug_gpgraphs[0]}")
 
-    def graphparser_sparql(self):
-        pass
+
+    def gpgraph_to_sparql(self, kg='dbpedia'):
+        """Trnaslate the ug_gpgraph into ug_sparql_graph
+        """
+        # extract the nodes and relations from the ug_gpgraph and create sparql triplets
+        # read out edges
+        query = Query()
+        variables_list = []
+        for gpgraph in self.ug_gpgraphs:
+        # create a dictionary of nodes using word position as index
+            nodes_dict={}
+            for node in gpgraph['nodes']:
+               pass 
+            for edge in gpgraph['Edges']:
+               pass 
 
     def translate_to_sparql(self, kg='dbpedia'):
         """
