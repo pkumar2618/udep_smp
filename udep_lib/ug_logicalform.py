@@ -3,7 +3,8 @@ import logging
 from rdflib import URIRef, BNode
 from udep_lib.ug_sparql_graph import UGSPARQLGraph
 from udep_lib.sparql_builder import Query
-
+from nltk.corpus import stopwords
+cachedStopWords = stopwords.words("english")
 logger = logging.getLogger(__name__)
 
 class UGLogicalForm():
@@ -18,18 +19,75 @@ class UGLogicalForm():
 
     def gpgraph_to_sparql(self, kg='dbpedia'):
         """Trnaslate the ug_gpgraph into ug_sparql_graph
+        {'Edges': [['(4,7,4)', '(supervisor.nmod.of,supervisor.arg0):0.0\n'],
+                   ['(0,0,4)', '(who.arg0,who.arg1):0.0\n']],
+        'EventEventModifiers': [],
+        'EventTypes': [],
+        'Properties': [['0', '[QUESTION]\n']],
+        'Semantic Parse': ' [QUESTION(0:x), who.arg0(0:e , 0:x), supervisor(4:s ,4:x), supervisor.arg0(4:e , 4:x), doctoral(3:s , 4:x), who(0:s , 0:x), who.arg1(0:e , 4:x), supervisor.nmod.of(4:e , 7:m.Albert_Einstein), arg0(7:e , 7:m.Albert_Einstein)]\n',
+        'Types': [['(4,3)', 'doctoral:0.0\n'], 
+                    ['(4,4)', 'supervisor:0.0\n'],
+                   ['(0,0)', 'who:0.0\n']],
+        'nodes': ['{0, Who, who, PRON, null}\n',
+                    '{3, doctoral, doctoral, ADJ, null}\n',
+                   '{4, supervisor, supervisor, NOUN, null}\n',
+                   '{7, Einstein, einstein, PROPN, null}\n']}
         """
         # extract the nodes and relations from the ug_gpgraph and create sparql triplets
         # read out edges
-        query = Query()
-        variables_list = []
+        queries = []
         for gpgraph in self.ug_gpgraphs:
         # create a dictionary of nodes using word position as index
+            query = Query()
+            spo_triples = []
             nodes_dict={}
             for node in gpgraph['nodes']:
-               pass 
+                node_split = node.strip().strip('{}').split(',')
+                nodes_dict[node_split[0]] = node_split[1:]
+            property_dict = {}
+            ##'Properties': [['0', '[QUESTION]\n']],
+            for prop in gpgraph['Properties']:
+                property_dict[prop[0]] = prop[1].strip().strip('[]')
+
+            variables_list = list(property_dict.keys())
+            variables_list_bnodex = {} 
+            for idx in variables_list: 
+                variables_list_bnodex[idx] = f'?x{idx}'
+
+            #['(4,7,4)', '(supervisor.nmod.of,supervisor.arg0):0.0\n'],
+            #'(4,7,4)' : mediator node(concept from freebase), left node and right node
             for edge in gpgraph['Edges']:
-               pass 
+                triplet = ['s', 'p', 'o']
+                relations_split = edge[1].strip().split(':')[0].strip('()').split(',')
+                sub_relation_l = relations_split[0] # sub relations are called in freebase
+                sub_relation = [relation for relation in sub_relation_l.split('.') if relation not in cachedStopWords]
+                predicate = URIRef(sub_relation[0]) # use only the main part, there may exist args or dependency labels.
+                triplet[1] = predicate
+                # adding nodes sub and obj now
+                edge_split = edge[0].strip('()').split(',')
+                s_idx = edge_split[1] 
+                o_idx = edge_split[2]
+                sub = nodes_dict[s_idx][0]
+                obj = nodes_dict[o_idx][0]
+                if s_idx in variables_list:
+                    triplet[0]= BNode(variables_list_bnodex[s_idx])
+                else:
+                    triplet[0]= URIRef(sub.strip())
+
+                if o_idx in variables_list:
+                    triplet[2]= BNode(variables_list_bnodex[o_idx])
+                else:
+                    triplet[2]= URIRef(obj.strip())
+
+                spo_triples.append(triplet)
+
+            query.select([v for k, v in variables_list_bnodex.items()])
+            query.distinct()
+            query.where([tuple(spo) for spo in spo_triples])
+            queries.append(UGSPARQLGraph(query))
+        return queries
+        
+
 
     def translate_to_sparql(self, kg='dbpedia'):
         """

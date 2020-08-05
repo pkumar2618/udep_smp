@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
-cp udepl_nlq.txt /Users/pawan/projects/UDepLambda/udepl_nlq.txt
-cd /Users/pawan/projects/UDepLambda/
-cat /Users/pawan/projects/UDepLambda/udepl_nlq.txt | /Users/pawan/projects/UDepLambda/run-english.sh
+cp udepl_nlq.txt /home/pawan/projects/aihn_qa/UDepLambda/udepl_nlq.txt
+cd /home/pawan/projects/aihn_qa/UDepLambda/
+cat /home/pawan/projects/aihn_qa/UDepLambda/udepl_nlq.txt | /home/pawan/projects/aihn_qa/UDepLambda/run-english.sh

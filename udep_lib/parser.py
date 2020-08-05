@@ -55,8 +55,10 @@ class Parser(object):
 
     # this is where all the magic happens, linking using elasticsearch, as well as reranking using BERT
     def grounded_sparql_graph(self, linker=None, kg=None):
-        for ug_sparql_graph, nlquestion in zip(self.ug_sparql_graph_list, self.nlq_questions_list):
-            ug_sparql_graph.ground_spo(question=nlquestion.question, linker=linker, kg=kg)
+        for ug_sparql_graphs, nlquestion in zip(self.ug_sparql_graphs_list, self.nlq_questions_list):
+            # there might me many gp_graphs obtained, we are using the first one for now, which is usually 
+            # the case with UDepLambda, it generates only on logical form therefore on ungrounded gp-graph
+            ug_sparql_graphs[0].ground_spo(question=nlquestion.question, linker=linker, kg=kg)
             graph_query = {'sparql_graph': ug_sparql_graph.get_g_sparql_graph(), 'sparql_query': ug_sparql_graph.get_g_sparql_query()}
             self.g_sparql_graph_list.append(graph_query)
 
