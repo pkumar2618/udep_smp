@@ -1,4 +1,4 @@
-# from SPARQLWrapper import SPARQLWrapper, JSON
+from SPARQLWrapper import SPARQLWrapper, JSON
 # from surf.query import a, select
 # from surf.rdf import BNode, Graph, ConjunctiveGraph, Literal, Namespace
 # from surf.rdf import RDF, URIRef

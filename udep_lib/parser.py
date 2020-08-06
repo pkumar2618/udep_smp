@@ -8,7 +8,6 @@ class Parser(object):
     Takes as input a list NLQuestion(one or more)
     and parse it.
     """
-    # ug_sparql_graph_list: List[Any]
     def __init__(self, nlqs):
         """
         Take a list of questions (one or more)
@@ -59,7 +58,7 @@ class Parser(object):
             # there might me many gp_graphs obtained, we are using the first one for now, which is usually 
             # the case with UDepLambda, it generates only on logical form therefore on ungrounded gp-graph
             ug_sparql_graphs[0].ground_spo(question=nlquestion.question, linker=linker, kg=kg)
-            graph_query = {'sparql_graph': ug_sparql_graph.get_g_sparql_graph(), 'sparql_query': ug_sparql_graph.get_g_sparql_query()}
+            graph_query = {'sparql_graph': ug_sparql_graphs[0].get_g_sparql_graph(), 'sparql_query': ug_sparql_graphs[0].get_g_sparql_query()}
             self.g_sparql_graph_list.append(graph_query)
 
     def query_executor(self, kg='dbpedia'):
@@ -73,22 +72,27 @@ class Parser(object):
         # WHERE
         # { <http://dbpedia.org/resource/Michael_Jackson> < http://dbpedia.org/ontology/deathDate> ?date}"""
         # query = Query(query_string)
-        json_item = {}
         json_list = []
         with open('execution_results.json', 'w') as f_handle:
-           for graph_query, question in zip(self.g_sparql_graph_list, self.nlq_questions_list):
+           for queries, nlq in zip(self.g_sparql_graph_list, self.nlq_questions_list):
                json_item = {}
-               json_item['question'] = question
-               query_object = graph_query['sparql_graph']
-               query_object.run(kg)
-               result_list_dict  = query_object.results["results"]["bindings"]
-               json_item['query_output'] = result_list_dict
+               topk_sparql_graphs = queries['sparql_graph']
+               topk_sparql_queries = queries['sparql_query']
+               topk = 1
+               json_item['question'] = nlq.question.strip()
+               json_item['query_result'] =  []
+               for query, q_string in zip(topk_sparql_graphs.g_query_topk[:topk], topk_sparql_queries[:topk]):
+                   temp_store = {'query_output': None, 'query_string': None}
+                   query.run(kg)
+                   result_list_dict  = query.results["results"]["bindings"]
+                   temp_store['query_output'] = result_list_dict
+                   temp_store['query_string'] = q_string
+                   json_item['query_result'].append(temp_store)
+                   # for result_dict in result_list_dict:
+                   # output_values = "\n".join([f"label: {key} \t value: { result_dict[key]}") for key in result_dict.keys()])
+                   # f_handle.writeline(output_values)
+                   # print("\n".join([f"label: {key} \t value: { result_dict[key]}") for key in result_dict.keys()]))
                json_list.append(json_item)
-               # print(result["label"]["value"])
-               # for result_dict in result_list_dict:
-               #     output_values = "\n".join([f"label: {key} \t value: { result_dict[key]}") for key in result_dict.keys()])
-               #     f_handle.writeline(output_values)
-               # print("\n".join([f"label: {key} \t value: { result_dict[key]}") for key in result_dict.keys()]))
            json.dump(json_list, f_handle, indent=4)
 
 

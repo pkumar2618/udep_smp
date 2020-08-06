@@ -6,8 +6,8 @@ class GroundedSPARQLGraph: #todo
         self.g_query_topk = g_query_topk
 
     def __str__(self):
-        return self.g_query.get_query_string()
+        return [g_query.get_query_string() for g_query in self.g_query_topk]
 
-    def run(self):
+    def run(self, kg='dbpedia'):
         for query in self.g_query_topk:
-            query.run()
+            query.run(kg)
