@@ -139,6 +139,9 @@ class NLQCanonical(object):
                        except AttributeError as e:
                            json_gp_graphs.append(json_graph)
                            break
+                       except StopIteration as e:
+                           json_gp_graphs.append(json_graph)
+                           break
 
         self.ug_gp_graphs = json_gp_graphs
         return UGLogicalForm(None, self.ug_gp_graphs)
