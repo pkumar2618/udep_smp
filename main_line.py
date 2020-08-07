@@ -147,7 +147,7 @@ while True:
                         parser.ungrounded_sparql_graph(kg=args.knowledge_graph)
                         parser.grounded_sparql_graph(linker=args.disambiguator, kg=args.knowledge_graph)
 
-                        # parser.query_executor(args.knowledge_graph)
+                        parser.query_executor(args.knowledge_graph)
 
                      # Result of Querying the Knowledge Graph
                     print("done")

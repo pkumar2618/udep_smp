@@ -62,38 +62,40 @@ class Parser(object):
             self.g_sparql_graph_list.append(graph_query)
 
     def query_executor(self, kg='dbpedia'):
-        # self.results_list = [query.run(kg) for query in self.query_list]
-        # query_string = """SELECT DISTINCT xsd:date(?d) WHERE { <http://dbpedia.org/resource/Diana,_Princess_of_Wales>
-        # <http://dbpedia.org/ontology/deathDate> ?d}
-        # """
-        # query_string="""
-        # SELECT
-        # DISTINCT ?date
-        # WHERE
-        # { <http://dbpedia.org/resource/Michael_Jackson> < http://dbpedia.org/ontology/deathDate> ?date}"""
-        # query = Query(query_string)
-        json_list = []
+        json_list = [] 
+        try:
+            with open('execution_results.json', 'r') as f_handle:
+                json_list = json.load(f_handle)
+        except FileNotFoundError as e:
+            json_list = [] 
+
         with open('execution_results.json', 'w') as f_handle:
-           for queries, nlq in zip(self.g_sparql_graph_list, self.nlq_questions_list):
-               json_item = {}
-               topk_sparql_graphs = queries['sparql_graph']
-               topk_sparql_queries = queries['sparql_query']
-               topk = 1
-               json_item['question'] = nlq.question.strip()
-               json_item['query_result'] =  []
-               for query, q_string in zip(topk_sparql_graphs.g_query_topk[:topk], topk_sparql_queries[:topk]):
-                   temp_store = {'query_output': None, 'query_string': None}
-                   query.run(kg)
-                   result_list_dict  = query.results["results"]["bindings"]
-                   temp_store['query_output'] = result_list_dict
-                   temp_store['query_string'] = q_string
-                   json_item['query_result'].append(temp_store)
-                   # for result_dict in result_list_dict:
-                   # output_values = "\n".join([f"label: {key} \t value: { result_dict[key]}") for key in result_dict.keys()])
-                   # f_handle.writeline(output_values)
-                   # print("\n".join([f"label: {key} \t value: { result_dict[key]}") for key in result_dict.keys()]))
-               json_list.append(json_item)
-           json.dump(json_list, f_handle, indent=4)
+            for queries, nlq in zip(self.g_sparql_graph_list, self.nlq_questions_list):
+                json_item = {}
+                topk_sparql_graphs = queries['sparql_graph']
+                topk_sparql_queries = queries['sparql_query']
+                topk = 1
+                json_item['question'] = nlq.question.strip()
+                json_item['query_result'] =  []
+                for query, q_string in zip(topk_sparql_graphs.g_query_topk[:topk], topk_sparql_queries[:topk]):
+                    temp_store = {'query_output': None, 'query_string': None}
+                    try:
+                        query.run(kg)
+                        result_list_dict  = query.results["results"]["bindings"]
+                        temp_store['query_output'] = result_list_dict
+                        temp_store['query_string'] = q_string
+                        json_item['query_result'].append(temp_store)
+                        # for result_dict in result_list_dict:
+                        # output_values = "\n".join([f"label: {key} \t value: { result_dict[key]}") for key in result_dict.keys()])
+                        # f_handle.writeline(output_values)
+                        # print("\n".join([f"label: {key} \t value: { result_dict[key]}") for key in result_dict.keys()]))
+                    except TypeError as e:
+                        temp_store['query_output'] =  ""
+                        temp_store['query_string'] = q_string
+                        json_item['query_result'].append(temp_store)
+
+                json_list.append(json_item)
+            json.dump(json_list, f_handle, indent=4)
 
 
     @staticmethod
