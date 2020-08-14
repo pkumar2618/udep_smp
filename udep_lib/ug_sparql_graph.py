@@ -100,8 +100,8 @@ class UGSPARQLGraph:
                     logger.info(f'top-es spo: ({subject_entities_list_sorted[0]}, {predicate_property_list_sorted[0]}, {object_entities_list_sorted[0]})')
                     # we can create a combination of s, p, o such that, the high scoring element in the
                     # set of S, P, O are together.
-                    disambiguated_spo_topk = UGSPARQLGraph.disambiguate_using_cotext(question, subject_entities_list_sorted[:50],
-                                                                                predicate_property_list_sorted[:50], object_entities_list_sorted[:50], rdf_type_s, rdf_type_o)
+                    disambiguated_spo_topk = UGSPARQLGraph.disambiguate_using_cotext(question, subject_entities_list_sorted[:10],
+                                                                                predicate_property_list_sorted[:10], object_entities_list_sorted[:10], rdf_type_s, rdf_type_o)
                     #The set of candidate-spos we will get above would create for a given spo-triple
                     for i, disambiguated_spo in enumerate(disambiguated_spo_topk):
                         disambiguated_spo_with_rdfterm = ['s', 'o', 'p']
