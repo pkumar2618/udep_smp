@@ -11,10 +11,10 @@
         "learning_rate": 0.0003,
         "epochs": 5,
         "USE_GPU": true,
-        "training_dataset": "../dataset_qald/qald_train.json",
-        "validation_dataset": "../dataset_qald/qald_val.json",
-        "iteration_info": "using bert-large-case",
+        "training_dataset": "../dataset_WebQSP/webqsp_train.json",
+        "validation_dataset": "../dataset_WebQSP/webqsp_val.json",
+        "iteration_info": null,
         "iteration_number": 0,
-        "experiment_info": "running with all layers of BERT to give embedding, Note that this doesn't causes backpro on these layers"
+        "experiment_info": true
     }
 }

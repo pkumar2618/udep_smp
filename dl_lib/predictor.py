@@ -7,7 +7,7 @@ from allennlp.data import Instance
 import torch
 import numpy as np
 from allennlp.nn import util as nn_util
-from dl_lib.dl_utilities import merge_list_of_dict
+from dl_utilities import merge_list_of_dict
 import json
 import logging
 logger = logging.getLogger(__name__)

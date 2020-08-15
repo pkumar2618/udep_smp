@@ -8,7 +8,7 @@ from allennlp.data.tokenizers import Token
 import json
 import numpy as np
 import logging
-from .dl_utilities import ConfigJSON
+from dl_utilities import ConfigJSON
 import os 
 import overrides 
 dir_path = os.path.dirname(os.path.realpath(__file__))
