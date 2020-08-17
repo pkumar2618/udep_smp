@@ -54,6 +54,7 @@ if __name__ =="__main__":
     args = arguments_parser.parse_args()
 
     if args.prediction:
+        from spo_disambiguator import cross_emb_predictor 
         cross_emb_predictor(input_file_str=args.test_file, input_dict=input_dict, write_pred=True, model_file=args.model_file)
 
     if args.training:
