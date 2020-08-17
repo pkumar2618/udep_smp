@@ -68,35 +68,10 @@ def cross_emb_predictor(input_file_str=None, input_dict=None, write_pred=False, 
     #print("prediction done, see the output_prediction.json")
 
 
-def cross_emb_trainer(log_new_experiment=True, experiment_iter=False, iteration_info=None, iteration_data=None):
-    config = ConfigJSON('configuration.json')
-    logging.basicConfig(filename='spo_disambiguator.log',level=logging.DEBUG)
-    logger = logging.getLogger(__name__)
-    if log_new_experiment:
-        # we are goint to use a single configuration file for the entire deep learning module.
-        config.update(section_name = "training_settings",
-                               data={"seed": 1, "batch_size":8, "learning_rate":3e-4,
-                                     "epochs": 8, "USE_GPU": torch.cuda.is_available(),
-                                     "training_dataset": "../dataset_WebQSP/webqsp_train.json",
-                                    "validation_dataset": "../dataset_WebQSP/webqsp_val.json",
-                                    "iteration_number": 0
-                                    }
-                            )
-        config.update(section_name="dataset_settings",
-                      data={"testing": False, "testing_samples": 4, "max_seq_len": 100,
-                            "max_vocab_size": 100000}
-                      )
-
-        config.experiment_info(log_new_experiment)
-        # config.run_cycle_reset() #when called it will reset the experiment run cycle,
-        # the training_run in the configuration file will be set to zero. and further iteration will update the value. 
-    elif experiment_iter:
-        # if continuing with the same experimens and only running its further iterations.
-        config.iteration_info(iteration_info)
-        if iteration_data: #iteration data may be optional.
-            config.update(section_name="training_settings", data=iteration_data)
-
-        config.iter_cycle_update()
+def cross_emb_trainer():
+    # loading the configuration data
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    config = ConfigJSON(os.path.join(dir_path,'configuration.json'))
 
     torch.manual_seed(config.config["training_settings"]["seed"])
 
@@ -168,55 +143,3 @@ def cross_emb_trainer(log_new_experiment=True, experiment_iter=False, iteration_
         torch.save(model.state_dict(), f)
     # save the vocabulary
     # vocab.save_to_files("./vocabulary")
-
-if __name__ =="__main__":
-    input_dict = {
-        "question": "Give me all types of eating disorders.",
-        "spos": [
-            [
-                "uri",
-                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-                "http://dbpedia.org/class/yago/EatingDisorders"
-            ],
-            [
-                "http://dbpedia.org/resource/Washington_(state)",
-                "http://dbpedia.org/property/largestmetro",
-                "uri"
-            ]
-
-        ],
-        "spos_label": [
-            [
-                "uri",
-                "type",
-                "Eating Disorders"
-            ],
-            [
-                "Washington state",
-                "largestmetro",
-                "uri"
-            ]
-        ]
-    }
-
-    arguments_parser = argparse.ArgumentParser(
-       prog='Entity Disambiguation',
-       description="Will take candidates entity(relation) and re-rank them to get the top candidate for final use in the"
-                   "query.")
-    arguments_parser.add_argument("--training", help="Train the Model, the training-settings are at configuration.json"
-                                                    " file", action="store_true")
-    arguments_parser.add_argument("--prediction", help="pass the block of candidate <S,P,O> to find out their score.",
-                                 action="store_true")
-    arguments_parser.add_argument("--test_file", type = str, help="test file to be scored by corss_emb_predictor")
-    arguments_parser.add_argument("--new_experiment", help="Start a new training experiment.", action="store_true")
-    arguments_parser.add_argument("--iteration_info", help="Provide info on what is new about this iteration.", action="store_true" )
-    arguments_parser.add_argument("--iteration_data", type=json.loads, help="Provide the data as string, which will be loaded with json.load")
-    arguments_parser.add_argument("--model_file", type = str, help="name of the saved model_file to be used for prediction")
-    args = arguments_parser.parse_args()
-
-    if args.prediction:
-        cross_emb_predictor(input_file_str=args.test_file, input_dict=input_dict, write_pred=True, model_file=args.model_file)
-
-    if args.training:
-       cross_emb_trainer(log_new_experiment=args.new_experiment, experiment_iter=args.iteration_info,
-                         iteration_info=args.iteration_info, iteration_data=args.iteration_data )
