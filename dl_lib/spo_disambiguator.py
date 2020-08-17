@@ -26,6 +26,7 @@ def cross_emb_predictor(input_file_str=None, input_dict=None, write_pred=False, 
     :param input_file_str:
     :return:
     """
+    #logging.basicConfig(filename='predictor.log',level=logging.DEBUG)
     logger = logging.getLogger(__name__)
     USE_GPU = torch.cuda.is_available()
     # vocab = Vocabulary.from_files("./vocabulary")
@@ -65,7 +66,6 @@ def cross_emb_predictor(input_file_str=None, input_dict=None, write_pred=False, 
     return test_preds
     #print(test_preds)
     #print("prediction done, see the output_prediction.json")
-    # iterate over the dataset without changing its order
 
 
 def cross_emb_trainer(log_new_experiment=True, experiment_iter=False, iteration_info=None, iteration_data=None):
@@ -76,7 +76,7 @@ def cross_emb_trainer(log_new_experiment=True, experiment_iter=False, iteration_
         # we are goint to use a single configuration file for the entire deep learning module.
         config.update(section_name = "training_settings",
                                data={"seed": 1, "batch_size":8, "learning_rate":3e-4,
-                                     "epochs": 5, "USE_GPU": torch.cuda.is_available(),
+                                     "epochs": 8, "USE_GPU": torch.cuda.is_available(),
                                      "training_dataset": "../dataset_WebQSP/webqsp_train.json",
                                     "validation_dataset": "../dataset_WebQSP/webqsp_val.json",
                                     "iteration_number": 0
@@ -170,7 +170,6 @@ def cross_emb_trainer(log_new_experiment=True, experiment_iter=False, iteration_
     # vocab.save_to_files("./vocabulary")
 
 if __name__ =="__main__":
-    """
     input_dict = {
         "question": "Give me all types of eating disorders.",
         "spos": [
@@ -198,7 +197,7 @@ if __name__ =="__main__":
                 "uri"
             ]
         ]
-    }"""
+    }
 
     arguments_parser = argparse.ArgumentParser(
        prog='Entity Disambiguation',
@@ -208,15 +207,16 @@ if __name__ =="__main__":
                                                     " file", action="store_true")
     arguments_parser.add_argument("--prediction", help="pass the block of candidate <S,P,O> to find out their score.",
                                  action="store_true")
+    arguments_parser.add_argument("--test_file", type = str, help="test file to be scored by corss_emb_predictor")
     arguments_parser.add_argument("--new_experiment", help="Start a new training experiment.", action="store_true")
     arguments_parser.add_argument("--iteration_info", help="Provide info on what is new about this iteration.", action="store_true" )
     arguments_parser.add_argument("--iteration_data", type=json.loads, help="Provide the data as string, which will be loaded with json.load")
     arguments_parser.add_argument("--model_file", type = str, help="name of the saved model_file to be used for prediction")
     args = arguments_parser.parse_args()
 
-    #if args.prediction:
-        # predictor(input_file_str="../dataset_qald/qald_test.json", write_pred=True, model_file=args.model_file)
-    #    cross_emb_predictor(input_dict=input_dict, write_pred=True, model_file=args.model_file)
+    if args.prediction:
+        cross_emb_predictor(input_file_str=args.test_file, input_dict=input_dict, write_pred=True, model_file=args.model_file)
+
     if args.training:
        cross_emb_trainer(log_new_experiment=args.new_experiment, experiment_iter=args.iteration_info,
                          iteration_info=args.iteration_info, iteration_data=args.iteration_data )
