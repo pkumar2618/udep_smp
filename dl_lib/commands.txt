@@ -1,2 +1,2 @@
- python -m pdb spo_disambiguator.py --prediction --test_file "../dataset_WebQSP/WebQSP_processed.test.json"
+python dl_shop.py --prediction --test_file "../dataset_WebQSP/WebQSP_processed.test.json"
 python -m pdb dl_shop.py --training --new_experiment

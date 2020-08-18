@@ -1,20 +1,20 @@
 {
+    "training_settings": {
+        "seed": 1,
+        "batch_size": 8,
+        "learning_rate": 0.0003,
+        "epochs": 8,
+        "USE_GPU": true,
+        "training_dataset": "../dataset_WebQSP/webqsp_train.json",
+        "validation_dataset": "../dataset_WebQSP/webqsp_val.json",
+        "iteration_number": 0,
+        "experiment_info": "New Experiment",
+        "iteration_info": null
+    },
     "dataset_settings": {
         "testing": false,
         "testing_samples": 4,
         "max_seq_len": 100,
         "max_vocab_size": 100000
-    },
-    "training_settings": {
-        "seed": 1,
-        "batch_size": 8,
-        "learning_rate": 0.0003,
-        "epochs": 5,
-        "USE_GPU": true,
-        "training_dataset": "../dataset_WebQSP/webqsp_train.json",
-        "validation_dataset": "../dataset_WebQSP/webqsp_val.json",
-        "iteration_info": null,
-        "iteration_number": 0,
-        "experiment_info": true
     }
 }
