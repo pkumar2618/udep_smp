@@ -150,7 +150,7 @@ class Query(object):
 
             bgp_string = ' . '.join([f"{self._angular_braces(s)} {self._angular_braces(p)} {self._angular_braces(o)}" for s, p, o in self._data])
 
-            self.sparql= f"{query_type}\n{self._where} {{{bgp_string}}}"
+            self.sparql= f"{query_type} {self._where} {{{bgp_string}}}"
 
         return str(self.sparql)
 
