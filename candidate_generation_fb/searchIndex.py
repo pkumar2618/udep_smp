@@ -111,14 +111,14 @@ def propertySearch(query):
         "bool": {
             "must": {
                 "bool" : { "should": [
-                      { "multi_match": { "query": query , "fields": ["label"]  }}
-                       ] }
+                      { "multi_match": { "query": query , "fields": ["label"]  }},
+                      { "multi_match": { "query": query , "fields": ["description"] , "fuzziness": "AUTO"}} ] }
             }
         }
     }
             ,"size":10})
     for result in elasticResults['hits']['hits']:
-        results.append([result["_source"]["label"],result["_source"]["uri"],result["_score"]*2,0])
+        results.append([result["_source"]["label"],result["_source"]["uri"],result["_source"]["description"],result["_score"]*2,0])
     return results
     #for result in results['hits']['hits']:
         #print (result["_score"])
@@ -127,7 +127,7 @@ def propertySearch(query):
 
 
 if __name__=="__main__":
-    results_of_entity =entitySearch('Port Mungo')
-    print(results_of_entity)
-    result_relation = propertySearch('score')
+    #results_of_entity =entitySearch('Port Mungo')
+    #print(results_of_entity)
+    result_relation = propertySearch('flower')
     print(result_relation)
