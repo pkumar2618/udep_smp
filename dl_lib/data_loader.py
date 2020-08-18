@@ -37,7 +37,8 @@ class QuestionSPOReader(DatasetReader):
                          sentence_spo_label_list: np.ndarray=None,
                          ):
         fields: Dict[str, Field] = {}
-        logger.debug(f'sentence-spo-block: {sentence_spo_list}')
+        #logger.debug(f'sentence-spo-block: {sentence_spo_list}')
+        logger.debug(f'sentence-spo-block: {sentence_spo_list_raw}')
         sentence_spo = ListField([TextField(sentence_spo_tokens, self.token_indexers) for sentence_spo_tokens in sentence_spo_list])
         fields['sentence_spo']= sentence_spo
         if sentence_spo_label_list is None:
@@ -69,10 +70,10 @@ class QuestionSPOReader(DatasetReader):
                     question = question_spos['question']
                     question_tokens = self.tokenizer(question)
                     question_tokens = [Token(x) for x in question_tokens]
-                    question_spo_list = list()
-                    question_spo_list_raw = list()
-                    question_spo_label_list = list()
                     for spo_list in question_spos['spos_label']:
+                        question_spo_list = list()
+                        question_spo_list_raw = list()
+                        question_spo_label_list = list()
                         # correct spo: positive sample
                         spo_label_joined = ' '.join(spo_list)
                         spo_tokens = self.tokenizer(spo_label_joined)
