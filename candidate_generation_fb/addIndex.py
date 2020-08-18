@@ -4,26 +4,26 @@ modified file, original was taken from
 """
 from elasticsearch import Elasticsearch
 import json
+import re
 from multiprocessing.pool import ThreadPool
 
 
 
 docType = "doc"
 # by default we connect to localhost:9200
-es = Elasticsearch(['http://localhost:9200'])
+es = Elasticsearch(['http://10.208.20.61:9200'])
 path_to_data = '/app/'
 # path_to_data = '../'
 
 def addToIndexThread(line):
-    try:
-        lineObject=json.loads(line, strict=False)
-        return addToIndex(lineObject["_source"]["uri"],lineObject["_source"]["label"])
-    except:
-        raise
-        print ("error")
-        return 'error'
-    
-    
+    if not re.match(r'\s*', line):
+        try:
+            lineObject=json.loads(line, strict=False)
+            return addToIndex(lineObject["_source"]["uri"],lineObject["_source"]["label"])
+        except:
+            raise
+            print ("error")
+            return 'error'
 
 def addToIndex(uri,label):
     try:
@@ -35,47 +35,45 @@ def addToIndex(uri,label):
 
 def propertyIndexAdd():
     global indexName
-    indexName= "dbpropertyindex"
-    with open('./elastic_dump/dbpropertyindex.json',encoding="utf8") as f:
-        lines = f.readlines()
-        pool = ThreadPool(10)
-        pool.map(addToIndexThread, lines)
-        pool.close()
-        pool.join()      
-
-def OntologyIndexAdd():
-    global indexName
-    indexName= "dbontologyindex"
-    with open('./elastic_dump/dbontologyindex.json',encoding="utf8") as f:
-        lines = f.readlines()
-        pool = ThreadPool(10)
-        pool.map(addToIndexThread, lines)
-        pool.close()
-        pool.join()    
-    
-def entitiesIndexAdd():
-    global indexName
-    indexName = "dbentityindex"
-    with open('./elastic_dump/dbentityindex.json',encoding="utf8") as f:
+    indexName= "fbpropertyindex"
+    with open('./predicates/predicate_dump.json',encoding="utf8") as f:
         lines = f.readlines()
         pool = ThreadPool(10)
         pool.map(addToIndexThread, lines)
         pool.close()
         pool.join()
-        
+
+def OntologyIndexAdd():
+    global indexName
+    indexName= "fbontologyindex"
+    with open('./ontology/ontology_dump.json',encoding="utf8") as f:
+        lines = f.readlines()
+        pool = ThreadPool(10)
+        pool.map(addToIndexThread, lines)
+        pool.close()
+        pool.join()
+
+def entitiesIndexAdd():
+    global indexName
+    indexName = "fbentityindex"
+    with open('./entities/entity_dump_part1.json',encoding="utf8") as f:
+        lines = f.readlines()
+        pool = ThreadPool(10)
+        pool.map(addToIndexThread, lines)
+        pool.close()
+        pool.join()
+
 def classesIndexAdd():
     global indexName
-    indexName = "dbclassindex"
+    indexName = "fbclassindex"
     with open('./elastic_dump/dbclassindex.json') as f:
         lines = f.readlines()
         pool = ThreadPool(12)
         pool.map(addToIndexThread, lines)
         pool.close()
         pool.join()
-    
-    
 
 if __name__ == '__main__':
-    #entitiesIndexAdd()
+    entitiesIndexAdd()
     #propertyIndexAdd()
-    OntologyIndexAdd()
+    #OntologyIndexAdd()

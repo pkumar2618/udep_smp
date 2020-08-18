@@ -101,7 +101,6 @@ if __name__ == '__main__':
         with open("pll_entity_dump.json", 'a') as f_write:
             for mids_from_chunk in result_mids_with_label:
                 try:
-                    [f_write.write(mid_label) for mid_label in mids_from_chunk.get()]
+                    [f_write.write(mid_label+'\n') for mid_label in mids_from_chunk.get()]
                 except Exception as e:
                     print(f'error in run block: {e}')
-                    print(e)
