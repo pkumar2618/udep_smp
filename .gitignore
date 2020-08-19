@@ -3,6 +3,22 @@
 *.pkl
 pkg_get_predicate/*
 glove/*
+candidate_generation/elastic_log/*
+candidate_generation/elastic_dump/*
+candidate_generation_fb/entities/*
+candidate_generation_fb/predicates/*
+candidate_generation_fb/ontology/*
+candidate_generation/__pycache__/
+candidate_generation_fb/__pycache__/
+post_smp_analysis/__pycache__/
+dbpedia_lib/__pycache__/
+dl_lib/__pycache__/
+udep_lib/__pycache__/
+
+# ML files #
+###########
+*.th
+
 
 # Compiled source #
 ###################
@@ -31,6 +47,13 @@ glove/*
 *.log
 *.sql
 *.sqlite
+*.swo
+
+# Big data files #
+######################
+*.json
+*.csv
+*.txt
 
 # OS generated files #
 ######################
@@ -41,3 +64,5 @@ glove/*
 .Trashes
 ehthumbs.db
 Thumbs.db
+glove_gensim_mmap
+glove_gensim_mmap.vectors.npy
