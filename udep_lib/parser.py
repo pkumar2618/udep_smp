@@ -62,14 +62,7 @@ class Parser(object):
             self.g_sparql_graph_list.append(graph_query)
 
     def query_executor(self, kg='dbpedia'):
-        json_list = [] 
-        try:
-            with open('execution_results.json', 'r') as f_handle:
-                json_list = json.load(f_handle)
-        except FileNotFoundError as e:
-            json_list = [] 
-
-        with open('execution_results.json', 'w') as f_handle:
+        with open('execution_results.json', 'a') as f_handle:
             for queries, nlq in zip(self.g_sparql_graph_list, self.nlq_questions_list):
                 json_item = {}
                 topk_sparql_graphs = queries['sparql_graph']
@@ -90,12 +83,12 @@ class Parser(object):
                         # f_handle.writeline(output_values)
                         # print("\n".join([f"label: {key} \t value: { result_dict[key]}") for key in result_dict.keys()]))
                     except TypeError as e:
-                        temp_store['query_output'] =  ""
+                        temp_store['query_output'] =  f'{e}'
                         temp_store['query_string'] = q_string
                         json_item['query_result'].append(temp_store)
 
-                json_list.append(json_item)
-            json.dump(json_list, f_handle, indent=4)
+                json_item_string = json.dumps(json_item)
+                f_handle.write(json_item_string + '\n')
 
 
     @staticmethod
