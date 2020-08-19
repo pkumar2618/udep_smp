@@ -119,7 +119,11 @@ def propertySearch(query):
             ,"size":10})
     for result in elasticResults['hits']['hits']:
         results.append([result["_source"]["label"],result["_source"]["uri"],result["_source"]["description"],result["_score"]*2,0])
-    return results
+
+    if len(results)==0:
+        return [['es_no_label', 'es_no_uri', 'es_no_description', 0, 0]]
+    else:
+        return results
     #for result in results['hits']['hits']:
         #print (result["_score"])
         #print (result["_source"])
@@ -129,5 +133,5 @@ def propertySearch(query):
 if __name__=="__main__":
     #results_of_entity =entitySearch('Port Mungo')
     #print(results_of_entity)
-    result_relation = propertySearch('flower')
+    result_relation = propertySearch('arg1')
     print(result_relation)

@@ -3,7 +3,7 @@ import os
 import logging
 from rdflib import BNode, URIRef
 
-from candidate_generation.searchIndex import entitySearch, propertySearch, ontologySearch
+#from candidate_generation.searchIndex import entitySearch, propertySearch, ontologySearch
 from dbpedia_lib.db_utils import get_property_using_cosine_similarity
 from dl_lib.spo_disambiguator import cross_emb_predictor 
 #from udep_lib.nlqtokens import question
@@ -82,15 +82,15 @@ class UGSPARQLGraph:
                 elif linker == 'elasticsearch':
                     logger.info(f'ug spo: {sub}, {pred}, {obj}')
                     # ground subject
-                    rdf_type_s, subject_entities_list = UGSPARQLGraph.ground_so_elasticsearch(self.query_graph, sub)
+                    rdf_type_s, subject_entities_list = UGSPARQLGraph.ground_so_elasticsearch(self.query_graph, sub, kg=kg)
                     # ground object, before passing them over strip off any white space.
                     # the object may belong to ontology whenever predicate is letter 'a'
-                    rdf_type_o, object_entities_list = UGSPARQLGraph.ground_so_elasticsearch(self.query_graph, obj, onto_hint=pred)
+                    rdf_type_o, object_entities_list = UGSPARQLGraph.ground_so_elasticsearch(self.query_graph, obj, onto_hint=pred, kg=kg)
                     # ground predicate, predicate is assumed given, never a blank node. 
                     # therefore not returning any type information.
                     # when predicate is letter 'a' specifying an ontology, this function will return 'a' withought going into searching 
                     # property-index in elasticsearch.
-                    predicate_property_list = UGSPARQLGraph.ground_predicate_elasticsearch(pred, onto_hint=obj)
+                    predicate_property_list = UGSPARQLGraph.ground_predicate_elasticsearch(pred, onto_hint=obj, kg=kg)
                     
                     # the returned items from elasticsearch are in the form of list of list-elements.
                     
@@ -133,7 +133,12 @@ class UGSPARQLGraph:
         return sparql_query
 
     @staticmethod
-    def ground_so_elasticsearch(query_graph, so, onto_hint=None):
+    def ground_so_elasticsearch(query_graph, so, onto_hint=None, kg='dbpedia'):
+        if kg=='dbpedia':
+            from candidate_generation.searchIndex import entitySearch, propertySearch, ontologySearch
+        if kg=='freebase':
+            from candidate_generation_fb.searchIndex import entitySearch, propertySearch, ontologySearch
+
         if isinstance(so, BNode):
             rdf_type = 'BNode'
         elif isinstance(so, URIRef):
@@ -163,7 +168,11 @@ class UGSPARQLGraph:
 
 
     @staticmethod
-    def ground_predicate_elasticsearch(predicate, onto_hint=None):
+    def ground_predicate_elasticsearch(predicate, onto_hint=None, kg='dbpedia'):
+        if kg=='dbpedia':
+            from candidate_generation.searchIndex import entitySearch, propertySearch, ontologySearch
+        if kg=='freebase':
+            from candidate_generation_fb.searchIndex import entitySearch, propertySearch, ontologySearch
         onto_wh = {'where':['location', 'place', 'country', 'city'],
                    'when': ['date', 'year', 'time', 'hour'],
                    'who': ['person', 'man', 'woman'],

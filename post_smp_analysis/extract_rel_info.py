@@ -7,8 +7,8 @@ columns_dict = {'question':[], 'ug_gp_graphs':[], 'ug_sparql':[], 'g-SPARQL':[]}
 #extract_info_about = ['udep_lib.ug_sparql_graph']
 # the last ug_sparql_graph corresponds to the ug-sparql-query, three appearances of spo-tripe and the g-sparql-query. 
 
-with open('../run_02_qald6.log', 'r') as f_read:
-    file_name= 'pp_run_02_qald6.txt'
+with open('../few_mids_11nlq.log', 'r') as f_read:
+    file_name= 'pp_few_mids_11nlq.txt'
     lines = f_read.readlines() 
     #next_line_write_flag = True
     for i in range(len(lines)):
@@ -23,6 +23,11 @@ with open('../run_02_qald6.log', 'r') as f_read:
                 else:
                     columns_dict[line_split[2]].append(line_split[3].strip())
 
-    df_table = pd.DataFrame(columns_dict)
+    lengths = [len(v) for k, v in columns_dict.items()] 
+    min_leng = min(lengths) 
+    temp_dict = {}
+    for key in columns_dict.keys():
+        temp_dict[key] =  columns_dict[key][:min_leng]
+    df_table = pd.DataFrame(temp_dict)
     df_table.to_csv(file_name, sep=',', index=False)
 
