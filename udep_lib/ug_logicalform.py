@@ -59,27 +59,36 @@ class UGLogicalForm():
             for edge in gpgraph['Edges']:
                 triplet = ['s', 'p', 'o']
                 relations_split = edge[1].strip().split(':')[0].strip('()').split(',')
-                sub_relation_l = relations_split[0] # sub relations are called in freebase
-                sub_relation = [relation for relation in sub_relation_l.split('.') if relation not in cachedStopWords]
-                predicate = URIRef(sub_relation[0]) # use only the main part, there may exist args or dependency labels.
-                triplet[1] = predicate
-                # adding nodes sub and obj now
-                edge_split = edge[0].strip('()').split(',')
-                s_idx = edge_split[1] 
-                o_idx = edge_split[2]
-                sub = nodes_dict[s_idx][0]
-                obj = nodes_dict[o_idx][0]
-                if s_idx in variables_list:
-                    triplet[0]= BNode(variables_list_bnodex[s_idx])
-                else:
-                    triplet[0]= URIRef(sub.strip())
+                sub_relation_1 = relations_split[0] # sub relations are called in freebase
+                # remove stop words from the relation
+                # sub_relation = [relation for relation in sub_relation_l.split('.') if relation not in cachedStopWords]
+                # remove arg[\d]
+                sub_relation = [relation for relation in sub_relation_1.split('.') if not re.match(r'arg[\d]+', relation)]
 
-                if o_idx in variables_list:
-                    triplet[2]= BNode(variables_list_bnodex[o_idx])
-                else:
-                    triplet[2]= URIRef(obj.strip())
+                #it is possible that after removing stop word that edge is rendered not useful at all
+                try:
+                    predicate = URIRef(sub_relation[0]) # use only the main part, there may exist dependency labels.
+                    triplet[1] = predicate
+                    # adding nodes sub and obj now
+                    edge_split = edge[0].strip('()').split(',')
+                    s_idx = edge_split[1] 
+                    o_idx = edge_split[2]
+                    sub = nodes_dict[s_idx][0]
+                    obj = nodes_dict[o_idx][0]
+                    if s_idx in variables_list:
+                        triplet[0]= BNode(variables_list_bnodex[s_idx])
+                    else:
+                        triplet[0]= URIRef(sub.strip())
 
-                spo_triples.append(triplet)
+                    if o_idx in variables_list:
+                        triplet[2]= BNode(variables_list_bnodex[o_idx])
+                    else:
+                        triplet[2]= URIRef(obj.strip())
+
+                    spo_triples.append(triplet)
+                except IndexError as e:
+                    pass
+
 
             query.select([v for k, v in variables_list_bnodex.items()])
             query.distinct()

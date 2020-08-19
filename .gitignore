@@ -66,3 +66,4 @@ ehthumbs.db
 Thumbs.db
 glove_gensim_mmap
 glove_gensim_mmap.vectors.npy
+__pycache__

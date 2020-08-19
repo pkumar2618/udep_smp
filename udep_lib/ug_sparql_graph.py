@@ -23,6 +23,8 @@ class UGSPARQLGraph:
     # glove = None  # the keyedvector stored using memory map for fast access
 
     def __init__(self, ug_query, grounded_topk=10):
+        # with grounded_topk we are going to limit number of final sparql queries available for evaluation to us. 
+        # these sparql-quereis can be run against sparql endpoint to provide MRR at say 5, 10. 
         self.query_graph = ug_query
         g_query_tmp = copy.deepcopy(ug_query) # this is just to get the various attribute copied.
         # and remove the basic graph pattern
@@ -93,15 +95,26 @@ class UGSPARQLGraph:
                     predicate_property_list = UGSPARQLGraph.ground_predicate_elasticsearch(pred, onto_hint=obj, kg=kg)
                     
                     # the returned items from elasticsearch are in the form of list of list-elements.
-                    
-                    subject_entities_list_sorted = sorted(subject_entities_list, key=lambda x: x[2], reverse=True)
-                    predicate_property_list_sorted = sorted(predicate_property_list, key=lambda x: x[2], reverse=True)
-                    object_entities_list_sorted = sorted(object_entities_list, key=lambda  x: x[2], reverse=True)
+                    if kg == 'dbpedia':
+                        # for dbpedia the entries only have lable uri score score while it changes for freebase
+                        subject_entities_list_sorted = sorted(subject_entities_list, key=lambda x: x[2], reverse=True)
+                        object_entities_list_sorted = sorted(object_entities_list, key=lambda  x: x[2], reverse=True)
+                        predicate_property_list_sorted = sorted(predicate_property_list, key=lambda x: x[2], reverse=True)
+
+                    if kg == 'freebase':
+                        # for freebase the predicate also has description field besides label and uri, entity indes are same
+                        subject_entities_list_sorted = sorted(subject_entities_list, key=lambda x: x[2], reverse=True)
+                        object_entities_list_sorted = sorted(object_entities_list, key=lambda  x: x[2], reverse=True)
+                        predicate_property_list_sorted = sorted(predicate_property_list, key=lambda x: x[3], reverse=True)
+
                     logger.info(f'top-es spo: ({subject_entities_list_sorted[0]}, {predicate_property_list_sorted[0]}, {object_entities_list_sorted[0]})')
                     # we can create a combination of s, p, o such that, the high scoring element in the
                     # set of S, P, O are together.
-                    disambiguated_spo_topk = UGSPARQLGraph.disambiguate_using_cotext(question, subject_entities_list_sorted[:10],
-                                                                                predicate_property_list_sorted[:10], object_entities_list_sorted[:10], rdf_type_s, rdf_type_o)
+                    topk_es = 10 #use this to select topk search resutls from elastic search
+                    # the choice os topk_es can slow down processing as it will create topk_es^3 spo triplets that need to be
+                    # re-ranked by spo-disambiguator
+                    disambiguated_spo_topk = UGSPARQLGraph.disambiguate_using_cotext(question, subject_entities_list_sorted[:topk_es],
+                                                                                predicate_property_list_sorted[:topk_es], object_entities_list_sorted[:topk_es], rdf_type_s, rdf_type_o)
                     #The set of candidate-spos we will get above would create for a given spo-triple
                     for i, disambiguated_spo in enumerate(disambiguated_spo_topk):
                         disambiguated_spo_with_rdfterm = ['s', 'o', 'p']
