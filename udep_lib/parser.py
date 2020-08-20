@@ -63,21 +63,21 @@ class Parser(object):
 
     def query_executor(self, kg='dbpedia'):
         with open('execution_results.json', 'a') as f_handle:
-            for queries, nlq in zip(self.g_sparql_graph_list, self.nlq_questions_list):
+            for query, nlq in zip(self.g_sparql_graph_list, self.nlq_questions_list):
                 json_item = {}
-                topk_sparql_graphs = queries['sparql_graph']
-                topk_sparql_queries = queries['sparql_query']
+                topk_sparql_graphs = query['sparql_graph']
+                topk_sparql_queries = query['sparql_query']
                 #topk = 1 #
                 json_item['question'] = nlq.question.strip()
-                json_item['queries_result'] =  []
-                for query, q_string in zip(topk_sparql_graphs.g_query_topk, topk_sparql_queries):
+                json_item['topk_queries'] =  []
+                for cand_query, q_string in zip(topk_sparql_graphs.g_query_topk, topk_sparql_queries):
                     temp_store = {'query_output': None, 'query_string': None}
                     try:
-                        query.run(kg)
-                        result_list_dict  = query.results["results"]["bindings"]
+                        cand_query.run(kg)
+                        result_list_dict  = cand_query.results["results"]["bindings"]
                         temp_store['query_output'] = result_list_dict
                         temp_store['query_string'] = q_string
-                        json_item['queries_result'].append(temp_store)
+                        json_item['topk_queries'].append(temp_store)
                         # for result_dict in result_list_dict:
                         # output_values = "\n".join([f"label: {key} \t value: { result_dict[key]}") for key in result_dict.keys()])
                         # f_handle.writeline(output_values)
@@ -85,7 +85,7 @@ class Parser(object):
                     except TypeError as e:
                         temp_store['query_output'] =  f'{e}'
                         temp_store['query_string'] = q_string
-                        json_item['query_result'].append(temp_store)
+                        json_item['topk_queries'].append(temp_store)
 
                 json_item_string = json.dumps(json_item)
                 f_handle.write(json_item_string + '\n')

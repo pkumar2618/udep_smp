@@ -189,8 +189,8 @@ class Query(object):
             self.results = sparql_endpoint.query().convert()
 
         except:
-            print("error quering endpoint")
-            self.results = None
+            #print("error quering endpoint")
+            self.results = []
 
 
 if __name__ == "__main__":
