@@ -7,8 +7,8 @@ columns_dict = {'question':[], 'ug_gp_graphs':[], 'ug_sparql':[], 'g-SPARQL':[]}
 #extract_info_about = ['udep_lib.ug_sparql_graph']
 # the last ug_sparql_graph corresponds to the ug-sparql-query, three appearances of spo-tripe and the g-sparql-query. 
 
-with open('../few_mids_11nlq.log', 'r') as f_read:
-    file_name= 'pp_few_mids_11nlq.txt'
+with open('../log_qald6.log', 'r') as f_read:
+    file_name= 'pp_qald6.txt'
     lines = f_read.readlines() 
     #next_line_write_flag = True
     for i in range(len(lines)):
