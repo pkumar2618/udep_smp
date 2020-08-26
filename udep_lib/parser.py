@@ -8,12 +8,22 @@ class Parser(object):
     Takes as input a list NLQuestion(one or more)
     and parse it.
     """
-    def __init__(self, nlqs):
+    def __init__(self, nlqs, annotation=False):
         """
         Take a list of questions (one or more)
         :param pp_nlqs: take as input a list of pre-processed NLQuestions
         """
-        self.nlq_questions_list = [NLQuestion(nl_question) for nl_question in nlqs]
+        self.nlq_questions_list=[]
+        self.nlq_annot_list = []
+
+        if not annotation:
+            self.nlq_questions_list = [NLQuestion(nl_question) for nl_question in nlqs]
+        elif annotation:
+            for nlq_annot in nlqs:
+                json_item = json.loads(nlq_annot)
+                self.nlq_questions_list.append(json_item['question'])
+                self.nlq_annot_list.append(json_item['annotation'])
+
         self.nlq_tokens_list = []
         self.nlq_canonical_list = []
         self.ug_logical_form_list = []
@@ -102,13 +112,16 @@ class Parser(object):
 
 
     @classmethod
-    def from_file(cls, file_obj):
+    def from_file(cls, file_obj, annotation=False):
         """
         should parse question in batch
         :param file_obj:
         :return:
         """
-        return cls(file_obj.readlines())
+        if annotation:
+            return cls(file_obj.readlines(), annotation=True)
+        else:
+            return cls(file_obj.readlines(), annotation=False)
 
 
     @classmethod

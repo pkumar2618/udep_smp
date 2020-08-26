@@ -13,6 +13,7 @@ arguments_parser = argparse.ArgumentParser(
     description="Take a Natural Language Question and provide it's answer.")
 
 arguments_parser.add_argument("--questions_file", help="Path to the file containing Natural Language Questions")
+arguments_parser.add_argument("--annotation", help="Flag if questions are annotated.", action="store_true")
 arguments_parser.add_argument("--batch", help="delete set of questions to be processed together, used in analysis of paraphrase and structures in the questions.")
 
 arguments_parser.add_argument("--questions_list", help="List all the questions one after another,"
@@ -70,7 +71,7 @@ while True:
                 except FileNotFoundError as e:
                     # # # provide the file name containing the questions
                     with open(args.questions_file, 'r') as file_obj:
-                        parser = Parser.from_file(file_obj)
+                        parser = Parser.from_file(file_obj, annotation = args.annotation)
 
                     parser.tokenize(args.dependency_parsing)
                     # for nlq_tokens in parser.nlq_tokens_list:
