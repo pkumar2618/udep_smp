@@ -16,7 +16,7 @@ if __name__=='__main__':
 
     f_write = open('nlqs_annot_webqsp.json', 'w')
     for question_query_dict in json_dict["Questions"]:
-        json_item = {'question':[], 'annotation':[]}
+        json_item = {'question':[], 'annotation':[], 'gold-query':[]}
         question = question_query_dict['RawQuestion']
         parses = question_query_dict['Parses']
         parse = parses[0] 
@@ -25,6 +25,7 @@ if __name__=='__main__':
         mid = parse["TopicEntityMid"]
         json_item['question'] = question
         json_item['annotation'] = {"name": mid_name, "annotation": mid}
+        json_item['gold-query'] = query
         json_string = json.dumps(json_item)
         f_write.write(json_string+'\n')
 

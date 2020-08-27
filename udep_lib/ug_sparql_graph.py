@@ -8,6 +8,7 @@ from dbpedia_lib.db_utils import get_property_using_cosine_similarity
 from dl_lib.spo_disambiguator import cross_emb_predictor 
 #from udep_lib.nlqtokens import question
 from udep_lib.g_sparql_graph import GroundedSPARQLGraph
+from udep_lib.sparql_builder import Query
 
 logger = logging.getLogger(__name__)
 
@@ -55,7 +56,7 @@ class UGSPARQLGraph:
     def get_ug_sparql_query_string(self):
         return self.query_graph.get_query_string()
 
-    def ground_spo(self, question=None, linker=None, kg=None): # this will generate a set of candidate spo,
+    def ground_spo(self, question=None, annotation=None, linker=None, kg=None): # this will generate a set of candidate spo,
         # which are later passed throug a disambiguation stage to obtain a final spo-triple
         """
         entity linking using dbpedia Spotlight
@@ -70,8 +71,8 @@ class UGSPARQLGraph:
             # and
             # linking dbpedia_predicate using cosine similarity on word2vec
             # find the event type tokens according to Neo-Davidsonia grammar
-            for sub, pred, obj in self.query_graph._data:
-                if linker == 'spotlight':
+            if linker == 'spotlight':
+                for sub, pred, obj in self.query_graph._data:
                     # ground subject
                     subject_entities = UGSPARQLGraph.ground_so_spotlight(self.query_graph, sub)
                     # ground object, before passing them over strip off any white space.
@@ -81,7 +82,8 @@ class UGSPARQLGraph:
                     # the triples obtained affter linking may need to be processed, or reranked.
                     self.g_query.add_triple((subject_entities, predicate_property, object_entities))
 
-                elif linker == 'elasticsearch':
+            elif linker == 'elasticsearch':
+                for sub, pred, obj in self.query_graph._data:
                     logger.info(f'ug spo: {sub}, {pred}, {obj}')
                     # ground subject
                     rdf_type_s, subject_entities_list = UGSPARQLGraph.ground_so_elasticsearch(self.query_graph, sub, kg=kg)
@@ -135,6 +137,40 @@ class UGSPARQLGraph:
                         #predicate will carry URIRef
                         disambiguated_spo_with_rdfterm[1] = URIRef(disambiguated_spo[1])
                         self.g_query_topk[i].add_triple(tuple(disambiguated_spo_with_rdfterm))
+
+            elif linker == 'queryKB':
+                entity_name = annotation['name']
+                entity_mid = annotation['annotation']
+                # storing triplet_original as list of ungrounded tuples
+                # storing triplet_grounded as list of list of tuples, 
+                triplets = {'triplets_ug':[], 'triplet_grounded':[]}
+                for sub, pred, obj in self.query_graph._data:
+                    triplet = [sub, pred, obj]
+                    triplets['triplets_ug'].append(tuple(triplet))
+
+                # once the triplets are obtained, we need to ground them by querying the KB for all possible relation that 
+                # emanates from the annotated entities. 
+                # the entity_name might directly appear in a triplet or it could be mentioned in the query.nodes_type
+                # for the first case
+                for triplet in triplets['triplets_ug']:
+                    triplet_candidates = []
+                    for so_position, surface_name in enumerate([triplet[0], triplet[2]]):
+                        if re.search(surface_name, entity_name):
+                            # then go for querying the KB for all the triplets emanating from or coming to entity
+                            # the ground_spo_query_KB may return only topk triplets, based on how the BERT-Softmax
+                            # re-ranker finds their similarity in it's embedding space
+                            # ground_triplet_queryKB will return a list corresponding to the ungrounded triplet.
+                            # letter we may as well accumulate re-ranker score to find do beam search when there are multiple
+                            # ungrounded triplets
+                            triplet_candidates = triplet_candidates + ground_triplet_queryKB(triplet, entity_mid, so_position=so_position, kg=kg) 
+                            
+                        # check if surface_name has a correponding common_name/type_name in the query.nodes_type
+                        elif surface_name in self.query_graph.nodes_type.keys():
+                            surface_name = self.query_graph.nodes_type[surface_name]
+                            if re.search(surface_name, entity_name):
+                                triplet_candidates = triplet_candidates + ground_triplet_queryKB(triplet, entity_mid, so_position=so_position, kg=kg) 
+
+                    triplets['triplet_grounded'].append(triplet_candidates)
 
     def get_g_sparql_graph(self):
         #todo from the list of candidates spo we need to disambiguate to obtain only one spo-triple
@@ -205,6 +241,19 @@ class UGSPARQLGraph:
         except:
             empty_list = []
             return empty_list
+
+    @staticmethod
+    def ground_triplet_queryKB(triplet, entity_mid, so_position=so_position, kg=kg): 
+
+        # if hops==1: # will do one hop first
+        if so_position ==0:
+            query_string = f'PREFIX ns: <http://rdf.freebase.com/ns/> SELECT ?rel ?obj WHERE{{ns:{entity_mid} ?rel ?obj}}' 
+            Query.run(query_string, kg=kg)
+
+        elif so_position ==2
+            query_string = f'PREFIX ns: <http://rdf.freebase.com/ns/> SELECT ?sub ?rel WHERE{{ ?sub ?rel ns:{entity_mid}}}' 
+            Query.run(query_string, kg=kg)
+
 
     @staticmethod
     def ground_so_spotlight(query_graph, so):

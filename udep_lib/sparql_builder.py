@@ -39,6 +39,7 @@ class Query(object):
         self._vars = []
         self._limit = None
         self._order_by = []
+        self.nodes_type = {}
 
 
     def _validate_variable(self, var):
@@ -123,7 +124,7 @@ class Query(object):
         :param optional_tripple:
         :return:
         """
-        self.sparql.optional_group(optional_tripple)
+        uelf.sparql.optional_group(optional_tripple)
 
     def filter(self, filter):
         """
@@ -177,7 +178,8 @@ class Query(object):
         all_ns = '\n'.join([f"PREFIX: {p} \t URL: {u}" for p, u in Query.sparql_group.namespaces()])
         print(all_ns)
 
-    def run(self, kg='dbpedia'):
+    @staticmethod
+    def run(query_string, kg='dbpedia'):
         #sparql_endpoint = SPARQLWrapper("http://dbpedia.org/sparql")
         sparql_endpoint = SPARQLWrapper("http://10.208.20.61:8890/sparql/")
         if kg=='freebase':
@@ -185,12 +187,12 @@ class Query(object):
 
         sparql_endpoint.setReturnFormat(JSON)
         try:
-            sparql_endpoint.setQuery(self.sparql)
-            self.results = sparql_endpoint.query().convert()
+            sparql_endpoint.setQuery(query_string)
+            results = sparql_endpoint.query().convert()
 
         except:
             #print("error quering endpoint")
-            self.results = []
+            results = []
 
 
 if __name__ == "__main__":

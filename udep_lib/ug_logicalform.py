@@ -39,11 +39,11 @@ class UGLogicalForm():
         for gpgraph in self.ug_gpgraphs:
         # create a dictionary of nodes using word position as index
             query = Query()
-            spo_triples = []
             nodes_dict={}
             for node in gpgraph['nodes']:
                 node_split = node.strip().strip('{}').split(',')
                 nodes_dict[node_split[0]] = node_split[1:]
+
             property_dict = {}
             ##'Properties': [['0', '[QUESTION]\n']],
             for prop in gpgraph['Properties']:
@@ -54,12 +54,29 @@ class UGLogicalForm():
             for idx in variables_list: 
                 variables_list_bnodex[idx] = f'?x{idx}'
 
+            """'Types': [['(4,3)', 'doctoral:0.0\n'], 
+                    ['(4,4)', 'supervisor:0.0\n'],
+                   ['(0,0)', 'who:0.0\n']]"""
+            type_info_dict = {}
+            for type_info in gpgraph['Types']:
+                type_idxs = type_info[0].strip().strip('()').split(',')
+                if type_idxs[0] != type_idxs[1]:
+                    if type_idxs[0] in nodes_dict.keys():
+                        name_entity = nodes_dict[type_idxs[0]][0]
+                        type_entity = nodes_dict[type_idxs[1]][0]
+                        type_info_dict[name_entity.strip()] = type_entity.strip()
+                    elif type_idxs[0] in variables_list:
+                        variable_label = variables_list_bnodex[type_idxs[0]]
+                        type_entity = type_info[1].strip().split(':')[0]
+                        type_info_dict[variable_label] = type_entity
+
             #['(4,7,4)', '(supervisor.nmod.of,supervisor.arg0):0.0\n'],
             #'(4,7,4)' : mediator node(concept from freebase), left node and right node
+            spo_triples = []
             for edge in gpgraph['Edges']:
                 triplet = ['s', 'p', 'o']
                 relations_split = edge[1].strip().split(':')[0].strip('()').split(',')
-                sub_relation_1 = relations_split[0] # sub relations are called in freebase
+                sub_relation_1 = relations_split[0] # sub relations are used in freebase
                 # remove stop words from the relation
                 # sub_relation = [relation for relation in sub_relation_l.split('.') if relation not in cachedStopWords]
                 # remove arg[\d]
@@ -71,21 +88,22 @@ class UGLogicalForm():
                     triplet[1] = predicate
                     # adding nodes sub and obj now
                     edge_split = edge[0].strip('()').split(',')
-                    s_idx = edge_split[1] 
-                    o_idx = edge_split[2]
-                    sub = nodes_dict[s_idx][0]
-                    obj = nodes_dict[o_idx][0]
-                    if s_idx in variables_list:
-                        triplet[0]= BNode(variables_list_bnodex[s_idx])
-                    else:
-                        triplet[0]= URIRef(sub.strip())
+                    if not (edge_split[0]==edge_split[1] or edge_split[1]==edge_split[2] or edge_split[2]==edge_split[0]):
+                        s_idx = edge_split[1] 
+                        o_idx = edge_split[2]
+                        sub = nodes_dict[s_idx][0]
+                        obj = nodes_dict[o_idx][0]
+                        if s_idx in variables_list:
+                            triplet[0]= BNode(variables_list_bnodex[s_idx])
+                        else:
+                            triplet[0]= URIRef(sub.strip())
 
-                    if o_idx in variables_list:
-                        triplet[2]= BNode(variables_list_bnodex[o_idx])
-                    else:
-                        triplet[2]= URIRef(obj.strip())
+                        if o_idx in variables_list:
+                            triplet[2]= BNode(variables_list_bnodex[o_idx])
+                        else:
+                            triplet[2]= URIRef(obj.strip())
 
-                    spo_triples.append(triplet)
+                        spo_triples.append(triplet)
                 except IndexError as e:
                     pass
 
@@ -93,6 +111,7 @@ class UGLogicalForm():
             query.select([v for k, v in variables_list_bnodex.items()])
             query.distinct()
             query.where([tuple(spo) for spo in spo_triples])
+            query.nodes_type = type_info_dict
             queries.append(UGSPARQLGraph(query))
         return queries
         

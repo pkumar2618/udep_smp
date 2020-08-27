@@ -15,14 +15,16 @@ class Parser(object):
         """
         self.nlq_questions_list=[]
         self.nlq_annot_list = []
+        self.nlq_gold_query_list = []
 
         if not annotation:
             self.nlq_questions_list = [NLQuestion(nl_question) for nl_question in nlqs]
         elif annotation:
             for nlq_annot in nlqs:
                 json_item = json.loads(nlq_annot)
-                self.nlq_questions_list.append(json_item['question'])
+                self.nlq_questions_list.append(NLQuestion(json_item['question']))
                 self.nlq_annot_list.append(json_item['annotation'])
+                self.nlq_gold_query_list.append(json_item['gold-query'])
 
         self.nlq_tokens_list = []
         self.nlq_canonical_list = []
@@ -64,10 +66,10 @@ class Parser(object):
 
     # this is where all the magic happens, linking using elasticsearch, as well as reranking using BERT
     def grounded_sparql_graph(self, linker=None, kg=None):
-        for ug_sparql_graphs, nlquestion in zip(self.ug_sparql_graphs_list, self.nlq_questions_list):
+        for ug_sparql_graphs, nlquestion, annot in zip(self.ug_sparql_graphs_list, self.nlq_questions_list, self.nlq_annot_list):
             # there might me many gp_graphs obtained, we are using the first one for now, which is usually 
             # the case with UDepLambda, it generates only on logical form therefore on ungrounded gp-graph
-            ug_sparql_graphs[0].ground_spo(question=nlquestion.question, linker=linker, kg=kg)
+            ug_sparql_graphs[0].ground_spo(question=nlquestion.question, annotation=annot, linker=linker, kg=kg)
             graph_query = {'sparql_graph': ug_sparql_graphs[0].get_g_sparql_graph(), 'sparql_query': ug_sparql_graphs[0].get_g_sparql_query()}
             self.g_sparql_graph_list.append(graph_query)
 
