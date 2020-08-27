@@ -1,6 +1,7 @@
 import copy
 import os
 import logging
+import re
 from rdflib import BNode, URIRef
 
 #from candidate_generation.searchIndex import entitySearch, propertySearch, ontologySearch
@@ -154,21 +155,25 @@ class UGSPARQLGraph:
                 # for the first case
                 for triplet in triplets['triplets_ug']:
                     triplet_candidates = []
-                    for so_position, surface_name in enumerate([triplet[0], triplet[2]]):
-                        if re.search(surface_name, entity_name):
+                    for so_position, surface_name in [(0, triplet[0]), (2, triplet[2])]:
+                        if isinstance(surface_name, BNode):
+                            continue
+                        elif re.search(f'{surface_name}', entity_name, re.IGNORECASE):
                             # then go for querying the KB for all the triplets emanating from or coming to entity
                             # the ground_spo_query_KB may return only topk triplets, based on how the BERT-Softmax
                             # re-ranker finds their similarity in it's embedding space
                             # ground_triplet_queryKB will return a list corresponding to the ungrounded triplet.
                             # letter we may as well accumulate re-ranker score to find do beam search when there are multiple
                             # ungrounded triplets
-                            triplet_candidates = triplet_candidates + ground_triplet_queryKB(triplet, entity_mid, so_position=so_position, kg=kg) 
+                            triplet_candidates = triplet_candidates + UGSPARQLGraph.ground_triplet_queryKB(triplet, entity_mid, so_position=so_position, kg=kg) 
                             
                         # check if surface_name has a correponding common_name/type_name in the query.nodes_type
-                        elif surface_name in self.query_graph.nodes_type.keys():
-                            surface_name = self.query_graph.nodes_type[surface_name]
-                            if re.search(surface_name, entity_name):
-                                triplet_candidates = triplet_candidates + ground_triplet_queryKB(triplet, entity_mid, so_position=so_position, kg=kg) 
+                        elif f'{surface_name}' in self.query_graph.nodes_type.keys():
+                            surface_name = self.query_graph.nodes_type[f'{surface_name}']
+                            if re.search(surface_name, entity_name, re.IGNORECASE):
+                                triplet_candidates = triplet_candidates + UGSPARQLGraph.ground_triplet_queryKB(triplet, entity_mid, so_position=so_position, kg=kg) 
+                            elif re.search(entity_name, surface_name, re.IGNORECASE):
+                                triplet_candidates = triplet_candidates + UGSPARQLGraph.ground_triplet_queryKB(triplet, entity_mid, so_position=so_position, kg=kg) 
 
                     triplets['triplet_grounded'].append(triplet_candidates)
 
@@ -243,16 +248,18 @@ class UGSPARQLGraph:
             return empty_list
 
     @staticmethod
-    def ground_triplet_queryKB(triplet, entity_mid, so_position=so_position, kg=kg): 
+    def ground_triplet_queryKB(triplet, entity_mid, so_position=0, kg='dbpedia'): 
 
         # if hops==1: # will do one hop first
         if so_position ==0:
-            query_string = f'PREFIX ns: <http://rdf.freebase.com/ns/> SELECT ?rel ?obj WHERE{{ns:{entity_mid} ?rel ?obj}}' 
-            Query.run(query_string, kg=kg)
+            if kg=='freebase':
+                query_string = f'PREFIX ns: <http://rdf.freebase.com/ns/> SELECT ?rel ?obj WHERE{{ns:{entity_mid} ?rel ?obj}}' 
+                Query.run(query_string, kg=kg)
 
-        elif so_position ==2
-            query_string = f'PREFIX ns: <http://rdf.freebase.com/ns/> SELECT ?sub ?rel WHERE{{ ?sub ?rel ns:{entity_mid}}}' 
-            Query.run(query_string, kg=kg)
+        elif so_position ==2:
+            if kg=='freebase':
+                query_string = f'PREFIX ns: <http://rdf.freebase.com/ns/> SELECT ?sub ?rel WHERE{{ ?sub ?rel ns:{entity_mid}}}' 
+                Query.run(query_string, kg=kg)
 
 
     @staticmethod
@@ -343,6 +350,13 @@ class UGSPARQLGraph:
         logger.debug(f"cross-emb spo: {reranked_spos_sorted}")
         return only_uri_list_topk
 
+    @staticmethod
+    def disambiguate_using_triplet_ug(triplet_ug, triplet_grounded):
+        input_dict = {'question':triplet_ug, 'spos':[], 'spos_label':[]}
+        # todo we can do some innovative mixing to create spo triple from the separate list of s, o, p.
+        # sort the list by thrid value of the sublist which is the score as returned by the elastic
+        # search.
+        pass
     @staticmethod
     def flatten_search_result(nested_list):
         result = []
