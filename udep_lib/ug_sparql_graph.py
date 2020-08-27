@@ -254,12 +254,12 @@ class UGSPARQLGraph:
         if so_position ==0:
             if kg=='freebase':
                 query_string = f'PREFIX ns: <http://rdf.freebase.com/ns/> SELECT ?rel ?obj WHERE{{ns:{entity_mid} ?rel ?obj}}' 
-                Query.run(query_string, kg=kg)
+                results = Query.run(query_string, kg=kg)
 
         elif so_position ==2:
             if kg=='freebase':
                 query_string = f'PREFIX ns: <http://rdf.freebase.com/ns/> SELECT ?sub ?rel WHERE{{ ?sub ?rel ns:{entity_mid}}}' 
-                Query.run(query_string, kg=kg)
+                results = Query.run(query_string, kg=kg)
 
 
     @staticmethod
