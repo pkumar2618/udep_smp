@@ -1,3 +1,13 @@
+# -*- coding: utf-8 -*-
+def isEnglish(s):
+    try:
+        s.encode(encoding='utf-8').decode('ascii')
+    except UnicodeDecodeError:
+        return False
+    else:
+        return True
+
+
 import json
 import sys
 from rdflib import URIRef
@@ -5,6 +15,7 @@ from rdflib import URIRef
 sys.path.append('/home/pawan/projects/aihn_qa/udep_smp/query_lib')
 from query_graph import QueryGraph
 
+from SPARQLWrapper import SPARQLWrapper, JSON
 import re
 from urllib.parse import urlparse, urlunparse
 
@@ -20,12 +31,41 @@ def get_label_from_uri(uri):
             if re.match(r'm.[a-zA-Z0-9]+', value_label): #it is a mid in freebase
                 #todo: later using elastic_search we should get the names of
                 #the mid and use it as the spo label
-                value_label = "mid"
-                return value_label
-            else: #not a mid buta predicate of the form type.object.type
+                query = f'PREFIX ns: <http://rdf.freebase.com/ns/> SELECT DISTINCT ?y WHERE {{ns:{value_label} ns:type.object.name ?y.}}'
+                sparql_endpoint = SPARQLWrapper("http://10.208.20.61:8895/sparql/")
+                sparql_endpoint.setReturnFormat(JSON)
+                results = None 
+                try:
+                    sparql_endpoint.setQuery(query)
+                    results = sparql_endpoint.query().convert()
+
+                except:
+                    #print("error quering endpoint")
+                    results = None
+
+                # extract only english name
+                try:
+                    y_values  = results["results"]["bindings"]
+                    # print(result_list_dict["label"]["value"])
+                    name_bup = y_values[0]['y']['value']
+                    value_label = None
+                    for y in y_values:
+                        name = y['y']['value']
+                        lang = y['y']['xml:lang']
+                        if isEnglish(name):
+                            value_label = name
+                            break
+                        else:
+                            continue
+                    if value_label is None:
+                        value_label = name_bup
+                    return value_label
+                except Exception as e:
+                    return ''
+            else: #not a mid but a predicate of the form type.object.type
                 return value_label.split('.')[-1]
-            url_base = urlunparse((url_parsed.scheme, url_parsed.netloc, '/'.join(url_path_split[:-1]), "", "", ""))
-        #return split_camelcase_predicates(value_label)
+                url_base = urlunparse((url_parsed.scheme, url_parsed.netloc, '/'.join(url_path_split[:-1]), "", "", ""))
+                    #return split_camelcase_predicates(value_label)
     else:
         return 'uri'
 
