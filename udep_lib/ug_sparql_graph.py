@@ -1,3 +1,12 @@
+# -*- coding: utf-8 -*-
+def isEnglish(s):
+    try:
+        s.encode(encoding='utf-8').decode('ascii')
+    except UnicodeDecodeError:
+        return False
+    else:
+        return True
+
 import copy
 import os
 import logging
@@ -165,15 +174,15 @@ class UGSPARQLGraph:
                             # ground_triplet_queryKB will return a list corresponding to the ungrounded triplet.
                             # letter we may as well accumulate re-ranker score to find do beam search when there are multiple
                             # ungrounded triplets
-                            triplet_candidates = triplet_candidates + UGSPARQLGraph.ground_triplet_queryKB(triplet, entity_mid, so_position=so_position, kg=kg) 
+                            triplet_candidates = triplet_candidates + UGSPARQLGraph.ground_triplet_queryKB(triplet, entity_name, entity_mid, so_position=so_position, kg=kg) 
                             
                         # check if surface_name has a correponding common_name/type_name in the query.nodes_type
                         elif f'{surface_name}' in self.query_graph.nodes_type.keys():
                             surface_name = self.query_graph.nodes_type[f'{surface_name}']
                             if re.search(surface_name, entity_name, re.IGNORECASE):
-                                triplet_candidates = triplet_candidates + UGSPARQLGraph.ground_triplet_queryKB(triplet, entity_mid, so_position=so_position, kg=kg) 
+                                triplet_candidates = triplet_candidates + UGSPARQLGraph.ground_triplet_queryKB(triplet, entity_name, entity_mid, so_position=so_position, kg=kg) 
                             elif re.search(entity_name, surface_name, re.IGNORECASE):
-                                triplet_candidates = triplet_candidates + UGSPARQLGraph.ground_triplet_queryKB(triplet, entity_mid, so_position=so_position, kg=kg) 
+                                triplet_candidates = triplet_candidates + UGSPARQLGraph.ground_triplet_queryKB(triplet,entity_name, entity_mid, so_position=so_position, kg=kg) 
 
                     triplets['triplet_grounded'].append(triplet_candidates)
 
@@ -248,19 +257,76 @@ class UGSPARQLGraph:
             return empty_list
 
     @staticmethod
-    def ground_triplet_queryKB(triplet, entity_mid, so_position=0, kg='dbpedia'): 
-
+    def ground_triplet_queryKB(triplet, entity_name, entity_mid, so_position=0, kg='dbpedia'): 
+        context_triplet_dict = {'question':triplet, 'spos':[], 'spos_label':[]}
         # if hops==1: # will do one hop first
-        if so_position ==0:
-            if kg=='freebase':
-                query_string = f'PREFIX ns: <http://rdf.freebase.com/ns/> SELECT ?rel ?obj WHERE{{ns:{entity_mid} ?rel ?obj}}' 
-                results = Query.run(query_string, kg=kg)
+        if kg=='freebase':
+            query_string1 = f'PREFIX ns: <http://rdf.freebase.com/ns/> SELECT ?rel ?obj ?objlabel WHERE{{ns:{entity_mid} ?rel ?obj . ?obj ns:type.object.name ?objlabel .}}' 
+            results = Query.run(query_string1, kg=kg)
+            # with the above results we need to create the triplet and take up their label so that we can populate 
+            # the context_triplet_dict to be used by the BERT Reranker. 
+            ## outward relations 
+            for rel, obj, objlabel in [(result['rel']['value'], result['obj']['value'], result['objlabel']) for result in results]:
+                # everytime we start we a fresh candidate type
+                tmp_list_spos = [f'http://rdf.freebase.com/ns/{entity_mid}',f'{rel}',f'{obj}']
+                tmp_list_spos_label = [f'{entity_name}', '', '']
+                rel_last = rel.split('/')[-1]
+                if len(rel_last.split('.')) >= 1:
+                    tmp_list_spos_label[1] = rel_last.split('.')[-1] 
+                else:
+                    continue
 
-        elif so_position ==2:
-            if kg=='freebase':
-                query_string = f'PREFIX ns: <http://rdf.freebase.com/ns/> SELECT ?sub ?rel WHERE{{ ?sub ?rel ns:{entity_mid}}}' 
-                results = Query.run(query_string, kg=kg)
+                # object label
+                obj_last = obj.split('/')[-1]
+                if re.match(r'm.[a-zA-Z0-9_]+', obj_last):
+                    # if it is a triple, it will have a name
+                    obj_name = objlabel['value']
+                    # we will only use english name
+                    # can't use xml:lang is always null in json resutl. 
+                    # obj_lang = objlabel['xml:lang']
+                    #if obj_lang=='@en':
+                    #if re.match(r'^[\s\w\d\?><;,\{\}\[\]\-_\+=!@\#\$%^&\*\|\']+', obj_name):
+                    if isEnglish(obj_name):
+                        tmp_list_spos_label[2] = obj_name
+                        context_triplet_dict['spos'].append(tmp_list_spos)
+                        context_triplet_dict['spos_label'].append(tmp_list_spos_label)
+                    else:
+                        continue
+                else:
+                    continue
 
+            ## inward relations
+            # we will also take up relation with entity postion changed in the triplet
+            query_string2 = f'PREFIX ns: <http://rdf.freebase.com/ns/> SELECT ?sub ?sublabel ?rel WHERE{{ ?sub ?rel ns:{entity_mid} . ?sub ns:type.object.name ?sublabel}}' 
+            results = Query.run(query_string2, kg=kg)
+            for sub, sublabel, rel in [(result['sub']['value'], result['sublabel'], result['rel']['value']) for result in results]:
+                tmp_list_spos = [f'{sub}', f'{rel}', f'http://rdf.freebase.com/ns/{entity_mid}']
+                tmp_list_spos_label = ['', '', f'{entity_name}']
+                rel_last = rel.split('/')[-1]
+                if len(rel_last.split('.')) >= 1:
+                    tmp_list_spos_label[1] = rel_last.split('.')[-1] 
+                else:
+                    continue
+
+                # subject label
+                sub_last = sub.split('/')[-1]
+                if re.match(r'm.[a-zA-Z0-9_]+', sub_last):
+                    # if it is a triple, it will have a name
+                    sub_name = sublabel['value']
+                    # we will only use english name
+                    # sub_lang is always null string in the json format
+                    # sub_lang = sublabel['xml:lang']
+                    #if sub_lang=='@en':
+                    #if re.match(r'^[\s\w\d\?><;,\{\}\[\]\-_\+=!@\#\$%^&\*\|\']+', sub_name):
+                    if isEnglish(sub_name):
+                        tmp_list_spos_label[0] = sub_name
+                        context_triplet_dict['spos'].append(tmp_list_spos)
+                        context_triplet_dict['spos_label'].append(tmp_list_spos_label)
+                    else:
+                        continue
+                else:
+                    continue
+        return context_triplet_dict
 
     @staticmethod
     def ground_so_spotlight(query_graph, so):

@@ -188,10 +188,12 @@ class Query(object):
         try:
             sparql_endpoint.setQuery(self.sparql)
             self.results = sparql_endpoint.query().convert()
+            return self.results
 
         except:
             #print("error quering endpoint")
             self.results = []
+            return self.results
 
     @staticmethod
     def run(query_string, kg='dbpedia'):
@@ -204,11 +206,11 @@ class Query(object):
         try:
             sparql_endpoint.setQuery(query_string)
             results = sparql_endpoint.query().convert()
-            result_list_dict  = results["results"]["bindings"]
+            return results["results"]["bindings"]
 
         except:
             #print("error quering endpoint")
-            results = []
+            return [] # return an empty list
 
 
 if __name__ == "__main__":
