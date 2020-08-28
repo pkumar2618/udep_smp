@@ -125,8 +125,7 @@ class UGSPARQLGraph:
                     topk_es = 10 #use this to select topk search resutls from elastic search
                     # the choice os topk_es can slow down processing as it will create topk_es^3 spo triplets that need to be
                     # re-ranked by spo-disambiguator
-                    disambiguated_spo_topk = UGSPARQLGraph.disambiguate_using_cotext(question, subject_entities_list_sorted[:topk_es],
-                                                                                predicate_property_list_sorted[:topk_es], object_entities_list_sorted[:topk_es], rdf_type_s, rdf_type_o)
+                    disambiguated_spo_topk = UGSPARQLGraph.disambiguate_using_cotext(question, subject_entities_list_sorted[:topk_es], predicate_property_list_sorted[:topk_es], object_entities_list_sorted[:topk_es], rdf_type_s, rdf_type_o)
                     #The set of candidate-spos we will get above would create for a given spo-triple
                     for i, disambiguated_spo in enumerate(disambiguated_spo_topk):
                         disambiguated_spo_with_rdfterm = ['s', 'o', 'p']
@@ -163,7 +162,7 @@ class UGSPARQLGraph:
                 # the entity_name might directly appear in a triplet or it could be mentioned in the query.nodes_type
                 # for the first case
                 for triplet in triplets['triplets_ug']:
-                    triplet_candidates = []
+                    triplet_candidates_dict = {} 
                     for so_position, surface_name in [(0, triplet[0]), (2, triplet[2])]:
                         if isinstance(surface_name, BNode):
                             continue
@@ -174,17 +173,36 @@ class UGSPARQLGraph:
                             # ground_triplet_queryKB will return a list corresponding to the ungrounded triplet.
                             # letter we may as well accumulate re-ranker score to find do beam search when there are multiple
                             # ungrounded triplets
-                            triplet_candidates = triplet_candidates + UGSPARQLGraph.ground_triplet_queryKB(triplet, entity_name, entity_mid, so_position=so_position, kg=kg) 
+                            triplet_candidates_dict = UGSPARQLGraph.ground_triplet_queryKB(triplet, entity_name, entity_mid, so_position=so_position, kg=kg) 
                             
                         # check if surface_name has a correponding common_name/type_name in the query.nodes_type
                         elif f'{surface_name}' in self.query_graph.nodes_type.keys():
                             surface_name = self.query_graph.nodes_type[f'{surface_name}']
                             if re.search(surface_name, entity_name, re.IGNORECASE):
-                                triplet_candidates = triplet_candidates + UGSPARQLGraph.ground_triplet_queryKB(triplet, entity_name, entity_mid, so_position=so_position, kg=kg) 
+                                triplet_candidates_dict = UGSPARQLGraph.ground_triplet_queryKB(triplet, entity_name, entity_mid, so_position=so_position, kg=kg) 
                             elif re.search(entity_name, surface_name, re.IGNORECASE):
-                                triplet_candidates = triplet_candidates + UGSPARQLGraph.ground_triplet_queryKB(triplet,entity_name, entity_mid, so_position=so_position, kg=kg) 
+                                triplet_candidates_dict = UGSPARQLGraph.ground_triplet_queryKB(triplet, entity_name, entity_mid, so_position=so_position, kg=kg) 
 
-                    triplets['triplet_grounded'].append(triplet_candidates)
+                    triplets['triplet_grounded'].append(triplet_candidates_dict)
+                #return triplets
+                
+                #re-ranking will be done using the BERT-Softmax classifier
+                #which will return at most 20 triplet_candidates
+                for idx, triplet in enumerate(triplets['triplets_ug']):
+                    logger.info(f'top10-queryKB triplet: {triplets["triplet_grounded"][idx]["spos"}')
+                    disambiguated_triplet_candidates_topk = UGSPARQLGraph.disambiguate_using_cotext_queryKB(question, triplets['triplet_grounded'][idx])
+                    #The set of candidate-spos we will get above would create for a given spo-triple
+                    for i, candidate_triplet in enumerate(disambiguated_triplet_candidates_topk):
+                        candidate_triplet_with_rdfterm = ['s', 'o', 'p']
+                        if candidate_triplet['var_at'] == 0:
+                            candidate_triplet_with_rdfterm[0] = BNode(candidate_triplet[0])
+                        
+                        elif candidate_triplet['var_at'] == 2:
+                            candidate_triplet_with_rdfterm[2] = BNode(candidate_triplet[2])
+
+                        #predicate will carry URIRef
+                        candidate_triplet_with_rdfterm[1] = URIRef(candidate_triplet[1])
+                        self.g_query_topk[idx].add_triple(tuple(candidate_triplet_with_rdfterm))
 
     def get_g_sparql_graph(self):
         #todo from the list of candidates spo we need to disambiguate to obtain only one spo-triple
@@ -258,7 +276,7 @@ class UGSPARQLGraph:
 
     @staticmethod
     def ground_triplet_queryKB(triplet, entity_name, entity_mid, so_position=0, kg='dbpedia'): 
-        context_triplet_dict = {'question':triplet, 'spos':[], 'spos_label':[]}
+        context_triplet_dict = {'question':triplet, 'spos':[], 'spos_label':[], 'var_at':[]}
         # if hops==1: # will do one hop first
         if kg=='freebase':
             query_string1 = f'PREFIX ns: <http://rdf.freebase.com/ns/> SELECT ?rel ?obj ?objlabel WHERE{{ns:{entity_mid} ?rel ?obj . ?obj ns:type.object.name ?objlabel .}}' 
@@ -290,6 +308,8 @@ class UGSPARQLGraph:
                         tmp_list_spos_label[2] = obj_name
                         context_triplet_dict['spos'].append(tmp_list_spos)
                         context_triplet_dict['spos_label'].append(tmp_list_spos_label)
+                        # when going back to sparql query, object should be removed with a variable node. 
+                        context_triplet_dict['var_at'].append(2)
                     else:
                         continue
                 else:
@@ -322,6 +342,8 @@ class UGSPARQLGraph:
                         tmp_list_spos_label[0] = sub_name
                         context_triplet_dict['spos'].append(tmp_list_spos)
                         context_triplet_dict['spos_label'].append(tmp_list_spos_label)
+                        # when going back to sparql query, object should be removed with a variable node. 
+                        context_triplet_dict['var_at'].append(0)
                     else:
                         continue
                 else:
@@ -417,12 +439,16 @@ class UGSPARQLGraph:
         return only_uri_list_topk
 
     @staticmethod
-    def disambiguate_using_triplet_ug(triplet_ug, triplet_grounded):
-        input_dict = {'question':triplet_ug, 'spos':[], 'spos_label':[]}
-        # todo we can do some innovative mixing to create spo triple from the separate list of s, o, p.
-        # sort the list by thrid value of the sublist which is the score as returned by the elastic
-        # search.
-        pass
+    def disambiguate_using_cotext_queryKB(question, triplet_candidates_dict):
+        input_dict = {'question':question, 'spos':triplet_candidates_dict['spos'], 'spos_label':triplet_candidates_dict['spos_label']}
+        reranked_spos = cross_emb_predictor(input_dict=input_dict, write_pred=False)
+        reranked_spos['var_at'] = triplet_candidates_dict['var_at']
+        reranked_spos_sorted = sorted(reranked_spos[0], key=lambda x: x['cross_emb_score'], reverse=True)
+        only_uri_list_topk = [only_uri['spo_triple_uri'] for only_uri in reranked_spos_sorted[:20]]
+        logger.info(f"cross-emb spo: {only_uri_list_topk}")
+        logger.debug(f"cross-emb spo: {reranked_spos_sorted}")
+        return only_uri_list_topk
+
     @staticmethod
     def flatten_search_result(nested_list):
         result = []
