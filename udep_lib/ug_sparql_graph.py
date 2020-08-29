@@ -33,7 +33,7 @@ class UGSPARQLGraph:
     # glove_loaded = False  # flag to load the keyedvector from file once
     # glove = None  # the keyedvector stored using memory map for fast access
 
-    def __init__(self, ug_query, grounded_topk=10):
+    def __init__(self, ug_query, grounded_topk=50):
         # with grounded_topk we are going to limit number of final sparql queries available for evaluation to us. 
         # these sparql-quereis can be run against sparql endpoint to provide MRR at say 5, 10. 
         self.query_graph = ug_query
@@ -188,21 +188,32 @@ class UGSPARQLGraph:
                 
                 #re-ranking will be done using the BERT-Softmax classifier
                 #which will return at most 20 triplet_candidates
-                for idx, triplet in enumerate(triplets['triplets_ug']):
-                    logger.info(f'top10-queryKB triplet: {triplets["triplet_grounded"][idx]["spos"}')
+                for triplet in triplets['triplets_ug']:
+                    logger.info(f'top10-queryKB triplet: {triplets["triplet_grounded"][idx]["spos"][:10]}')
                     disambiguated_triplet_candidates_topk = UGSPARQLGraph.disambiguate_using_cotext_queryKB(question, triplets['triplet_grounded'][idx])
+                    #find out the variable name
+                    #consider only single variable triplet for now
+                    variable_name = None 
+                    for term in triplet:
+                        if isinstance(term, BNode):
+                            variable_name = term
+
                     #The set of candidate-spos we will get above would create for a given spo-triple
-                    for i, candidate_triplet in enumerate(disambiguated_triplet_candidates_topk):
+                    for query_idx, candidate_triplet in enumerate(disambiguated_triplet_candidates_topk):
                         candidate_triplet_with_rdfterm = ['s', 'o', 'p']
                         if candidate_triplet['var_at'] == 0:
-                            candidate_triplet_with_rdfterm[0] = BNode(candidate_triplet[0])
+                            candidate_triplet_with_rdfterm[0] = variable_name                        
+                            #predicate will carry URIRef
+                            candidate_triplet_with_rdfterm[1] = URIRef(candidate_triplet[1])
+                            candidate_triplet_with_rdfterm[2] = URIRef(candidate_triplet[2])
                         
                         elif candidate_triplet['var_at'] == 2:
-                            candidate_triplet_with_rdfterm[2] = BNode(candidate_triplet[2])
+                            candidate_triplet_with_rdfterm[2] = variable_name
+                            #predicate will carry URIRef
+                            candidate_triplet_with_rdfterm[1] = URIRef(candidate_triplet[1])
+                            candidate_triplet_with_rdfterm[0] = URIRef(candidate_triplet[0])
 
-                        #predicate will carry URIRef
-                        candidate_triplet_with_rdfterm[1] = URIRef(candidate_triplet[1])
-                        self.g_query_topk[idx].add_triple(tuple(candidate_triplet_with_rdfterm))
+                        self.g_query_topk[query_idx].add_triple(tuple(candidate_triplet_with_rdfterm))
 
     def get_g_sparql_graph(self):
         #todo from the list of candidates spo we need to disambiguate to obtain only one spo-triple
@@ -442,12 +453,16 @@ class UGSPARQLGraph:
     def disambiguate_using_cotext_queryKB(question, triplet_candidates_dict):
         input_dict = {'question':question, 'spos':triplet_candidates_dict['spos'], 'spos_label':triplet_candidates_dict['spos_label']}
         reranked_spos = cross_emb_predictor(input_dict=input_dict, write_pred=False)
-        reranked_spos['var_at'] = triplet_candidates_dict['var_at']
-        reranked_spos_sorted = sorted(reranked_spos[0], key=lambda x: x['cross_emb_score'], reverse=True)
-        only_uri_list_topk = [only_uri['spo_triple_uri'] for only_uri in reranked_spos_sorted[:20]]
+        reranked_spos_with_var_position=[[]]
+        for dict_item, position in zip(reranked_spos[0], triplet_candidates_dict['var_at']):
+            dict_item['var_at'] = position
+            reranked_spos_with_var_position[0].append(dict_item)
+
+        reranked_spos_sorted = sorted(reranked_spos_with_var_position[0], key=lambda x: x['cross_emb_score'], reverse=True)
+        only_uri_list_topk = [only_uri['spo_triple_uri'] for only_uri in reranked_spos_sorted[:50]]
         logger.info(f"cross-emb spo: {only_uri_list_topk}")
         logger.debug(f"cross-emb spo: {reranked_spos_sorted}")
-        return only_uri_list_topk
+        return reranked_spos_sorted[:50] 
 
     @staticmethod
     def flatten_search_result(nested_list):
