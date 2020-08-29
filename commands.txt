@@ -1,0 +1,5 @@
+main_line.py --questions_file nlqs_flower_maxico.txt --disambiguator elasticsearch --knowledge_graph freebase --log debug --logname maxico
+python -m pdb main_line.py --questions_file nlqs_webqsp_few_mids.txt --disambiguator elasticsearch --knowledge_graph freebase --log debug --logname few_mids
+python -m pdb main_line.py --questions_file nlqs_annot_webqsp.json --annotation --disambiguator elasticsearch --knowledge_graph freebase --log debug --logname direct
+python -m pdb read_execution_results.py --execution_file execution_results.json --stop_at query_output
+python -m main_line.py --questions_file nlqs_webqsp_select_t1.json --annotation --disambiguator queryKB --knowledge_graph freebase --log debug --logname webqsp_select_t1
