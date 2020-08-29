@@ -190,38 +190,47 @@ class UGSPARQLGraph:
                 #re-ranking will be done using the BERT-Softmax classifier
                 #which will return at most 20 triplet_candidates
                 for triplet_idx, triplet in enumerate(triplets['triplets_ug']):
-                    logger.info(f'top10-queryKB triplet: {triplets["triplet_grounded"][triplet_idx]["spos"][:50]}')
-                    #try: 
-                    #    with open(f'reranked_candidates_{triplet_idx}.pkl', 'rb') as f_read:
-                    #        disambiguated_triplet_candidates_topk = pickle.load(f_read)
-                    #except FileNotFoundError as e:
-                    disambiguated_triplet_candidates_topk = UGSPARQLGraph.disambiguate_using_cotext_queryKB(question, triplets['triplet_grounded'][triplet_idx])
-                    #    with open(f'reranked_candidates_{triplet_idx}.pkl', 'wb') as f_write:
-                    #        pickle.dump(disambiguated_triplet_candidates_topk, f_write)
+                    #it is possibel that no grounded elements were found for a triplet, in that case we will have to continue with
+                    # next triplet in the query 
+                    if 'spos' in triplets["triplet_grounded"][triplet_idx].keys():
+                        logger.info(f'top10-queryKB triplet: {triplets["triplet_grounded"][triplet_idx]["spos"][:50]}')
+                        #try: 
+                        #    with open(f'reranked_candidates_{triplet_idx}.pkl', 'rb') as f_read:
+                        #        disambiguated_triplet_candidates_topk = pickle.load(f_read)
+                        #except FileNotFoundError as e:
+                        disambiguated_triplet_candidates_topk = UGSPARQLGraph.disambiguate_using_cotext_queryKB(question, triplets['triplet_grounded'][triplet_idx])
+                        #    with open(f'reranked_candidates_{triplet_idx}.pkl', 'wb') as f_write:
+                        #        pickle.dump(disambiguated_triplet_candidates_topk, f_write)
 
-                    #find out the variable name
-                    #consider only single variable triplet for now
-                    variable_name = None 
-                    for term in triplet:
-                        if isinstance(term, BNode):
-                            variable_name = term
+                        #find out the variable name
+                        #consider only single variable triplet for now
+                        variable_name = None 
+                        for term in triplet:
+                            if isinstance(term, BNode):
+                                variable_name = term
 
-                    #The set of candidate-spos we will get above would create for a given spo-triple
-                    for query_idx, candidate_triplet in enumerate(disambiguated_triplet_candidates_topk):
-                        candidate_triplet_with_rdfterm = ['s', 'o', 'p']
-                        if candidate_triplet['var_at'] == 0:
-                            candidate_triplet_with_rdfterm[0] = variable_name                        
-                            #predicate will carry URIRef
-                            candidate_triplet_with_rdfterm[1] = URIRef(candidate_triplet['spo_triple_uri'][1])
-                            candidate_triplet_with_rdfterm[2] = URIRef(candidate_triplet['spo_triple_uri'][2])
-                        
-                        elif candidate_triplet['var_at'] == 2:
-                            candidate_triplet_with_rdfterm[2] = variable_name
-                            #predicate will carry URIRef
-                            candidate_triplet_with_rdfterm[1] = URIRef(candidate_triplet['spo_triple_uri'][1])
-                            candidate_triplet_with_rdfterm[0] = URIRef(candidate_triplet['spo_triple_uri'][0])
+                        if variable_name is None:
+                            continue
+                        else:# we are considering only single triplet queries, for multiple triplet query, we may not find any
+                        # variable in a triplet, there may exist commore resources, etc. 
+                            #The set of candidate-spos we will get above would create for a given spo-triple
+                            for query_idx, candidate_triplet in enumerate(disambiguated_triplet_candidates_topk):
+                                candidate_triplet_with_rdfterm = ['s', 'o', 'p']
+                                if candidate_triplet['var_at'] == 0:
+                                    candidate_triplet_with_rdfterm[0] = variable_name                        
+                                    #predicate will carry URIRef
+                                    candidate_triplet_with_rdfterm[1] = URIRef(candidate_triplet['spo_triple_uri'][1])
+                                    candidate_triplet_with_rdfterm[2] = URIRef(candidate_triplet['spo_triple_uri'][2])
+                                
+                                elif candidate_triplet['var_at'] == 2:
+                                    candidate_triplet_with_rdfterm[2] = variable_name
+                                    #predicate will carry URIRef
+                                    candidate_triplet_with_rdfterm[1] = URIRef(candidate_triplet['spo_triple_uri'][1])
+                                    candidate_triplet_with_rdfterm[0] = URIRef(candidate_triplet['spo_triple_uri'][0])
 
-                        self.g_query_topk[query_idx].add_triple(tuple(candidate_triplet_with_rdfterm))
+                                self.g_query_topk[query_idx].add_triple(tuple(candidate_triplet_with_rdfterm))
+                    else:
+                        continue # continue with the next triplet in the query
 
     def get_g_sparql_graph(self):
         #todo from the list of candidates spo we need to disambiguate to obtain only one spo-triple
