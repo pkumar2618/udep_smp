@@ -11,6 +11,7 @@ import copy
 import os
 import logging
 import re
+import pickle
 from rdflib import BNode, URIRef
 
 #from candidate_generation.searchIndex import entitySearch, propertySearch, ontologySearch
@@ -188,9 +189,16 @@ class UGSPARQLGraph:
                 
                 #re-ranking will be done using the BERT-Softmax classifier
                 #which will return at most 20 triplet_candidates
-                for triplet in triplets['triplets_ug']:
-                    logger.info(f'top10-queryKB triplet: {triplets["triplet_grounded"][idx]["spos"][:10]}')
-                    disambiguated_triplet_candidates_topk = UGSPARQLGraph.disambiguate_using_cotext_queryKB(question, triplets['triplet_grounded'][idx])
+                for triplet_idx, triplet in enumerate(triplets['triplets_ug']):
+                    logger.info(f'top10-queryKB triplet: {triplets["triplet_grounded"][triplet_idx]["spos"][:50]}')
+                    #try: 
+                    #    with open(f'reranked_candidates_{triplet_idx}.pkl', 'rb') as f_read:
+                    #        disambiguated_triplet_candidates_topk = pickle.load(f_read)
+                    #except FileNotFoundError as e:
+                    disambiguated_triplet_candidates_topk = UGSPARQLGraph.disambiguate_using_cotext_queryKB(question, triplets['triplet_grounded'][triplet_idx])
+                    #    with open(f'reranked_candidates_{triplet_idx}.pkl', 'wb') as f_write:
+                    #        pickle.dump(disambiguated_triplet_candidates_topk, f_write)
+
                     #find out the variable name
                     #consider only single variable triplet for now
                     variable_name = None 
@@ -204,14 +212,14 @@ class UGSPARQLGraph:
                         if candidate_triplet['var_at'] == 0:
                             candidate_triplet_with_rdfterm[0] = variable_name                        
                             #predicate will carry URIRef
-                            candidate_triplet_with_rdfterm[1] = URIRef(candidate_triplet[1])
-                            candidate_triplet_with_rdfterm[2] = URIRef(candidate_triplet[2])
+                            candidate_triplet_with_rdfterm[1] = URIRef(candidate_triplet['spo_triple_uri'][1])
+                            candidate_triplet_with_rdfterm[2] = URIRef(candidate_triplet['spo_triple_uri'][2])
                         
                         elif candidate_triplet['var_at'] == 2:
                             candidate_triplet_with_rdfterm[2] = variable_name
                             #predicate will carry URIRef
-                            candidate_triplet_with_rdfterm[1] = URIRef(candidate_triplet[1])
-                            candidate_triplet_with_rdfterm[0] = URIRef(candidate_triplet[0])
+                            candidate_triplet_with_rdfterm[1] = URIRef(candidate_triplet['spo_triple_uri'][1])
+                            candidate_triplet_with_rdfterm[0] = URIRef(candidate_triplet['spo_triple_uri'][0])
 
                         self.g_query_topk[query_idx].add_triple(tuple(candidate_triplet_with_rdfterm))
 

@@ -1,6 +1,7 @@
 from udep_lib.nlquestion import NLQuestion
 import logging
 import json
+from udep_lib.sparql_builder import Query
 logger = logging.getLogger(__name__)
 
 class Parser(object):
@@ -85,8 +86,7 @@ class Parser(object):
                 for cand_query, q_string in zip(topk_sparql_graphs.g_query_topk, topk_sparql_queries):
                     temp_store = {'query_output': None, 'query_string': None}
                     try:
-                        cand_query.run(kg)
-                        result_list_dict  = cand_query.results["results"]["bindings"]
+                        result_list_dict  = Query.run(q_string, kg=kg)
                         temp_store['query_output'] = result_list_dict
                         temp_store['query_string'] = q_string
                         json_item['topk_queries'].append(temp_store)

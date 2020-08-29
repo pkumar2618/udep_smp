@@ -178,23 +178,6 @@ class Query(object):
         all_ns = '\n'.join([f"PREFIX: {p} \t URL: {u}" for p, u in Query.sparql_group.namespaces()])
         print(all_ns)
 
-    def run(kg='dbpedia'):
-        #sparql_endpoint = SPARQLWrapper("http://dbpedia.org/sparql")
-        sparql_endpoint = SPARQLWrapper("http://10.208.20.61:8890/sparql/")
-        if kg=='freebase':
-            sparql_endpoint = SPARQLWrapper("http://10.208.20.61:8895/sparql/")
-
-        sparql_endpoint.setReturnFormat(JSON)
-        try:
-            sparql_endpoint.setQuery(self.sparql)
-            self.results = sparql_endpoint.query().convert()
-            return self.results
-
-        except:
-            #print("error quering endpoint")
-            self.results = []
-            return self.results
-
     @staticmethod
     def run(query_string, kg='dbpedia'):
         #sparql_endpoint = SPARQLWrapper("http://dbpedia.org/sparql")
