@@ -17,7 +17,11 @@ if __name__=='__main__':
         for line in lines:
             json_item = json.loads(line)
             if args.stop_at=="query_output":
+                print(f'************************************************************************************************')
                 print(f'question: {json_item["question"]}')
                 for topk_query in json_item["topk_queries"]:
-                    print(f'query_output: {topk_query["query_output"]}')
+                    print(f'---------------------------------------------------- ')
                     print(f'query_string: {topk_query["query_string"]}')
+                    print(f'query_output: .........................................')
+                    for output in topk_query["query_output"]:
+                        print(output)
