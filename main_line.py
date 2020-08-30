@@ -119,16 +119,19 @@ while True:
                 # entity linking or disambiguation is an required for the tokens in the questions. The disambiguator
                 # provides denotation (entity or resources) for each token,
                 # the parser stores a dictionary of token-denotation pairs
-                batch_name=180
+                #batch_name=40
+                #batch_name=180
+                start_qn = args.start_qn 
+                end_qn = args.end_qn 
                 try:
-                    with open(f'{args.logname}_log4_{batch_name}_parser.pkl', 'rb') as f:
+                    with open(f'{args.logname}_log4_{start_qn}_{end_qn}_parser.pkl', 'rb') as f:
                         parser = pickle.load(f)
                 except FileNotFoundError as e:
-                    parser.grounded_sparql_graph(linker=args.disambiguator, kg=args.knowledge_graph)
-                    with open(f'{args.logname}_log4_{batch_name}_parser.pkl', 'wb') as f:
+                    parser.grounded_sparql_graph(start_qn = start_qn, end_qn=end_qn, linker=args.disambiguator, kg=args.knowledge_graph)
+                    with open(f'{args.logname}_log4_{start_qn}_{end_qn}_parser.pkl', 'wb') as f:
                         pickle.dump(parser, f)
 
-                parser.query_executor(args.knowledge_graph, result_file=f'execution_result_{batch_name}.json')
+                parser.query_executor(args.knowledge_graph, result_file=f'execution_result_{start_qn}_{end_qn}.json', start_qn=args.start_qn, end_qn=args.end_qn)
 
                 # Result of Querying the Knowledge Graph
                 print("done")

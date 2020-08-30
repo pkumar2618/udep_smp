@@ -1,11 +1,17 @@
 from udep_lib.nlquestion import NLQuestion
 import logging
 import json
+import pickle
 from udep_lib.sparql_builder import Query
 logger = logging.getLogger(__name__)
 
-start_qn = 160
-end_qn = 180
+#start_qn = 20
+#end_qn = 40
+##start_qn = 160
+##end_qn = 180
+#start_qn = 180
+#end_qn = 200
+
 
 class Parser(object):
     """
@@ -36,6 +42,7 @@ class Parser(object):
         self.ug_gpgraphs_list = []
         self.ug_sparql_graphs_list = []
         self.g_sparql_graph_list = []
+        self.g_sparql_graph_list_batch = []
         self.results_list = []
 
     def tokenize(self, dependency_parsing, bypass=True):
@@ -69,16 +76,21 @@ class Parser(object):
             self.ug_sparql_graphs_list.append(ug_graphs.gpgraph_to_sparql(kg))
 
     # this is where all the magic happens, linking using elasticsearch, as well as reranking using BERT
-    def grounded_sparql_graph(self, linker=None, kg=None):
+    def grounded_sparql_graph(self, start_qn=None, end_qn=None, linker=None, kg=None):
         count = start_qn
+        g_sparql_graph_list_batch = []
         for ug_sparql_graphs, nlquestion, annot in zip(self.ug_sparql_graphs_list[start_qn:end_qn], self.nlq_questions_list[start_qn:end_qn], self.nlq_annot_list[start_qn:end_qn]):
             # there might me many gp_graphs obtained, we are using the first one for now, which is usually 
             # the case with UDepLambda, it generates only on logical form therefore on ungrounded gp-graph
             print(count)
             ug_sparql_graphs[0].ground_spo(question=nlquestion.question, annotation=annot, linker=linker, kg=kg)
             graph_query = {'sparql_graph': ug_sparql_graphs[0].get_g_sparql_graph(), 'sparql_query': ug_sparql_graphs[0].get_g_sparql_query()}
-            self.g_sparql_graph_list.append(graph_query)
+            #the append has to be offseted for maintaining correct order 
+            #self.g_sparql_graph_list.append(graph_query)
+            g_sparql_graph_list_batch.append(graph_query)
             count += 1
+        with open(f'grounded_sparql_graph_{start_qn}_{end_qn}.pkl', 'wb') as f_write:
+            pickle.dump(g_sparql_graph_list_batch, f_write)
         #ug_sparql_graphs = self.ug_sparql_graphs_list[5]  
         #nlquestion = self.nlq_questions_list[5]
         #annot = self.nlq_annot_list[5]
@@ -86,40 +98,47 @@ class Parser(object):
         #graph_query = {'sparql_graph': ug_sparql_graphs[0].get_g_sparql_graph(), 'sparql_query': ug_sparql_graphs[0].get_g_sparql_query()}
         #self.g_sparql_graph_list.append(graph_query)
 
-    def query_executor(self, kg='dbpedia', result_file=None):
+    def query_executor(self, kg='dbpedia', result_file=None, start_qn=None, end_qn=None):
         f_handle = None
         if result_file is None:
             f_handle = open('execution_results.json', 'a')
         else:
             f_handle = open(f'{result_file}', 'a')
 
-        for query, nlq in zip(self.g_sparql_graph_list[start_qn:end_qn], self.nlq_questions_list[start_qn:end_qn]):
-            json_item = {}
-            topk_sparql_graphs = query['sparql_graph']
-            topk_sparql_queries = query['sparql_query']
-            #topk = 1 #
-            json_item['question'] = nlq.question.strip()
-            json_item['topk_queries'] =  []
-            for cand_query, q_string in zip(topk_sparql_graphs.g_query_topk, topk_sparql_queries):
-                temp_store = {'query_output': None, 'query_string': None}
-                try:
-                    result_list_dict  = Query.run(q_string, kg=kg)
-                    temp_store['query_output'] = result_list_dict
-                    temp_store['query_string'] = q_string
-                    json_item['topk_queries'].append(temp_store)
-                    # for result_dict in result_list_dict:
-                    # output_values = "\n".join([f"label: {key} \t value: { result_dict[key]}") for key in result_dict.keys()])
-                    # f_handle.writeline(output_values)
-                    # print("\n".join([f"label: {key} \t value: { result_dict[key]}") for key in result_dict.keys()]))
-                except TypeError as e:
-                    temp_store['query_output'] =  f'{e}'
-                    temp_store['query_string'] = q_string
-                    json_item['topk_queries'].append(temp_store)
+        try:
+            with open(f'grounded_sparql_graph_{start_qn}_{end_qn}.pkl', 'rb') as f_read:
+                g_sparql_graph_list_batch = pickle.load(f_read)
 
-            json_item_string = json.dumps(json_item)
-            f_handle.write(json_item_string + '\n')
+        #for query, nlq in zip(self.g_sparql_graph_list[start_qn:end_qn], self.nlq_questions_list[start_qn:end_qn]):
+            for query, nlq in zip(g_sparql_graph_list_batch, self.nlq_questions_list[start_qn:end_qn]):
+                json_item = {}
+                topk_sparql_graphs = query['sparql_graph']
+                topk_sparql_queries = query['sparql_query']
+                #topk = 1 #
+                json_item['question'] = nlq.question.strip()
+                json_item['topk_queries'] =  []
+                for cand_query, q_string in zip(topk_sparql_graphs.g_query_topk, topk_sparql_queries):
+                    temp_store = {'query_output': None, 'query_string': None}
+                    try:
+                        result_list_dict  = Query.run(q_string, kg=kg)
+                        temp_store['query_output'] = result_list_dict
+                        temp_store['query_string'] = q_string
+                        json_item['topk_queries'].append(temp_store)
+                        # for result_dict in result_list_dict:
+                        # output_values = "\n".join([f"label: {key} \t value: { result_dict[key]}") for key in result_dict.keys()])
+                        # f_handle.writeline(output_values)
+                        # print("\n".join([f"label: {key} \t value: { result_dict[key]}") for key in result_dict.keys()]))
+                    except TypeError as e:
+                        temp_store['query_output'] =  f'{e}'
+                        temp_store['query_string'] = q_string
+                        json_item['topk_queries'].append(temp_store)
 
-        f_handle.close()
+                json_item_string = json.dumps(json_item)
+                f_handle.write(json_item_string + '\n')
+
+            f_handle.close()
+        except:
+            pass
 
     @staticmethod
     def nlq_to_ug_form(nlq):
