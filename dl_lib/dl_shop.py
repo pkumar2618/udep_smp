@@ -67,7 +67,7 @@ if __name__ =="__main__":
                                    data={"seed": 1, "batch_size":8, "learning_rate":3e-4,
                                          "epochs": 8, "USE_GPU": torch.cuda.is_available(),
                                          "training_dataset": "../dataset_WebQSP/webqsp_train.json",
-                                        "validation_dataset": "../dataset_WebQSP/webqsp_val.json",
+                                         "validation_dataset": "../dataset_WebQSP/webqsp_val.json",
                                         "iteration_number": 0
                                         }
                                 )

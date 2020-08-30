@@ -15,6 +15,8 @@ arguments_parser = argparse.ArgumentParser(
 arguments_parser.add_argument("--questions_file", help="Path to the file containing Natural Language Questions")
 arguments_parser.add_argument("--annotation", help="Flag if questions are annotated.", action="store_true")
 arguments_parser.add_argument("--batch", help="delete set of questions to be processed together, used in analysis of paraphrase and structures in the questions.")
+arguments_parser.add_argument("--start_qn", help="start of question number for the batch from the questions corpus", type=int)
+arguments_parser.add_argument("--end_qn", help="end of question number for the batch from the questions corpus", type=int)
 
 arguments_parser.add_argument("--questions_list", help="List all the questions one after another,"
                                                        " separated by new line")
@@ -47,7 +49,6 @@ numeric_level = getattr(logging, args.log.upper(), None)
 if not isinstance(numeric_level, int):
         raise ValueError('Invalid log level: %s' % args.log)
 
-logging.basicConfig(filename=f'{args.logname}.log', level=numeric_level, filemode='a')
 
 while True:
     """
@@ -64,6 +65,7 @@ while True:
             # # # # Tokenize the list of questions.
             # save the name of the question_sets under consideration.
             if not args.batch:
+                logging.basicConfig(filename=f'{args.logname}.log', level=numeric_level, filemode='a')
                 logging.info('Semantic Parser Started')
                 try:
                     with open(f'{args.logname}_log0_parser.pkl', 'rb') as f:
@@ -117,15 +119,16 @@ while True:
                 # entity linking or disambiguation is an required for the tokens in the questions. The disambiguator
                 # provides denotation (entity or resources) for each token,
                 # the parser stores a dictionary of token-denotation pairs
+                batch_name=180
                 try:
-                    with open(f'{args.logname}_log4_parser.pkl', 'rb') as f:
+                    with open(f'{args.logname}_log4_{batch_name}_parser.pkl', 'rb') as f:
                         parser = pickle.load(f)
                 except FileNotFoundError as e:
                     parser.grounded_sparql_graph(linker=args.disambiguator, kg=args.knowledge_graph)
-                    with open(f'{args.logname}_log4_parser.pkl', 'wb') as f:
+                    with open(f'{args.logname}_log4_{batch_name}_parser.pkl', 'wb') as f:
                         pickle.dump(parser, f)
 
-                parser.query_executor(args.knowledge_graph)
+                parser.query_executor(args.knowledge_graph, result_file=f'execution_result_{batch_name}.json')
 
                 # Result of Querying the Knowledge Graph
                 print("done")
@@ -133,22 +136,23 @@ while True:
             if args.batch:
                 # if the questions in the file are to be processed in batches. 
                 # list of questions
+                logging.basicConfig(filename=f'{args.logname}_batch_{args.start_qn}_{args.end_qn}.log', level=numeric_level, filemode='a')
                 with open(args.questions_file, 'r') as f_read:
                     questions_list = f_read.readlines()
 
                     logging.info('Semantic Parser Started')
-                    for i in range(int(len(questions_list)/3)):
-                        batch = questions_list[3*i:3*i+3]
-                        logging.info(f'Questions: {3*i+1}...{3*i+4}')
-                        parser = Parser(batch)
+                    #for i in range(int(len(questions_list)/3)):
+                        #batch = questions_list[3*i:3*i+3]
+                    batch = questions_list[args.start_qn:args.end_qn]
+                    logging.info(f'Questions: {args.start_qn}...{args.end_qn}')
+                    parser = Parser(batch)
 
-                        parser.tokenize(args.dependency_parsing)
-                        parser.canonicalize(args.dependency_parsing, args.canonical_form)
-                        parser.ungrounded_logical_form()
-                        parser.ungrounded_sparql_graph(kg=args.knowledge_graph)
-                        parser.grounded_sparql_graph(linker=args.disambiguator, kg=args.knowledge_graph)
-
-                        parser.query_executor(args.knowledge_graph)
+                    parser.tokenize(args.dependency_parsing)
+                    parser.canonicalize(args.dependency_parsing, args.canonical_form)
+                    parser.ungrounded_logical_form()
+                    parser.ungrounded_sparql_graph(kg=args.knowledge_graph)
+                    parser.grounded_sparql_graph(linker=args.disambiguator, kg=args.knowledge_graph)
+                    parser.query_executor(args.knowledge_graph, result_file=f'execution_batch_{args.start_qn}_{args.end_qn}.json')
 
                      # Result of Querying the Knowledge Graph
                     print("done")
