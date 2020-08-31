@@ -40,11 +40,11 @@ if __name__=='__main__':
 
         with open(args.output_file, 'r') as f_read:
             lines = f_read.readlines()
+            total_count = 0
+            correct_answer_count = 0
             for line in lines:
                 json_item = json.loads(line)
                 question = json_item["question"].strip()
-                total_count = 0
-                correct_answer_count = 0
                 gold_answers_list = webqsp_test_question_dict[f'{question}']
                 total_count +=1
                 # find out if the two have common answers
@@ -61,11 +61,13 @@ if __name__=='__main__':
                 # if gold_answers and predicated_answers_list have common answers
                 gold_set = set(gold_answers_list)
                 predicted_answers_set = set(predicted_answers_list)
+                print('***********************************************************************')
+                print(f'gold_answer: {gold_set}')
+                print(f'predicted_answers_set: {predicted_answers_set}')
                 if gold_set & predicted_answers_set:
+                    print(f'!!!!!!!!!!Match!!!!!!!!!!')
                     correct_answer_count += 1
-
-            try:
+                else:
+                    print(f'VVVVVVVVVVVVVVVVVVVV')
                 accuracy_pct = correct_answer_count/total_count
-            except:
-                accuracy_pct = "undefined"
             print(f'Accuracy: {accuracy_pct} ({correct_answer_count}/{total_count})')
