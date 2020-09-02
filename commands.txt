@@ -1,9 +1,11 @@
 main_line.py --questions_file nlqs_flower_maxico.txt --disambiguator elasticsearch --knowledge_graph freebase --log debug --logname maxico
 python -m pdb main_line.py --questions_file nlqs_webqsp_few_mids.txt --disambiguator elasticsearch --knowledge_graph freebase --log debug --logname few_mids
 python -m pdb main_line.py --questions_file nlqs_annot_webqsp.json --annotation --disambiguator elasticsearch --knowledge_graph freebase --log debug --logname direct
-python -m pdb read_execution_results.py --execution_file execution_results.json --stop_at query_output
+python -m pdb read_execution_results.py --output_file execution_result_None_None.json
 python -m main_line.py --questions_file nlqs_webqsp_select_t1.json --annotation --disambiguator queryKB --knowledge_graph freebase --log debug --logname webqsp_select_t1
 python -m main_line --questions_file nlqs_webqsp_select_t1.json --annotation --disambiguator queryKB --knowledge_graph freebase --log info --logname webqsp_select_t1
 python -m main_line --questions_file nlqs_webqsp_select_t1.json --annotation --start_qn 164 --end_qn 169 --disambiguator queryKB --knowledge_graph freebase --log info --logname webqsp_select_t1
 python metric_values.py --output_file execution_result_20.json --benchmark WebQSP
 python  metric_values.py --output_file_dir webqsp_results --benchmark WebQSP
+python -m pdb main_line.py --questions_file nlqs.json --annotation --disambiguator queryKB --knowledge_graph freebase --log debug --logname analysis
+python -m pdb metric_values.py --output_file execution_result_None_None.json --benchmark WebQSP --printflag match

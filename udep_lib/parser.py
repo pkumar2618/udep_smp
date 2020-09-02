@@ -88,7 +88,10 @@ class Parser(object):
             #the append has to be offseted for maintaining correct order 
             #self.g_sparql_graph_list.append(graph_query)
             g_sparql_graph_list_batch.append(graph_query)
-            count += 1
+            if count is None:
+                continue
+            else:
+                count += 1
         with open(f'grounded_sparql_graph_{start_qn}_{end_qn}.pkl', 'wb') as f_write:
             pickle.dump(g_sparql_graph_list_batch, f_write)
         #ug_sparql_graphs = self.ug_sparql_graphs_list[5]  

@@ -11,6 +11,7 @@ arguments_parser = argparse.ArgumentParser(
 arguments_parser.add_argument("--output_file", help="file with query output and query string")
 arguments_parser.add_argument("--output_file_dir", help="directory of output file, where the extension are json.")
 arguments_parser.add_argument("--benchmark", help="benchmark dataset for question answering", choices=['qald-6', 'WebQSP'])
+arguments_parser.add_argument("--printflag", help="enable print when a matched answer is found", choices=['match', 'both'])
 
 args = arguments_parser.parse_args()
 
@@ -83,10 +84,11 @@ if __name__=='__main__':
                     gold_set = set(gold_answers_list)
                     predicted_answers_set = set(predicted_answers_list)
                     if gold_set & predicted_answers_set:
-                        #print('***********************************************************************')
-                        #print(f'gold_answer: {gold_set}')
-                        #print(f'predicted_answers_set: {predicted_answers_set}')
-                        #print(f'!!!!!!!!!!Match!!!!!!!!!!')
+                        if args.printflag in ['match', 'both']:
+                            print('***********************************************************************')
+                            print(f'gold_answer: {gold_set}')
+                            print(f'predicted_answers_set: {predicted_answers_set}')
+                            print(f'{i}-th query got a Match!')
                         answer_found = True
                         query_rr.append(1/(1+i))
                         # if answer is found we need to update the hit rate, 
@@ -94,10 +96,11 @@ if __name__=='__main__':
                             if i < int(hitat):# the keys are 1, 3, 5.., and idexes take value 0,1,2 therefore less than
                                 hit_list[at_idx]=1
                     else:
-                        #print('***********************************************************************')
-                        #print(f'gold_answer: {gold_set}')
-                        #print(f'predicted_answers_set: {predicted_answers_set}')
-                        #print(f'VVVVVVVVVVVVVVVVVVVV')
+                        if args.printflag in ['both']:
+                            print('***********************************************************************')
+                            print(f'gold_answer: {gold_set}')
+                            print(f'predicted_answers_set: {predicted_answers_set}')
+                            print(f'VVVVVVVVVVVVVVVVVVVV')
                         query_rr.append(0)
                         continue
                 max_query_rr = max(query_rr)
