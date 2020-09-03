@@ -66,8 +66,8 @@ if __name__ =="__main__":
             config.update(section_name = "training_settings",
                                    data={"seed": 1, "batch_size":8, "learning_rate":3e-4,
                                          "epochs": 8, "USE_GPU": torch.cuda.is_available(),
-                                         "training_dataset": "../dataset_WebQSP/webqsp_train.json",
-                                         "validation_dataset": "../dataset_WebQSP/webqsp_val.json",
+                                         "training_dataset": "../dataset_WebQSP/dl_files/webqsp_train.json",
+                                         "validation_dataset": "../dataset_WebQSP/dl_files/webqsp_val.json",
                                         "iteration_number": 0
                                         }
                                 )

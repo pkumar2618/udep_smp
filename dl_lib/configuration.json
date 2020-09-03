@@ -5,8 +5,8 @@
         "learning_rate": 0.0003,
         "epochs": 8,
         "USE_GPU": true,
-        "training_dataset": "../dataset_WebQSP/webqsp_train.json",
-        "validation_dataset": "../dataset_WebQSP/webqsp_val.json",
+        "training_dataset": "../dataset_WebQSP/dl_files/webqsp_train.json",
+        "validation_dataset": "../dataset_WebQSP/dl_files/webqsp_val.json",
         "iteration_number": 0,
         "experiment_info": "New Experiment",
         "iteration_info": null

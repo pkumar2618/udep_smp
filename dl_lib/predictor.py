@@ -43,7 +43,7 @@ class Predictor:
                 # because during prediction we are only using batch size 1. we will have block_score=batch_scores
                 for block_sentence_spo_raw in batch_sentence_candidates["sentence_spo_raw"]:
                     input_list_of_dict = block_sentence_spo_raw
-                    output_list_dict2= [{"cross_emb_score": score.item()} for score in batch_scores]
+                    output_list_dict2= [{"cross_emb_score": score.item()} for score in batch_scores.squeeze(dim=0).squeeze(dim=1)]
                     json_list.append(merge_list_of_dict(input_list_of_dict, output_list_dict2))
 
         if write_pred:

@@ -25,20 +25,17 @@ class CrossEncoderModel(Model):
     def forward(self, sentence_spo: Dict[str, torch.Tensor],
                 sentence_spo_raw: Any,
                 labels: List[torch.Tensor] = None) -> torch.Tensor:
-        all_sample_logits = list()
-        # all_sample_labels = list()
-        for sentence_spo_block in sentence_spo['sentence_spo']:
-            for sentence_spo_tokens in sentence_spo_block:
-                # mask = get_text_field_mask(sentence_spo_tokens)
-                bert_embedding = self.word_embeddings({'sentence_spo': sentence_spo_tokens.unsqueeze(dim=0)})
-                cls_token_rep = self.cls_token_rep(bert_embedding.squeeze(0))
-                cross_emb_score_logit = self.cross_emb_score(cls_token_rep)
-                all_sample_logits.append(cross_emb_score_logit)
+        # shape: block_size, number of tokens, embedding_dim
+        bert_embedding = self.word_embeddings({'sentence_spo': sentence_spo['sentence_spo']})
+        # shape: block_size, encoding_dim 
+        cls_token_rep = self.cls_token_rep(bert_embedding)
+        # shape: block_size  
+        cross_emb_score_logit = self.cross_emb_score(cls_token_rep)
 
-        output = {'sentence_spo_logits': all_sample_logits,
+        output = {'sentence_spo_logits': cross_emb_score_logit,
                   'sentence_spo_labels': labels}
         if labels is not None:
-            loss = self.loss(torch.cat(all_sample_logits), labels.view(-1))
+            loss = self.loss(cross_emb_score_logit.view(-1), labels.view(-1))
             output["loss"] = loss
 
         return output
@@ -70,7 +67,7 @@ class Encoder(Seq2VecEncoder):
 
     def forward(self, emb_seq: torch.tensor) -> torch.tensor:
         # extract first token tensor
-        return emb_seq[0, :]
+        return emb_seq[:,:,0,:]
 
     def get_output_dim(self) -> int:
         return BERT_DIM
