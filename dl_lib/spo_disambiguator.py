@@ -60,7 +60,7 @@ def cross_emb_predictor(input_file_str=None, input_dict=None, write_pred=False, 
             with open(model_file, 'rb') as f_model:
                 model.load_state_dict(torch.load(f_model, map_location='cuda:0'))
                 model.to(device)
-        except: 
+        except:
             raise
 
     predictor = Predictor(model, seq_iterator, cuda_device=0 if USE_GPU else -1)
