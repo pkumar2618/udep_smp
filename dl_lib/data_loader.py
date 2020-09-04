@@ -112,7 +112,7 @@ class QuestionSPOReader(DatasetReader):
                 input_dict = {'question': 'How far is Moon from Earth?', 'spos': [spo1, spo2], 'spos_label': [spo1, spo2]}
             """
             block_size = len(input_dict['spos_label'])
-            split_block = 100
+            split_block = 32 
             count_split_blocks = int(block_size/split_block)
             for i in range(count_split_blocks+1):
                 split_block_range_start = i*split_block 
@@ -126,8 +126,8 @@ class QuestionSPOReader(DatasetReader):
                 question_spo_list = list()
                 question_spo_list_raw = list()
                 question_spo_label_list = list()
-                for spo_list, spo_uri in zip(input_dict['spos_label'][split_block_range_start:split_block_range_end]
-, input_dict['spos'][split_block_range_start:split_block_range_end]):
+                for spo_list, spo_uri, var_posit in zip(input_dict['spos_label'][split_block_range_start:split_block_range_end]
+, input_dict['spos'][split_block_range_start:split_block_range_end], input_dict['var_at'][split_block_range_start:split_block_range_end]):
                     # correct spo: positive sample
                     spo_label_joined = ' '.join(spo_list)
                     spo_tokens = self.tokenizer(spo_label_joined)
@@ -137,7 +137,7 @@ class QuestionSPOReader(DatasetReader):
                     question_spo_list.append(question_spo_tokens)
                     question_spo_label_list.append(1)  # not really required during production.
                     #however assume each one of these is a true striple
-                    question_spo_list_raw.append({'question': question, 'spo_triple': spo_list, 'spo_triple_uri':spo_uri, 'target_score': 1})
+                    question_spo_list_raw.append({'question': question, 'spo_triple': spo_list, 'spo_triple_uri':spo_uri, 'target_score': 1, 'var_at': var_posit})
                 yield self.text_to_instance(question_spo_list, question_spo_list_raw, np.array(question_spo_label_list))
 
 

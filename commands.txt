@@ -7,5 +7,6 @@ python -m main_line --questions_file nlqs_webqsp_select_t1.json --annotation --d
 python -m main_line --questions_file nlqs_webqsp_select_t1.json --annotation --start_qn 164 --end_qn 169 --disambiguator queryKB --knowledge_graph freebase --log info --logname webqsp_select_t1
 python metric_values.py --output_file execution_result_20.json --benchmark WebQSP
 python  metric_values.py --output_file_dir webqsp_results --benchmark WebQSP
+python metric_values.py --output_file execution_result_0_20.json --benchmark WebQSP --printflag both
 python -m pdb main_line.py --questions_file nlqs.json --annotation --disambiguator queryKB --knowledge_graph freebase --log debug --logname analysis
 python -m pdb metric_values.py --output_file execution_result_None_None.json --benchmark WebQSP --printflag match

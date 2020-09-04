@@ -133,8 +133,15 @@ def combine_input_output(input_file_path, output_file_path):
 
 
 def merge_dict(dict1, dict2):
-    res = {**dict1, **dict2}
-    return res
+    # some time there are empty dict in, for ease of batching
+    try:
+        return {**dict1, **dict2}
+    except TypeError as e:
+        # return an empty dict
+        if dict1 is None:
+            return {}
+        elif dict2 is None:
+            return {}
 
 def merge_list_of_dict(list_dict1, list_dict2):
     res_list_dict = [merge_dict(dict1, dict2) for dict1, dict2 in zip(list_dict1, list_dict2)]

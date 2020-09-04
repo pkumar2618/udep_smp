@@ -212,16 +212,15 @@ class UGSPARQLGraph:
                         if variable_name is None:
                             continue
                         else:# we are considering only single triplet queries, for multiple triplet query, we may not find any
-                        # variable in a triplet, there may exist commore resources, etc. 
+                        # variable in a triplet, there may exist common resources, etc. 
                             #The set of candidate-spos we will get above would create for a given spo-triple
                             for query_idx, candidate_triplet in enumerate(disambiguated_triplet_candidates_topk):
                                 candidate_triplet_with_rdfterm = ['s', 'o', 'p']
                                 if candidate_triplet['var_at'] == 0:
-                                    candidate_triplet_with_rdfterm[0] = variable_name                        
+                                    candidate_triplet_with_rdfterm[0] = variable_name
                                     #predicate will carry URIRef
                                     candidate_triplet_with_rdfterm[1] = URIRef(candidate_triplet['spo_triple_uri'][1])
                                     candidate_triplet_with_rdfterm[2] = URIRef(candidate_triplet['spo_triple_uri'][2])
-                                
                                 elif candidate_triplet['var_at'] == 2:
                                     candidate_triplet_with_rdfterm[2] = variable_name
                                     #predicate will carry URIRef
@@ -468,16 +467,18 @@ class UGSPARQLGraph:
 
     @staticmethod
     def disambiguate_using_cotext_queryKB(question, triplet_candidates_dict):
-        input_dict = {'question':question, 'spos':triplet_candidates_dict['spos'], 'spos_label':triplet_candidates_dict['spos_label']}
+        input_dict = {'question':question, 'spos':triplet_candidates_dict['spos'], 'spos_label':triplet_candidates_dict['spos_label'], 'var_at': triplet_candidates_dict['var_at']}
         reranked_spos = cross_emb_predictor(input_dict=input_dict, write_pred=False)
-        reranked_spos_with_var_position=[[]]
-        for dict_item, position in zip(reranked_spos[0], triplet_candidates_dict['var_at']):
-            dict_item['var_at'] = position
-            reranked_spos_with_var_position[0].append(dict_item)
-
-        reranked_spos_sorted = sorted(reranked_spos_with_var_position[0], key=lambda x: x['cross_emb_score'], reverse=True)
-        only_uri_list_topk = [only_uri['spo_triple_uri'] for only_uri in reranked_spos_sorted[:50]]
-        logger.info(f"cross-emb spo: {only_uri_list_topk}")
+        # take out empty dictionary
+        reranked_spos = [x for x in reranked_spos if x]
+        #reranked_spos_with_var_position=[[]]
+        #for dict_item, position in zip(reranked_spos[0], triplet_candidates_dict['var_at']):
+        #    dict_item['var_at'] = position
+        #    reranked_spos_with_var_position[0].append(dict_item)
+        #reranked_spos_sorted = sorted(reranked_spos_with_var_position[0], key=lambda x: x['cross_emb_score'], reverse=True)
+        reranked_spos_sorted = sorted(reranked_spos, key=lambda x: x['cross_emb_score'], reverse=True)
+        #only_uri_list_topk = [only_uri['spo_triple_uri'] for only_uri in reranked_spos_sorted[:50]]
+        #logger.info(f"cross-emb spo: {only_uri_list_topk}")
         logger.debug(f"cross-emb spo: {reranked_spos_sorted}")
         return reranked_spos_sorted[:50] 
 
