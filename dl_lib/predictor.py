@@ -41,10 +41,10 @@ class Predictor:
                 # each batch is formed by a set of block, where batch size id determined internally by allennlp. 
                 # one block is formed by a sentence and a set of positive and negative spo-triples
                 # because during prediction we are only using batch size 1. we will have block_score=batch_scores
-                for block_sentence_spo_raw in batch_sentence_candidates["sentence_spo_raw"]:
+                for block_id, block_sentence_spo_raw in enumerate(batch_sentence_candidates["sentence_spo_raw"]):
                     input_list_of_dict = block_sentence_spo_raw
-                    output_list_dict2= [{"cross_emb_score": score.item()} for score in batch_scores.squeeze(dim=0).squeeze(dim=1)]
-                    json_list.append(merge_list_of_dict(input_list_of_dict, output_list_dict2))
+                    output_list_dict2= [{"cross_emb_score": score.item()} for score in batch_scores[block_id,:,:].view(-1)]
+                    json_list = json_list + merge_list_of_dict(input_list_of_dict, output_list_dict2)
 
         if write_pred:
             with open('output_prediction.json', 'w') as f_write:

@@ -36,9 +36,18 @@ def cross_emb_predictor(input_file_str=None, input_dict=None, write_pred=False, 
     # test_ds = reader.read("../dataset_qald/qald_test.json")
     # test_ds = test_ds[:3]
     test_ds = reader.read(file_path=input_file_str, input_dict=input_dict) #one of them must be None
+    ### the iterator is used to batch the data and prepare it for input to the model
+    from allennlp.data.iterators import BucketIterator
+    iterator = BucketIterator(batch_size=8,
+                              sorting_keys=[('sentence_spo', 'num_fields'), ('sentence_spo', 'list_num_tokens')])
+
+    # # the iterator has to be informed about how the indexing has to be done, indexing require the vocabulary
+    # # of all the tokens (may be trimmed if the vocab size is huge).
     vocab = Vocabulary()
-    seq_iterator = BasicIterator(batch_size=1)
-    seq_iterator.index_with(vocab)
+    iterator.index_with(vocab)
+    #vocab = Vocabulary()
+    #seq_iterator = BasicIterator(batch_size=1)
+    #seq_iterator.index_with(vocab)
     # instantiating the model
     cls_token_encoder = Encoder(vocab)
     model = CrossEncoderModel(word_embeddings, cls_token_encoder, vocab)
@@ -63,7 +72,7 @@ def cross_emb_predictor(input_file_str=None, input_dict=None, write_pred=False, 
         except:
             raise
 
-    predictor = Predictor(model, seq_iterator, cuda_device=0 if USE_GPU else -1)
+    predictor = Predictor(model, iterator, cuda_device=0 if USE_GPU else -1)
     test_preds = predictor.predict(test_ds, write_pred=write_pred)
     return test_preds
     #print(test_preds)
