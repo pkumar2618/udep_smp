@@ -52,11 +52,13 @@ if __name__=='__main__':
         mrr_list = []
         total_count = 0
         correct_answer_count = 0
+        failed_questions = []
+        answered_questions = []
         for result_file in result_file_full_path:
             # will go through the question in the output file one by one 
             f_read = open(result_file, 'r')
             lines = f_read.readlines()
-            for line in lines:
+            for question_num, line in enumerate(lines):
                 json_item = json.loads(line)
                 question = json_item["question"].strip()
                 gold_answers_list = webqsp_test_question_dict[f'{question}']
@@ -95,6 +97,7 @@ if __name__=='__main__':
                         for at_idx, hitat in enumerate(hit_at.keys()):
                             if i < int(hitat):# the keys are 1, 3, 5.., and idexes take value 0,1,2 therefore less than
                                 hit_list[at_idx]=1
+                        break
                     else:
                         if args.printflag in ['both']:
                             print('***********************************************************************')
@@ -112,9 +115,12 @@ if __name__=='__main__':
 
                 if answer_found:
                     correct_ans_found.append(1)
+                    answered_questions.append(question_num)
                 else:
                     correct_ans_found.append(0)
-                f_read.close()
+                    failed_questions.append(question_num)
+
+            f_read.close()
 
         correct_answer_count =len([1 for hit in correct_ans_found if hit==1])
         total_count = len(correct_ans_found)
@@ -125,3 +131,9 @@ if __name__=='__main__':
         for k, v in hit_at.items():
             hit_rate = round(v[0]/v[1], 2)
             print(f'hit@{k} : {v[0]}/{v[1]}, {hit_rate}')
+
+        #print(f'pass questions: {answered_questions}')
+        #print(f'failed questions: {failed_questions}')
+        with open(f'pass_fail_{args.benchmark}.json','w') as f_write:
+            json_dict = {'benchmark': args.benchmark, 'pass': answered_questions, 'fail': failed_questions}
+            f_write.write(json.dumps(json_dict))
