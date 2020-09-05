@@ -183,7 +183,7 @@ class UGSPARQLGraph:
                                 triplet_candidates_dict = UGSPARQLGraph.ground_triplet_queryKB(triplet, entity_name, entity_mid, so_position=so_position, kg=kg) 
                             elif re.search(entity_name, surface_name, re.IGNORECASE):
                                 triplet_candidates_dict = UGSPARQLGraph.ground_triplet_queryKB(triplet, entity_name, entity_mid, so_position=so_position, kg=kg) 
-
+                    # only one of the above grounding will return/execute, given if-elif-else conditions.
                     triplets['triplet_grounded'].append(triplet_candidates_dict)
                 #return triplets
                 

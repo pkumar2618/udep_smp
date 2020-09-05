@@ -119,6 +119,8 @@ class QuestionSPOReader(DatasetReader):
                 split_block_range_end = i*split_block + split_block
                 if split_block_range_end > block_size:
                     split_block_range_end = block_size 
+                if split_block_range_start == split_block_range_end:# start end should not be equal
+                    break
 
                 question = input_dict['question']
                 question_tokens = self.tokenizer(question)
@@ -138,7 +140,22 @@ class QuestionSPOReader(DatasetReader):
                     question_spo_label_list.append(1)  # not really required during production.
                     #however assume each one of these is a true striple
                     question_spo_list_raw.append({'question': question, 'spo_triple': spo_list, 'spo_triple_uri':spo_uri, 'target_score': 1, 'var_at': var_posit})
-                yield self.text_to_instance(question_spo_list, question_spo_list_raw, np.array(question_spo_label_list))
+                try:
+                    #print(f'split block is {i}')
+                    #print(f'while total split are {count_split_blocks}')
+                    #print(split_block_range_start)
+                    #print(split_block_range_end)
+                    #print(block_size)
+                    #print(question_spo_list)
+                    #print(question_spo_list_raw)
+                    #print(question_spo_label_list)
+                    yield self.text_to_instance(question_spo_list, question_spo_list_raw, np.array(question_spo_label_list))
+                except Exception as e:
+                    #print(question_spo_list)
+                    #print(question_spo_list_raw)
+                    #print(question_spo_label_list)
+                    print(e)
+                    raise
 
 
 # The sentence need to be converted into a tensor(embedding space),

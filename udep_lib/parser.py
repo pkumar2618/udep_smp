@@ -5,14 +5,6 @@ import pickle
 from udep_lib.sparql_builder import Query
 logger = logging.getLogger(__name__)
 
-#start_qn = 20
-#end_qn = 40
-##start_qn = 160
-##end_qn = 180
-#start_qn = 180
-#end_qn = 200
-
-
 class Parser(object):
     """
     Takes as input a list NLQuestion(one or more)
@@ -78,6 +70,9 @@ class Parser(object):
     # this is where all the magic happens, linking using elasticsearch, as well as reranking using BERT
     def grounded_sparql_graph(self, start_qn=None, end_qn=None, linker=None, kg=None):
         count = start_qn
+        if count is None:
+            count = 0
+
         g_sparql_graph_list_batch = []
         for ug_sparql_graphs, nlquestion, annot in zip(self.ug_sparql_graphs_list[start_qn:end_qn], self.nlq_questions_list[start_qn:end_qn], self.nlq_annot_list[start_qn:end_qn]):
             # there might me many gp_graphs obtained, we are using the first one for now, which is usually 
@@ -88,10 +83,8 @@ class Parser(object):
             #the append has to be offseted for maintaining correct order 
             #self.g_sparql_graph_list.append(graph_query)
             g_sparql_graph_list_batch.append(graph_query)
-            if count is None:
-                continue
-            else:
-                count += 1
+            count += 1
+
         with open(f'grounded_sparql_graph_{start_qn}_{end_qn}.pkl', 'wb') as f_write:
             pickle.dump(g_sparql_graph_list_batch, f_write)
         #ug_sparql_graphs = self.ug_sparql_graphs_list[5]  
