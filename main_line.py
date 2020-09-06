@@ -15,6 +15,7 @@ arguments_parser = argparse.ArgumentParser(
 arguments_parser.add_argument("--questions_file", help="Path to the file containing Natural Language Questions")
 arguments_parser.add_argument("--annotation", help="Flag if questions are annotated.", action="store_true")
 arguments_parser.add_argument("--batch", help="delete set of questions to be processed together, used in analysis of paraphrase and structures in the questions.")
+
 arguments_parser.add_argument("--start_qn", help="start of question number for the batch from the questions corpus", type=int)
 arguments_parser.add_argument("--end_qn", help="end of question number for the batch from the questions corpus", type=int)
 
@@ -130,8 +131,7 @@ while True:
                     parser.grounded_sparql_graph(start_qn = start_qn, end_qn=end_qn, linker=args.disambiguator, kg=args.knowledge_graph)
                     with open(f'{args.logname}_log4_{start_qn}_{end_qn}_parser.pkl', 'wb') as f:
                         pickle.dump(parser, f)
-
-                parser.query_executor(args.knowledge_graph, result_file=f'execution_result_{start_qn}_{end_qn}.json', start_qn=args.start_qn, end_qn=args.end_qn)
+                parser.query_executor(args.knowledge_graph, result_file=f'{args.logname}_execution_result_{start_qn}_{end_qn}.json', start_qn=args.start_qn, end_qn=args.end_qn)
 
                 # Result of Querying the Knowledge Graph
                 print("done")

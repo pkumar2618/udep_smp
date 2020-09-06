@@ -10,3 +10,4 @@ python  metric_values.py --output_file_dir webqsp_results --benchmark WebQSP
 python metric_values.py --output_file execution_result_0_20.json --benchmark WebQSP --printflag both
 python -m pdb main_line.py --questions_file nlqs.json --annotation --disambiguator queryKB --knowledge_graph freebase --log debug --logname analysis
 python -m pdb metric_values.py --output_file execution_result_None_None.json --benchmark WebQSP --printflag match
+python -m main_line.py --questions_file split_fail_nlqs_webqsp_select_t1.json --annotation --disambiguator queryKB --knowledge_graph freebase --log debug --logname analyse
