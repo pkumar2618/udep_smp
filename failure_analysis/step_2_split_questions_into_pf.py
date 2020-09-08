@@ -9,7 +9,7 @@ arguments_parser = argparse.ArgumentParser(
     description="Find out question numbers which are failing.")
 
 arguments_parser.add_argument("--question_file_original", help="file containing original questions")
-arguments_parser.add_argument("--questions_pass_fail", help="file containing json dict of passing questions number and failing questions.")
+arguments_parser.add_argument("--questions_pass_fail", help="this file is obtained during evaluation, the file contains json dict of passing questions number and failing questions.")
 
 args = arguments_parser.parse_args()
 
